@@ -1,0 +1,33 @@
+[gd_scene format=3 uid="uid://ch7cn7j0irokp"]
+
+[ext_resource type="Theme" uid="uid://blcrbrjkkdhi1" path="res://ui/themes/new_theme.tres" id="1_utai3"]
+
+[node name="Control" type="Control" unique_id=1354381578]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 1
+
+[node name="MarginContainer" type="MarginContainer" parent="." unique_id=1544737011]
+layout_mode = 1
+anchors_preset = 2
+anchor_top = 1.0
+anchor_bottom = 1.0
+offset_top = -40.0
+offset_right = 40.0
+grow_vertical = 0
+theme = ExtResource("1_utai3")
+theme_override_constants/margin_left = 50
+theme_override_constants/margin_bottom = 50
+
+[node name="VirtualJoystick" type="VirtualJoystick" parent="MarginContainer" unique_id=124557262]
+custom_minimum_size = Vector2(200, 200)
+layout_mode = 2
+joystick_size = 200.0
+action_left = &"move_left"
+action_right = &"move_right"
+action_up = &"move_forward"
+action_down = &"move_back"
