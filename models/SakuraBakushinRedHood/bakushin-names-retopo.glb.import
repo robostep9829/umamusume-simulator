@@ -66,6 +66,53 @@ _subresources={
 "use_external/fallback_path": "res://models/SakuraBakushinRedHood/Materials/mtl_tail0001_00.tres",
 "use_external/path": "uid://dijkanwkm8eq6"
 }
+},
+"meshes": {
+"bakushin-names-retopo_1041 Sakura Bakushin O": {
+"generate/lightmap_uv": 0,
+"generate/lods": 0,
+"generate/shadow_meshes": 0,
+"lods/normal_merge_angle": 20.0,
+"save_to_file/enabled": true,
+"save_to_file/fallback_path": "res://models/SakuraBakushinRedHood/Meshes/bakushin-names-retopo_1041 Sakura Bakushin O.res",
+"save_to_file/path": "uid://dxx7sronkk7us"
+},
+"bakushin-names-retopo_1041 Sakura Bakushin O_001": {
+"generate/lightmap_uv": 0,
+"generate/lods": 0,
+"generate/shadow_meshes": 0,
+"lods/normal_merge_angle": 20.0,
+"save_to_file/enabled": true,
+"save_to_file/fallback_path": "res://models/SakuraBakushinRedHood/Meshes/bakushin-names-retopo_1041 Sakura Bakushin O_001.res",
+"save_to_file/path": "uid://b23wo8nma0qbt"
+},
+"bakushin-names-retopo_1041 Sakura Bakushin O_008": {
+"generate/lightmap_uv": 0,
+"generate/lods": 0,
+"generate/shadow_meshes": 0,
+"lods/normal_merge_angle": 20.0,
+"save_to_file/enabled": true,
+"save_to_file/fallback_path": "res://models/SakuraBakushinRedHood/Meshes/bakushin-names-retopo_1041 Sakura Bakushin O_008.res",
+"save_to_file/path": "uid://c0do6h0ob4uct"
+},
+"bakushin-names-retopo_1041 Sakura Bakushin O_009": {
+"generate/lightmap_uv": 0,
+"generate/lods": 0,
+"generate/shadow_meshes": 0,
+"lods/normal_merge_angle": 20.0,
+"save_to_file/enabled": true,
+"save_to_file/fallback_path": "res://models/SakuraBakushinRedHood/Meshes/bakushin-names-retopo_1041 Sakura Bakushin O_009.res",
+"save_to_file/path": "uid://cuxbyrev6gvy4"
+},
+"bakushin-names-retopo_1041 Sakura Bakushin O_010": {
+"generate/lightmap_uv": 0,
+"generate/lods": 0,
+"generate/shadow_meshes": 0,
+"lods/normal_merge_angle": 20.0,
+"save_to_file/enabled": true,
+"save_to_file/fallback_path": "res://models/SakuraBakushinRedHood/Meshes/bakushin-names-retopo_1041 Sakura Bakushin O_010.res",
+"save_to_file/path": "uid://bxi0aabkre38x"
+}
 }
 }
 gltf/naming_version=2

@@ -1,6 +1,7 @@
 [gd_scene format=3 uid="uid://c0yayr2umivaj"]
 
 [ext_resource type="PackedScene" uid="uid://bdup2cn4ied4c" path="res://models/SakuraBakushinRedHood/bakushin-names-retopo.glb" id="1_y8d8t"]
+[ext_resource type="AnimationLibrary" uid="uid://r8gcebjyg3vl" path="res://models/SakuraBakushinRedHood/Anim/Anim.res" id="2_c5aly"]
 
 [sub_resource type="Animation" id="Animation_c5aly"]
 resource_name = "UMA_2026-07-05_02-06-51_bone"
@@ -710,7 +711,7 @@ _data = {
 
 [node name="bakushin-names-retopo" unique_id=1773179698 instance=ExtResource("1_y8d8t")]
 
-[node name="Skeleton3D" parent="." index="0" unique_id=734648647]
+[node name="Skeleton3D" parent="." index="0" unique_id=1447683617]
 bones/1/position = Vector3(-0.026653187, 0.8012064, -0.07011586)
 bones/1/rotation = Quaternion(-0.33606395, 0.08872994, 0.02639854, 0.9372786)
 bones/28/rotation = Quaternion(0.99134773, -0.07949699, 0.10315043, -0.016428113)
@@ -763,5 +764,6 @@ bones/191/rotation = Quaternion(-0.120385185, 0.369979, 0.32590616, 0.86163116)
 bones/192/rotation = Quaternion(0.09964381, -0.04908001, -0.048075344, 0.9926485)
 
 [node name="AnimationPlayer" type="AnimationPlayer" parent="." index="1" unique_id=2137594267]
+libraries/BakushinRedHood = ExtResource("2_c5aly")
 libraries/bakushin-anim-run = SubResource("AnimationLibrary_k37pt")
 libraries/bakushin-anim-walk = SubResource("AnimationLibrary_c5aly")
