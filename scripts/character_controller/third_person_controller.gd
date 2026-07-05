@@ -1,7 +1,7 @@
 extends CharacterBody3D
 
 ## Movement tuning
-@export var move_speed: float = 5.0
+@export var move_speed: float = 2.0
 @export var sprint_speed: float = 8.0
 @export var acceleration: float = 10.0
 @export var jump_velocity: float = 4.5
@@ -12,9 +12,19 @@ extends CharacterBody3D
 @export var min_pitch: float = -60.0   # look down limit (degrees)
 @export var max_pitch: float = 70.0    # look up limit (degrees)
 
+## Sprint camera
+@export var normal_spring_length: float = 1.0
+@export var sprint_spring_length: float = 2.0
+@export var sprint_zoom_time: float = 0.2
+
+@export var normal_spring_position: Vector3 = Vector3(0.5, 0.0, 0.0)
+@export var sprint_spring_position: Vector3 = Vector3(0.0, 0.0, 0.0)
+
+
 # Cached node references
 @onready var camera_pivot: Node3D = $CameraPivot
 @onready var mesh: Node3D = $Skeleton3D
+@onready var spring: Node3D = $CameraPivot/SpringArm3D
 
 # Gravity pulled from project settings so it stays consistent
 var gravity: float = ProjectSettings.get_setting("physics/3d/default_gravity")
@@ -22,6 +32,10 @@ var gravity: float = ProjectSettings.get_setting("physics/3d/default_gravity")
 # Camera rotation state
 var _yaw: float = 0.0
 var _pitch: float = 0.0
+
+# Sprint tracking
+var _sprint_timer: float = 0.0
+var is_sprinting: bool = false
 
 
 func _ready() -> void:
@@ -79,8 +93,19 @@ func _handle_movement(delta: float) -> void:
 		direction = (forward * -input_dir.y + right * input_dir.x).normalized()
 
 	# Choose speed based on sprint input
-	var speed := sprint_speed if Input.is_action_pressed("sprint") else move_speed
+	is_sprinting = Input.is_action_pressed("sprint")
+	var speed := sprint_speed if is_sprinting else move_speed
 
+	if is_sprinting:
+		_sprint_timer += delta
+	else:
+		_sprint_timer = 0.0
+
+	var target_length := sprint_spring_length if _sprint_timer >= sprint_zoom_time else normal_spring_length
+	spring.spring_length = lerpf(spring.spring_length, target_length, 3 * delta)
+	var target_offset := sprint_spring_position if _sprint_timer >= sprint_zoom_time else normal_spring_position
+	spring.position = lerp(spring.position, target_offset, acceleration * delta)
+	
 	# Smoothly accelerate toward the target horizontal velocity
 	var target_velocity := direction * speed
 	velocity.x = lerp(velocity.x, target_velocity.x, acceleration * delta)

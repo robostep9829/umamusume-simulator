@@ -2,6 +2,7 @@
 
 [ext_resource type="CompressedTexture3D" uid="uid://e573kqiepk0a" path="res://environment/tonemap/pbrNeutral.exr" id="1_noarx"]
 [ext_resource type="PackedScene" uid="uid://c11xkbxmyhcu5" path="res://prefabs/third_person.tscn" id="3_a0tk4"]
+[ext_resource type="LightmapGIData" uid="uid://dpaoj4eef6bop" path="res://node_3d.lmbake" id="3_r3fl7"]
 
 [sub_resource type="ProceduralSkyMaterial" id="ProceduralSkyMaterial_a0tk4"]
 ground_horizon_color = Color(0.66224277, 0.6717428, 0.6867428, 1)
@@ -23,11 +24,23 @@ adjustment_color_correction = ExtResource("1_noarx")
 albedo_color = Color(0.52906674, 0.5290667, 0.5290667, 1)
 
 [sub_resource type="PlaneMesh" id="PlaneMesh_56iun"]
+lightmap_size_hint = Vector2i(102, 102)
 material = SubResource("StandardMaterial3D_noarx")
+add_uv2 = true
 size = Vector2(20, 20)
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_56iun"]
 size = Vector3(20, 0.579, 20)
+
+[sub_resource type="CapsuleMesh" id="CapsuleMesh_56iun"]
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_23lnl"]
+albedo_color = Color(0, 0.2833333, 1, 1)
+
+[sub_resource type="BoxMesh" id="BoxMesh_56iun"]
+lightmap_size_hint = Vector2i(14, 21)
+material = SubResource("StandardMaterial3D_23lnl")
+add_uv2 = true
 
 [node name="Node3D" type="Node3D" unique_id=936718334]
 
@@ -45,15 +58,6 @@ environment = SubResource("Environment_jka67")
 [node name="MeshInstance3D" type="MeshInstance3D" parent="." unique_id=1668694097]
 mesh = SubResource("PlaneMesh_56iun")
 
-[node name="Node3D" type="Node3D" parent="." unique_id=218371272]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.22654921, 2.3841858e-07, -1.0800883)
-
-[node name="ReflectionProbe" type="ReflectionProbe" parent="Node3D" unique_id=2105507024]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.07535303, 0)
-
-[node name="ReflectionProbe3" type="ReflectionProbe" parent="Node3D" unique_id=1754610638]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.3296578, 0)
-
 [node name="CharacterBody3D" parent="." unique_id=2027806480 instance=ExtResource("3_a0tk4")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2.0985637, 0, -0.9083092)
 
@@ -63,3 +67,18 @@ freeze = true
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="RigidBody3D" unique_id=193178486]
 shape = SubResource("BoxShape3D_56iun")
+
+[node name="MeshInstance3D2" type="MeshInstance3D" parent="." unique_id=1204056644]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2.944909, 0.6469058, 2.2527442)
+mesh = SubResource("CapsuleMesh_56iun")
+
+[node name="MeshInstance3D3" type="MeshInstance3D" parent="." unique_id=1257146697]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2.0269046, 0.17961347, 2.1091666)
+mesh = SubResource("BoxMesh_56iun")
+
+[node name="ReflectionProbe" type="ReflectionProbe" parent="." unique_id=1240778262]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.28020775, 0)
+
+[node name="LightmapGI" type="LightmapGI" parent="." unique_id=934452372]
+generate_probes_subdiv = 3
+light_data = ExtResource("3_r3fl7")
