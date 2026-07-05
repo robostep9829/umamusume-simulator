@@ -1,7 +1,7 @@
 [gd_scene format=3 uid="uid://c7v3y38mem6h8"]
 
-[ext_resource type="PackedScene" uid="uid://c0yayr2umivaj" path="res://models/SakuraBakushinRedHood/bakushin_names_retopo.tscn" id="1_a202f"]
 [ext_resource type="CompressedTexture3D" uid="uid://e573kqiepk0a" path="res://environment/tonemap/pbrNeutral.exr" id="1_noarx"]
+[ext_resource type="PackedScene" uid="uid://c11xkbxmyhcu5" path="res://prefabs/third_person.tscn" id="3_a0tk4"]
 
 [sub_resource type="ProceduralSkyMaterial" id="ProceduralSkyMaterial_a0tk4"]
 ground_horizon_color = Color(0.66224277, 0.6717428, 0.6867428, 1)
@@ -26,14 +26,17 @@ albedo_color = Color(0.52906674, 0.5290667, 0.5290667, 1)
 material = SubResource("StandardMaterial3D_noarx")
 size = Vector2(20, 20)
 
+[sub_resource type="BoxShape3D" id="BoxShape3D_56iun"]
+size = Vector3(20, 0.579, 20)
+
 [node name="Node3D" type="Node3D" unique_id=936718334]
 
 [node name="DirectionalLight3D" type="DirectionalLight3D" parent="." unique_id=1182674247]
 transform = Transform3D(0.9236814, -0.27753508, -0.2641728, 0.37862152, 0.7669435, 0.51811534, 0.058810413, -0.57859504, 0.813492, 0, 0.76838285, -0.9386827)
 shadow_enabled = true
-directional_shadow_mode = 0
+directional_shadow_blend_splits = true
 directional_shadow_fade_start = 1.0
-directional_shadow_max_distance = 3.9
+directional_shadow_max_distance = 23.9
 directional_shadow_pancake_size = 0.0
 
 [node name="WorldEnvironment" type="WorldEnvironment" parent="." unique_id=1209810545]
@@ -42,17 +45,21 @@ environment = SubResource("Environment_jka67")
 [node name="MeshInstance3D" type="MeshInstance3D" parent="." unique_id=1668694097]
 mesh = SubResource("PlaneMesh_56iun")
 
-[node name="bakushin-names-retopo" parent="." unique_id=1773179698 instance=ExtResource("1_a202f")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.14229086, 0, -0.94432354)
-
 [node name="Node3D" type="Node3D" parent="." unique_id=218371272]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.22654921, 2.3841858e-07, -1.0800883)
 
 [node name="ReflectionProbe" type="ReflectionProbe" parent="Node3D" unique_id=2105507024]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.07535303, 0)
 
-[node name="ReflectionProbe2" type="ReflectionProbe" parent="Node3D" unique_id=275127032]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.7586577, 0)
-
 [node name="ReflectionProbe3" type="ReflectionProbe" parent="Node3D" unique_id=1754610638]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.3296578, 0)
+
+[node name="CharacterBody3D" parent="." unique_id=2027806480 instance=ExtResource("3_a0tk4")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2.0985637, 0, -0.9083092)
+
+[node name="RigidBody3D" type="RigidBody3D" parent="." unique_id=1505443295]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.27160394, 0)
+freeze = true
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="RigidBody3D" unique_id=193178486]
+shape = SubResource("BoxShape3D_56iun")
