@@ -1,0 +1,9 @@
+[gd_resource type="StandardMaterial3D" format=3 uid="uid://crd2r7uvdp4wg"]
+
+[ext_resource type="Texture2D" uid="uid://daio6bgendh4t" path="res://models/SakuraBakushinRedHood/bakushin-names-retopo_tex_chr1041_50_face_diff.png" id="1_qnrxp"]
+
+[resource]
+resource_name = "mtl_chr1041_50_face.001"
+albedo_texture = ExtResource("1_qnrxp")
+roughness = 0.61
+metadata/_gltf_primary_texture_coord = 0

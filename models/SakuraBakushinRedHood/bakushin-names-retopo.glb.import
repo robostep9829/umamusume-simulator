@@ -1,0 +1,73 @@
+[remap]
+
+importer="scene"
+importer_version=1
+type="PackedScene"
+uid="uid://bdup2cn4ied4c"
+path="res://.godot/imported/bakushin-names-retopo.glb-ac328c5222d9f0d14f4e640517928064.scn"
+
+[deps]
+
+source_file="res://models/SakuraBakushinRedHood/bakushin-names-retopo.glb"
+dest_files=["res://.godot/imported/bakushin-names-retopo.glb-ac328c5222d9f0d14f4e640517928064.scn"]
+
+[params]
+
+nodes/root_type=""
+nodes/root_name=""
+nodes/root_script=null
+mesh_library/use_node_names_as_mesh_names=false
+array_mesh/deduplicate_surfaces=true
+nodes/apply_root_scale=true
+nodes/root_scale=1.0
+nodes/import_as_skeleton_bones=false
+nodes/use_name_suffixes=true
+nodes/use_node_type_suffixes=true
+meshes/ensure_tangents=true
+meshes/generate_lods=true
+meshes/create_shadow_meshes=true
+meshes/light_baking=1
+meshes/lightmap_texel_size=0.2
+meshes/force_disable_compression=false
+skins/use_named_skins=true
+animation/import=true
+animation/fps=30
+animation/trimming=false
+animation/remove_immutable_tracks=true
+animation/import_rest_as_RESET=false
+import_script/path=""
+materials/extract=0
+materials/extract_format=0
+materials/extract_path=""
+_subresources={
+"materials": {
+"mtl_bdy1041_50": {
+"use_external/enabled": true,
+"use_external/fallback_path": "res://models/SakuraBakushinRedHood/Materials/mtl_bdy1041_50.tres",
+"use_external/path": "uid://bvbrgm52naqew"
+},
+"mtl_chr1041_50_eye": {
+"use_external/enabled": true,
+"use_external/fallback_path": "res://models/SakuraBakushinRedHood/Materials/mtl_chr1041_50_eye.tres",
+"use_external/path": "uid://duojd56ubwh4s"
+},
+"mtl_chr1041_50_face.001": {
+"use_external/enabled": true,
+"use_external/fallback_path": "res://models/SakuraBakushinRedHood/Materials/mtl_chr1041_50_face.001.tres",
+"use_external/path": "uid://crd2r7uvdp4wg"
+},
+"mtl_chr1041_50_hair": {
+"use_external/enabled": true,
+"use_external/fallback_path": "res://models/SakuraBakushinRedHood/Materials/mtl_chr1041_50_hair.tres",
+"use_external/path": "uid://b3h0meq2v6gdc"
+},
+"mtl_tail0001_00": {
+"use_external/enabled": true,
+"use_external/fallback_path": "res://models/SakuraBakushinRedHood/Materials/mtl_tail0001_00.tres",
+"use_external/path": "uid://dijkanwkm8eq6"
+}
+}
+}
+gltf/naming_version=2
+gltf/embedded_image_handling=1
+gltf/texture_map_mode=1

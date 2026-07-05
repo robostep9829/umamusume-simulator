@@ -1,0 +1,9 @@
+[gd_resource type="StandardMaterial3D" format=3 uid="uid://b3h0meq2v6gdc"]
+
+[ext_resource type="Texture2D" uid="uid://5gn27ei5dw4h" path="res://models/SakuraBakushinRedHood/bakushin-names-retopo_tex_chr1041_50_hair_diff.png" id="1_tjvoi"]
+
+[resource]
+resource_name = "mtl_chr1041_50_hair"
+albedo_texture = ExtResource("1_tjvoi")
+roughness = 0.5
+metadata/_gltf_primary_texture_coord = 0
