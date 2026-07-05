@@ -8,21 +8,33 @@
 radius = 0.352
 height = 1.6088867
 
+[sub_resource type="AnimationNodeAnimation" id="AnimationNodeAnimation_6yq1o"]
+animation = &"Anim/idle-serious"
+
 [sub_resource type="AnimationNodeAnimation" id="AnimationNodeAnimation_opy5f"]
 animation = &"Anim/wlk"
 
 [sub_resource type="AnimationNodeStateMachineTransition" id="AnimationNodeStateMachineTransition_jmel8"]
 advance_mode = 2
 
-[sub_resource type="AnimationNodeStateMachineTransition" id="AnimationNodeStateMachineTransition_b1wfh"]
+[sub_resource type="AnimationNodeStateMachineTransition" id="AnimationNodeStateMachineTransition_opy5f"]
+xfade_time = 0.2
 advance_mode = 2
+advance_expression = "velocity.length() > 0.1"
+
+[sub_resource type="AnimationNodeStateMachineTransition" id="AnimationNodeStateMachineTransition_6yq1o"]
+xfade_time = 0.2
+advance_mode = 2
+advance_expression = "velocity.length() < 0.1"
 
 [sub_resource type="AnimationNodeStateMachine" id="AnimationNodeStateMachine_apkb4"]
-states/Anim_wlk/node = SubResource("AnimationNodeAnimation_opy5f")
-states/Anim_wlk/position = Vector2(513, 81)
 states/End/position = Vector2(815, 81)
-states/Start/position = Vector2(242, 81)
-transitions = ["Start", "Anim_wlk", SubResource("AnimationNodeStateMachineTransition_jmel8"), "Anim_wlk", "End", SubResource("AnimationNodeStateMachineTransition_b1wfh")]
+states/Start/position = Vector2(137, 107)
+states/idle/node = SubResource("AnimationNodeAnimation_6yq1o")
+states/idle/position = Vector2(356, 71)
+states/walk/node = SubResource("AnimationNodeAnimation_opy5f")
+states/walk/position = Vector2(591, 76)
+transitions = ["Start", "idle", SubResource("AnimationNodeStateMachineTransition_jmel8"), "idle", "walk", SubResource("AnimationNodeStateMachineTransition_opy5f"), "walk", "idle", SubResource("AnimationNodeStateMachineTransition_6yq1o")]
 
 [node name="CharacterBody3D" type="CharacterBody3D" unique_id=2027806480]
 script = ExtResource("1_hfxtm")
@@ -43,5 +55,9 @@ spring_length = 2.0
 [node name="Camera3D" type="Camera3D" parent="CameraPivot/SpringArm3D" unique_id=160364595]
 
 [node name="AnimationTree" type="AnimationTree" parent="." unique_id=1500092216]
-libraries/Anim = ExtResource("3_6yq1o")
 tree_root = SubResource("AnimationNodeStateMachine_apkb4")
+advance_expression_base_node = NodePath("..")
+anim_player = NodePath("../AnimationPlayer")
+
+[node name="AnimationPlayer" type="AnimationPlayer" parent="." unique_id=614668737]
+libraries/Anim = ExtResource("3_6yq1o")

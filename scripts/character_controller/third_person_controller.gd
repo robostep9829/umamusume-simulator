@@ -90,5 +90,5 @@ func _handle_movement(delta: float) -> void:
 	if direction != Vector3.ZERO:
 		var target_yaw := atan2(direction.x, direction.z)
 		mesh.rotation.y = lerp_angle(mesh.rotation.y, target_yaw, rotation_speed * delta)
-
+	
 	move_and_slide()
