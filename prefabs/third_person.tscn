@@ -3,6 +3,7 @@
 [ext_resource type="PackedScene" uid="uid://bg01lnqig6mhg" path="res://models/SakuraBakushinRedHood/bakushin_skele.tscn" id="1_0gmjo"]
 [ext_resource type="Script" uid="uid://dbwtn12hlo5t2" path="res://scripts/character_controller/third_person_controller.gd" id="1_hfxtm"]
 [ext_resource type="AnimationLibrary" uid="uid://r8gcebjyg3vl" path="res://models/SakuraBakushinRedHood/Anim/Anim.res" id="3_6yq1o"]
+[ext_resource type="PackedScene" uid="uid://ch7cn7j0irokp" path="res://ui/controls/movement.tscn" id="4_opy5f"]
 
 [sub_resource type="CapsuleShape3D" id="CapsuleShape3D_56iun"]
 radius = 0.352
@@ -88,15 +89,15 @@ bones/29/rotation = Quaternion(0.07772964, 2.2613575e-08, 3.1029683e-09, 0.99697
 bones/32/rotation = Quaternion(0.8597086, -0.047841273, 0.022960754, -0.50802076)
 bones/33/rotation = Quaternion(0.05321467, 3.134373e-09, -2.67335e-09, 0.9985831)
 bones/37/position = Vector3(-0.0016773853, 0.11380492, -0.008218778)
-bones/37/rotation = Quaternion(0.008994857, -0.039179746, 0.009189983, 0.99914944)
-bones/38/rotation = Quaternion(0.04604156, 0.0024407078, -0.003153708, 0.99893165)
-bones/39/rotation = Quaternion(0.06676678, 0.010417641, -0.07334358, 0.99501485)
+bones/37/rotation = Quaternion(0.012679932, -0.03908901, 0.008930612, 0.99911547)
+bones/38/rotation = Quaternion(0.049725827, 0.0025085707, -0.003564477, 0.9987534)
+bones/39/rotation = Quaternion(0.06810607, 0.010327115, -0.07350694, 0.9949129)
 bones/40/position = Vector3(-1.4030666e-06, 0.054407522, -1.2463445e-05)
-bones/40/rotation = Quaternion(-0.057802048, -0.07689254, -0.024831807, 0.9950527)
-bones/151/rotation = Quaternion(0.6802099, 0.447122, 0.48199522, -0.32415587)
-bones/152/rotation = Quaternion(-0.45844162, 0.05184085, 0.10278283, 0.88123757)
+bones/40/rotation = Quaternion(-0.06258824, -0.07831, -0.023565697, 0.9946834)
+bones/151/rotation = Quaternion(0.67942065, 0.44867906, 0.48919034, -0.312678)
+bones/152/rotation = Quaternion(-0.4504736, 0.053468272, 0.102556884, 0.88526654)
 bones/153/rotation = Quaternion(0.009526392, 0.003618542, -0.10134007, 0.99479973)
-bones/157/rotation = Quaternion(-0.0062023136, -0.15723562, 0.16258308, 0.97406644)
+bones/157/rotation = Quaternion(-0.0030111435, -0.15742967, 0.16215733, 0.9741211)
 bones/158/rotation = Quaternion(-0.018345056, 0.10475528, -0.07844217, 0.99122995)
 bones/159/rotation = Quaternion(-0.20053753, 0.023143444, 0.024445152, 0.97910756)
 bones/160/rotation = Quaternion(0.5300525, 0.5466242, 0.48436308, 0.4308582)
@@ -112,10 +113,10 @@ bones/169/rotation = Quaternion(0.67544085, 0.4449163, 0.40437165, 0.4269811)
 bones/170/position = Vector3(0.017002508, 0.018514344, -0.012519138)
 bones/170/rotation = Quaternion(-0.1305066, -0.2030073, -0.18505691, 0.9526332)
 bones/171/rotation = Quaternion(0.057724413, 0.049404934, 0.028576791, 0.9966998)
-bones/174/rotation = Quaternion(0.6495661, -0.4859852, -0.4831695, -0.32928658)
-bones/175/rotation = Quaternion(-0.4757699, 0.0063030478, -0.21438517, 0.8530195)
+bones/174/rotation = Quaternion(0.6485607, -0.48598656, -0.4915702, -0.3186612)
+bones/175/rotation = Quaternion(-0.46790773, 0.0056204586, -0.21431543, 0.8573795)
 bones/176/rotation = Quaternion(-0.0042958036, -0.00236108, 0.13298011, 0.99110657)
-bones/178/rotation = Quaternion(-0.013588821, 0.12498192, -0.22251046, 0.96679056)
+bones/178/rotation = Quaternion(-0.015221434, 0.1320314, -0.21729748, 0.9670149)
 bones/179/rotation = Quaternion(0.032795466, -0.109914325, 0.080921575, 0.99009854)
 bones/180/rotation = Quaternion(-0.16304477, -0.052841492, -0.054184265, 0.98371154)
 bones/181/rotation = Quaternion(0.5448385, -0.5349606, -0.49953738, 0.40918285)
@@ -154,3 +155,5 @@ parameters/walk_spd/walk_speed/scale = 1.0
 
 [node name="AnimationPlayer" type="AnimationPlayer" parent="." unique_id=614668737]
 libraries/Anim = ExtResource("3_6yq1o")
+
+[node name="Control" parent="." unique_id=1354381578 instance=ExtResource("4_opy5f")]

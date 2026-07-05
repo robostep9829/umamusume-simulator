@@ -1,10 +1,10 @@
 [gd_scene format=3 uid="uid://bg01lnqig6mhg"]
 
-[ext_resource type="ArrayMesh" uid="uid://ba5nhbsxycjge" path="res://models/SakuraBakushinRedHood/Meshes/bakushin-names-retopo_1041 Sakura Bakushin O_001.res" id="1_dnt75"]
-[ext_resource type="ArrayMesh" uid="uid://cbadtit30srcg" path="res://models/SakuraBakushinRedHood/Meshes/bakushin-names-retopo_1041 Sakura Bakushin O_008.res" id="2_ocjca"]
-[ext_resource type="ArrayMesh" uid="uid://cqbsush3j783n" path="res://models/SakuraBakushinRedHood/Meshes/bakushin-names-retopo_1041 Sakura Bakushin O_009.res" id="3_7jh6c"]
+[ext_resource type="ArrayMesh" uid="uid://b23wo8nma0qbt" path="res://models/SakuraBakushinRedHood/Meshes/bakushin-names-retopo_1041 Sakura Bakushin O_001.res" id="1_dnt75"]
+[ext_resource type="ArrayMesh" uid="uid://c0do6h0ob4uct" path="res://models/SakuraBakushinRedHood/Meshes/bakushin-names-retopo_1041 Sakura Bakushin O_008.res" id="2_ocjca"]
+[ext_resource type="ArrayMesh" uid="uid://cuxbyrev6gvy4" path="res://models/SakuraBakushinRedHood/Meshes/bakushin-names-retopo_1041 Sakura Bakushin O_009.res" id="3_7jh6c"]
 [ext_resource type="ArrayMesh" uid="uid://bxi0aabkre38x" path="res://models/SakuraBakushinRedHood/Meshes/bakushin-names-retopo_1041 Sakura Bakushin O_010.res" id="4_wkltr"]
-[ext_resource type="ArrayMesh" uid="uid://btyh0bwmrna5" path="res://models/SakuraBakushinRedHood/Meshes/bakushin-names-retopo_1041 Sakura Bakushin O.res" id="5_bpkjs"]
+[ext_resource type="ArrayMesh" uid="uid://dxx7sronkk7us" path="res://models/SakuraBakushinRedHood/Meshes/bakushin-names-retopo_1041 Sakura Bakushin O.res" id="5_bpkjs"]
 
 [sub_resource type="Skin" id="Skin_70dqd"]
 resource_name = "Skin"

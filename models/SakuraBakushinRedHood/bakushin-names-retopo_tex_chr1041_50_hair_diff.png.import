@@ -4,8 +4,9 @@ importer="texture"
 type="CompressedTexture2D"
 uid="uid://5gn27ei5dw4h"
 path.s3tc="res://.godot/imported/bakushin-names-retopo_tex_chr1041_50_hair_diff.png-6947c311c684646439f25dbba2a37284.s3tc.ctex"
+path.etc2="res://.godot/imported/bakushin-names-retopo_tex_chr1041_50_hair_diff.png-6947c311c684646439f25dbba2a37284.etc2.ctex"
 metadata={
-"imported_formats": ["s3tc_bptc"],
+"imported_formats": ["s3tc_bptc", "etc2_astc"],
 "vram_texture": true
 }
 generator_parameters={
@@ -15,7 +16,7 @@ generator_parameters={
 [deps]
 
 source_file="res://models/SakuraBakushinRedHood/bakushin-names-retopo_tex_chr1041_50_hair_diff.png"
-dest_files=["res://.godot/imported/bakushin-names-retopo_tex_chr1041_50_hair_diff.png-6947c311c684646439f25dbba2a37284.s3tc.ctex"]
+dest_files=["res://.godot/imported/bakushin-names-retopo_tex_chr1041_50_hair_diff.png-6947c311c684646439f25dbba2a37284.s3tc.ctex", "res://.godot/imported/bakushin-names-retopo_tex_chr1041_50_hair_diff.png-6947c311c684646439f25dbba2a37284.etc2.ctex"]
 
 [params]
 
