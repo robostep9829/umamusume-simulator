@@ -3,7 +3,7 @@
 [ext_resource type="ArrayMesh" uid="uid://ba5nhbsxycjge" path="res://models/SakuraBakushinRedHood/Meshes/bakushin-names-retopo_1041 Sakura Bakushin O_001.res" id="1_dnt75"]
 [ext_resource type="ArrayMesh" uid="uid://cbadtit30srcg" path="res://models/SakuraBakushinRedHood/Meshes/bakushin-names-retopo_1041 Sakura Bakushin O_008.res" id="2_ocjca"]
 [ext_resource type="ArrayMesh" uid="uid://cqbsush3j783n" path="res://models/SakuraBakushinRedHood/Meshes/bakushin-names-retopo_1041 Sakura Bakushin O_009.res" id="3_7jh6c"]
-[ext_resource type="ArrayMesh" uid="uid://dgvru21bs6k1i" path="res://models/SakuraBakushinRedHood/Meshes/bakushin-names-retopo_1041 Sakura Bakushin O_010.res" id="4_wkltr"]
+[ext_resource type="ArrayMesh" uid="uid://bxi0aabkre38x" path="res://models/SakuraBakushinRedHood/Meshes/bakushin-names-retopo_1041 Sakura Bakushin O_010.res" id="4_wkltr"]
 [ext_resource type="ArrayMesh" uid="uid://btyh0bwmrna5" path="res://models/SakuraBakushinRedHood/Meshes/bakushin-names-retopo_1041 Sakura Bakushin O.res" id="5_bpkjs"]
 
 [sub_resource type="Skin" id="Skin_70dqd"]
@@ -2073,11 +2073,13 @@ bones/205/rotation = Quaternion(0.99904823, -6.943035e-17, -6.9442964e-17, -0.04
 bones/205/scale = Vector3(1, 1, 1.0000143)
 
 [node name="000_mtl_bdy1041_50" type="MeshInstance3D" parent="." unique_id=411386046]
+gi_mode = 2
 mesh = ExtResource("1_dnt75")
 skin = SubResource("Skin_70dqd")
 skeleton = NodePath("..")
 
 [node name="007_mtl_chr1041_50_face" type="MeshInstance3D" parent="." unique_id=2129768304]
+gi_mode = 2
 mesh = ExtResource("2_ocjca")
 skin = SubResource("Skin_70dqd")
 skeleton = NodePath("..")
@@ -2229,6 +2231,7 @@ skeleton = NodePath("..")
 "blend_shapes/Mouth_56_0(LowAngle)[M_Face]" = 0.0
 
 [node name="008_mtl_chr1041_50_eye" type="MeshInstance3D" parent="." unique_id=777752829]
+gi_mode = 2
 mesh = ExtResource("3_7jh6c")
 skin = SubResource("Skin_70dqd")
 skeleton = NodePath("..")
@@ -2274,6 +2277,7 @@ skeleton = NodePath("..")
 "blend_shapes/Eye_23_L(SeriousA)[M_Face]" = 0.0
 
 [node name="009_mtl_chr1041_50_hair" type="MeshInstance3D" parent="." unique_id=617379972]
+gi_mode = 2
 mesh = ExtResource("4_wkltr")
 skin = SubResource("Skin_70dqd")
 skeleton = NodePath("..")
@@ -2311,6 +2315,7 @@ skeleton = NodePath("..")
 "blend_shapes/Ear_16_L(Roll)[M_Hair]" = 0.0
 
 [node name="00B_mtl_tail0001_00" type="MeshInstance3D" parent="." unique_id=503687915]
+gi_mode = 2
 mesh = ExtResource("5_bpkjs")
 skin = SubResource("Skin_70dqd")
 skeleton = NodePath("..")
