@@ -1,8 +1,8 @@
 extends CharacterBody3D
 
 ## Movement tuning
-@export var move_speed: float = 2.0
-@export var sprint_speed: float = 8.0
+@export var move_speed: float = 1.5
+@export var sprint_speed: float = 7.0
 @export var acceleration: float = 10.0
 @export var jump_velocity: float = 4.5
 @export var rotation_speed: float = 12.0
@@ -13,8 +13,8 @@ extends CharacterBody3D
 @export var max_pitch: float = 70.0    # look up limit (degrees)
 
 ## Sprint camera
-@export var normal_spring_length: float = 1.0
-@export var sprint_spring_length: float = 2.0
+@export var normal_spring_length: float = 1.5
+@export var sprint_spring_length: float = 2.5
 @export var sprint_zoom_time: float = 0.2
 
 @export var normal_spring_position: Vector3 = Vector3(0.5, 0.0, 0.0)
