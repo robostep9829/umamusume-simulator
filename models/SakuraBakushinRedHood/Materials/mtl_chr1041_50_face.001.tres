@@ -6,6 +6,5 @@
 resource_name = "mtl_chr1041_50_face.001"
 albedo_texture = ExtResource("1_qnrxp")
 roughness = 0.48
-emission_enabled = true
-emission = Color(0.14, 0.039666664, 0, 1)
+emission = Color(0.14, 0.11391334, 0.1036, 1)
 metadata/_gltf_primary_texture_coord = 0
