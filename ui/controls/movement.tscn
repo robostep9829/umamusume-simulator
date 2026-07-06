@@ -20,8 +20,8 @@ offset_top = -40.0
 offset_right = 40.0
 grow_vertical = 0
 theme = ExtResource("1_utai3")
-theme_override_constants/margin_left = 50
-theme_override_constants/margin_bottom = 50
+theme_override_constants/margin_left = 100
+theme_override_constants/margin_bottom = 100
 
 [node name="VirtualJoystick" type="VirtualJoystick" parent="MarginContainer" unique_id=124557262]
 custom_minimum_size = Vector2(200, 200)
