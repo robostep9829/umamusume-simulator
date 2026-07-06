@@ -1,6 +1,7 @@
 [gd_scene format=3 uid="uid://ch7cn7j0irokp"]
 
 [ext_resource type="Theme" uid="uid://blcrbrjkkdhi1" path="res://ui/themes/new_theme.tres" id="1_utai3"]
+[ext_resource type="Script" uid="uid://dvwwme20ob8e3" path="res://ui/controls/SprintTouchZone.cs" id="2_gdscript"]
 
 [node name="Control" type="Control" unique_id=1354381578]
 layout_mode = 3
@@ -31,3 +32,12 @@ action_left = &"move_left"
 action_right = &"move_right"
 action_up = &"move_forward"
 action_down = &"move_back"
+
+[node name="SprintTouchZone" type="Control" parent="." unique_id=2147483647]
+anchors_preset = 0
+anchor_left = 0.5
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("2_gdscript")
