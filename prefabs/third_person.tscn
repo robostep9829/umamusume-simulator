@@ -2,7 +2,7 @@
 
 [ext_resource type="PackedScene" uid="uid://bg01lnqig6mhg" path="res://models/SakuraBakushinRedHood/bakushin_skele.tscn" id="1_0gmjo"]
 [ext_resource type="Script" uid="uid://dbwtn12hlo5t2" path="res://scripts/character_controller/third_person_controller.gd" id="1_hfxtm"]
-[ext_resource type="AnimationLibrary" uid="uid://r8gcebjyg3vl" path="res://models/SakuraBakushinRedHood/Anim/Anim.res" id="3_6yq1o"]
+[ext_resource type="AnimationLibrary" uid="uid://r8gcebjyg3vl" path="res://anim/Anim.res" id="3_6yq1o"]
 [ext_resource type="PackedScene" uid="uid://ch7cn7j0irokp" path="res://ui/controls/movement.tscn" id="4_opy5f"]
 
 [sub_resource type="CapsuleShape3D" id="CapsuleShape3D_56iun"]
@@ -89,15 +89,15 @@ bones/29/rotation = Quaternion(0.07772964, 2.2613575e-08, 3.1029683e-09, 0.99697
 bones/32/rotation = Quaternion(0.8597086, -0.047841273, 0.022960754, -0.50802076)
 bones/33/rotation = Quaternion(0.05321467, 3.134373e-09, -2.67335e-09, 0.9985831)
 bones/37/position = Vector3(-0.0016773853, 0.11380492, -0.008218778)
-bones/37/rotation = Quaternion(0.0065613417, -0.03924026, 0.009361434, 0.99916446)
-bones/38/rotation = Quaternion(0.043634836, 0.002396414, -0.0028852907, 0.99904054)
-bones/39/rotation = Quaternion(0.06541846, 0.0105087655, -0.07317921, 0.9951156)
+bones/37/rotation = Quaternion(0.013350249, -0.039072603, 0.008883454, 0.9991078)
+bones/38/rotation = Quaternion(0.050406273, 0.00252107, -0.003640419, 0.99871904)
+bones/39/rotation = Quaternion(0.06851258, 0.010299615, -0.07355636, 0.9948816)
 bones/40/position = Vector3(-1.4030666e-06, 0.054407522, -1.2463445e-05)
-bones/40/rotation = Quaternion(-0.059746765, -0.07423454, -0.026657095, 0.99509245)
-bones/151/rotation = Quaternion(0.6808097, 0.44591004, 0.4762004, -0.33300993)
-bones/152/rotation = Quaternion(-0.4645779, 0.0505553, 0.102962576, 0.878072)
+bones/40/rotation = Quaternion(-0.06184672, -0.07887531, -0.023198014, 0.99469376)
+bones/151/rotation = Quaternion(0.6792609, 0.44893563, 0.49045274, -0.31067297)
+bones/152/rotation = Quaternion(-0.44906798, 0.053756796, 0.10251501, 0.88596773)
 bones/153/rotation = Quaternion(0.009526392, 0.003618542, -0.10134007, 0.99479973)
-bones/157/rotation = Quaternion(-0.007656411, -0.15714547, 0.16277713, 0.9740382)
+bones/157/rotation = Quaternion(-0.0024326046, -0.15746485, 0.16207987, 0.9741299)
 bones/158/rotation = Quaternion(-0.018345056, 0.10475528, -0.07844217, 0.99122995)
 bones/159/rotation = Quaternion(-0.20053753, 0.023143444, 0.024445152, 0.97910756)
 bones/160/rotation = Quaternion(0.5300525, 0.5466242, 0.48436308, 0.4308582)
@@ -113,10 +113,10 @@ bones/169/rotation = Quaternion(0.67544085, 0.4449163, 0.40437165, 0.4269811)
 bones/170/position = Vector3(0.017002508, 0.018514344, -0.012519138)
 bones/170/rotation = Quaternion(-0.1305066, -0.2030073, -0.18505691, 0.9526332)
 bones/171/rotation = Quaternion(0.057724413, 0.049404934, 0.028576791, 0.9966998)
-bones/174/rotation = Quaternion(0.65035874, -0.48596114, -0.47640526, -0.3375108)
-bones/175/rotation = Quaternion(-0.4814327, 0.0068606045, -0.2144557, 0.84981424)
+bones/174/rotation = Quaternion(0.64835566, -0.48597342, -0.49309027, -0.316744)
+bones/175/rotation = Quaternion(-0.46648276, 0.005489098, -0.21429715, 0.8581611)
 bones/176/rotation = Quaternion(-0.0042958036, -0.00236108, 0.13298011, 0.99110657)
-bones/178/rotation = Quaternion(-0.012286006, 0.11955349, -0.22644994, 0.96657985)
+bones/178/rotation = Quaternion(-0.015524008, 0.13331409, -0.21635324, 0.9670458)
 bones/179/rotation = Quaternion(0.032795466, -0.109914325, 0.080921575, 0.99009854)
 bones/180/rotation = Quaternion(-0.16304477, -0.052841492, -0.054184265, 0.98371154)
 bones/181/rotation = Quaternion(0.5448385, -0.5349606, -0.49953738, 0.40918285)
@@ -152,12 +152,6 @@ settings/0/drag/damping_curve = null
 settings/0/gravity/value = 0.0
 settings/0/gravity/damping_curve = null
 settings/0/gravity/direction = Vector3(0, -1, 0)
-settings/0/joints/0/bone_name = "Ear_01_L"
-settings/0/joints/0/bone = 123
-settings/0/joints/1/bone_name = "Ear_02_L"
-settings/0/joints/1/bone = 124
-settings/0/joints/2/bone_name = "Ear_03_L"
-settings/0/joints/2/bone = 125
 settings/0/enable_all_child_collisions = true
 settings/0/exclude_collision_count = 0
 settings/1/root_bone_name = "Ear_01_R"
@@ -177,17 +171,11 @@ settings/1/drag/damping_curve = null
 settings/1/gravity/value = 0.0
 settings/1/gravity/damping_curve = null
 settings/1/gravity/direction = Vector3(0, -1, 0)
-settings/1/joints/0/bone_name = "Ear_01_R"
-settings/1/joints/0/bone = 126
-settings/1/joints/1/bone_name = "Ear_02_R"
-settings/1/joints/1/bone = 127
-settings/1/joints/2/bone_name = "Ear_03_R"
-settings/1/joints/2/bone = 128
 settings/1/enable_all_child_collisions = true
 settings/1/exclude_collision_count = 0
 
 [node name="ModifierBoneTarget3D" type="ModifierBoneTarget3D" parent="Skeleton3D" unique_id=294106539]
-transform = Transform3D(0.980629, 0.18067676, -0.07564978, -0.1808991, 0.9834935, 0.003959447, 0.07511642, 0.009802178, 0.9971264, -0.0001606252, 1.3183529, 0.00015274435)
+transform = Transform3D(0.98014593, 0.17948368, -0.08426, -0.18202181, 0.9830155, -0.023411825, 0.07862682, 0.038284115, 0.9961685, 0.0006988612, 1.3181027, 0.0059098667)
 bone_name = "Head"
 bone = 40
 
@@ -217,18 +205,6 @@ settings/0/drag/damping_curve = null
 settings/0/gravity/value = 0.2
 settings/0/gravity/damping_curve = null
 settings/0/gravity/direction = Vector3(0, -1, 0)
-settings/0/joints/0/bone_name = "Sp_He_Hair4_R_00"
-settings/0/joints/0/bone = 145
-settings/0/joints/1/bone_name = "Sp_He_Hair4_R_01"
-settings/0/joints/1/bone = 146
-settings/0/joints/2/bone_name = "Sp_He_Hair4_R_02"
-settings/0/joints/2/bone = 147
-settings/0/joints/3/bone_name = "Sp_He_Hair4_R_03"
-settings/0/joints/3/bone = 148
-settings/0/joints/4/bone_name = "Sp_He_Hair4_R_04"
-settings/0/joints/4/bone = 149
-settings/0/joints/5/bone_name = "Sp_He_Hair4_R_05"
-settings/0/joints/5/bone = 150
 settings/0/enable_all_child_collisions = true
 settings/0/exclude_collision_count = 0
 settings/1/root_bone_name = "Sp_He_Hair4_L_00"
@@ -248,18 +224,6 @@ settings/1/drag/damping_curve = null
 settings/1/gravity/value = 0.2
 settings/1/gravity/damping_curve = null
 settings/1/gravity/direction = Vector3(0, -1, 0)
-settings/1/joints/0/bone_name = "Sp_He_Hair4_L_00"
-settings/1/joints/0/bone = 139
-settings/1/joints/1/bone_name = "Sp_He_Hair4_L_01"
-settings/1/joints/1/bone = 140
-settings/1/joints/2/bone_name = "Sp_He_Hair4_L_02"
-settings/1/joints/2/bone = 141
-settings/1/joints/3/bone_name = "Sp_He_Hair4_L_03"
-settings/1/joints/3/bone = 142
-settings/1/joints/4/bone_name = "Sp_He_Hair4_L_04"
-settings/1/joints/4/bone = 143
-settings/1/joints/5/bone_name = "Sp_He_Hair4_L_05"
-settings/1/joints/5/bone = 144
 settings/1/enable_all_child_collisions = true
 settings/1/exclude_collision_count = 0
 settings/2/root_bone_name = "Sp_Hi_Tail0_B_00"
@@ -279,16 +243,6 @@ settings/2/drag/damping_curve = null
 settings/2/gravity/value = 0.0
 settings/2/gravity/damping_curve = null
 settings/2/gravity/direction = Vector3(0, -1, 0)
-settings/2/joints/0/bone_name = "Sp_Hi_Tail0_B_00"
-settings/2/joints/0/bone = 201
-settings/2/joints/1/bone_name = "Sp_Hi_Tail0_B_01"
-settings/2/joints/1/bone = 202
-settings/2/joints/2/bone_name = "Sp_Hi_Tail0_B_02"
-settings/2/joints/2/bone = 203
-settings/2/joints/3/bone_name = "Sp_Hi_Tail0_B_03"
-settings/2/joints/3/bone = 204
-settings/2/joints/4/bone_name = "Sp_Hi_Tail0_B_04"
-settings/2/joints/4/bone = 205
 settings/2/enable_all_child_collisions = true
 settings/2/exclude_collision_count = 0
 

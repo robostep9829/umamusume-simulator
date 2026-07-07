@@ -3,6 +3,7 @@
 [ext_resource type="CompressedTexture3D" uid="uid://e573kqiepk0a" path="res://environment/tonemap/pbrNeutral.exr" id="1_noarx"]
 [ext_resource type="Texture2D" uid="uid://d07byxrqf6f45" path="res://worlds/gridmap/tile.png" id="2_jka67"]
 [ext_resource type="PackedScene" uid="uid://c11xkbxmyhcu5" path="res://prefabs/third_person.tscn" id="3_a0tk4"]
+[ext_resource type="Resource" uid="uid://ck8dx66csso42" path="res://models/Matikanetannhauser/matitan.tres" id="4_r3fl7"]
 
 [sub_resource type="ProceduralSkyMaterial" id="ProceduralSkyMaterial_a0tk4"]
 ground_horizon_color = Color(0.66224277, 0.6717428, 0.6867428, 1)
@@ -62,6 +63,7 @@ mesh = SubResource("PlaneMesh_56iun")
 
 [node name="CharacterBody3D" parent="." unique_id=2027806480 instance=ExtResource("3_a0tk4")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2.0985637, 0, -0.9083092)
+player_data = ExtResource("4_r3fl7")
 
 [node name="MeshInstance3D2" type="MeshInstance3D" parent="." unique_id=1204056644]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2.944909, 0.6469058, 2.2527442)

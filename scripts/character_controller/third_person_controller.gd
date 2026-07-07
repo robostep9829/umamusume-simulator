@@ -20,6 +20,11 @@ extends CharacterBody3D
 @export var normal_spring_position: Vector3 = Vector3(0.5, 0.0, 0.0)
 @export var sprint_spring_position: Vector3 = Vector3(0.0, 0.0, 0.0)
 
+@export var player_data: PlayerData:
+	set(value):
+		player_data = value
+		_update_character_mesh()
+
 
 # Cached node references
 @onready var camera_pivot: Node3D = $CameraPivot
@@ -39,8 +44,27 @@ var is_sprinting: bool = false
 
 
 func _ready() -> void:
-	# Capture the mouse for a standard third person look feel
 	Input.mouse_mode = Input.MOUSE_MODE_CAPTURED
+	_update_character_mesh()
+
+
+func _update_character_mesh() -> void:
+	if not player_data or not player_data.character:
+		return
+	var old: Node3D = get_node_or_null("Skeleton3D")
+	if not old:
+		return
+	for child in old.get_children():
+		if child is MeshInstance3D:
+			old.remove_child(child)
+			child.queue_free()
+	var new_mesh: Node3D = player_data.character.instantiate()
+	old.replace_by(new_mesh)
+	old.queue_free()
+	mesh = new_mesh
+	for child in mesh.get_children():
+		if child is SpringBoneSimulator3D:
+			child.setting_count = 0
 
 
 func _unhandled_input(event: InputEvent) -> void:

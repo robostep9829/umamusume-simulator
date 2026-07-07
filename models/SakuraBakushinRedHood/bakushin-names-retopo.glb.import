@@ -113,6 +113,13 @@ _subresources={
 "save_to_file/fallback_path": "res://models/SakuraBakushinRedHood/Meshes/bakushin-names-retopo_1041 Sakura Bakushin O_010.res",
 "save_to_file/path": "uid://bxi0aabkre38x"
 }
+},
+"nodes": {
+"PATH:Skeleton3D": {
+"retarget/bone_map": Resource("uid://ce786ngdwdm0s", "res://models/SakuraBakushinRedHood/new_bone_map.tres"),
+"retarget/bone_renamer/rename_bones": false,
+"retarget/bone_renamer/unique_node/make_unique": false
+}
 }
 }
 gltf/naming_version=2

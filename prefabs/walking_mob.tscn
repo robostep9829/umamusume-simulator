@@ -2,7 +2,7 @@
 
 [ext_resource type="Script" uid="uid://comwpkhkporbv" path="res://scripts/character_controller/auto_walk_controller.gd" id="1_vheto"]
 [ext_resource type="PackedScene" uid="uid://bg01lnqig6mhg" path="res://models/SakuraBakushinRedHood/bakushin_skele.tscn" id="2_yyxlg"]
-[ext_resource type="AnimationLibrary" uid="uid://r8gcebjyg3vl" path="res://models/SakuraBakushinRedHood/Anim/Anim.res" id="3_hx3aj"]
+[ext_resource type="AnimationLibrary" uid="uid://r8gcebjyg3vl" path="res://anim/Anim.res" id="3_hx3aj"]
 
 [sub_resource type="CapsuleShape3D" id="CapsuleShape3D_56iun"]
 
