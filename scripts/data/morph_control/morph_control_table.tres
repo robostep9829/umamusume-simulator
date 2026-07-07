@@ -1,35 +1,35 @@
 [gd_resource type="Resource" script_class="MorphControl" format=3 uid="uid://6ytpnesveeqh"]
 
-[ext_resource type="Script" uid="uid://dhjm6qjraw5qs" path="res://scripts/data/morph_control/morph_control_entry.gd" id="1_j4isj"]
-[ext_resource type="Script" uid="uid://ca3m1rx7dekka" path="res://scripts/data/morph_control/morph_control.gd" id="2_rcgug"]
+[ext_resource type="Script" uid="uid://dhjm6qjraw5qs" path="res://scripts/data/morph_control/morph_control_entry.gd" id="1_v4lq7"]
+[ext_resource type="Script" uid="uid://ca3m1rx7dekka" path="res://scripts/data/morph_control/morph_control.gd" id="2_lmud1"]
 
 [sub_resource type="Resource" id="Resource_34x3k"]
-script = ExtResource("1_j4isj")
+script = ExtResource("1_v4lq7")
 names = Dictionary[int, StringName]({
 0: &"Mouth_44_0",
 1: &"Mouth_11_0"
 })
 
 [sub_resource type="Resource" id="Resource_ehxvn"]
-script = ExtResource("1_j4isj")
+script = ExtResource("1_v4lq7")
 names = Dictionary[int, StringName]({
 0: &"Mouth_17_0"
 })
 
 [sub_resource type="Resource" id="Resource_13etn"]
-script = ExtResource("1_j4isj")
+script = ExtResource("1_v4lq7")
 names = Dictionary[int, StringName]({
 0: &"Mouth_15_0"
 })
 
 [sub_resource type="Resource" id="Resource_5ey2v"]
-script = ExtResource("1_j4isj")
+script = ExtResource("1_v4lq7")
 names = Dictionary[int, StringName]({
 0: &"Mouth_16_0"
 })
 
 [sub_resource type="Resource" id="Resource_jwqs3"]
-script = ExtResource("1_j4isj")
+script = ExtResource("1_v4lq7")
 names = Dictionary[int, StringName]({
 0: &"Mouth_5_0",
 1: &"Mouth_6_0",
@@ -38,7 +38,7 @@ names = Dictionary[int, StringName]({
 })
 
 [sub_resource type="Resource" id="Resource_4rhyl"]
-script = ExtResource("1_j4isj")
+script = ExtResource("1_v4lq7")
 names = Dictionary[int, StringName]({
 0: &"Mouth_25_0",
 1: &"Mouth_35_0",
@@ -47,14 +47,14 @@ names = Dictionary[int, StringName]({
 })
 
 [sub_resource type="Resource" id="Resource_yi6hi"]
-script = ExtResource("1_j4isj")
+script = ExtResource("1_v4lq7")
 names = Dictionary[int, StringName]({
 0: &"Mouth_28_0",
 1: &"Mouth_27_0"
 })
 
 [sub_resource type="Resource" id="Resource_vne53"]
-script = ExtResource("1_j4isj")
+script = ExtResource("1_v4lq7")
 names = Dictionary[int, StringName]({
 0: &"Mouth_29_0",
 1: &"Mouth_30_0",
@@ -63,7 +63,7 @@ names = Dictionary[int, StringName]({
 })
 
 [sub_resource type="Resource" id="Resource_fv57i"]
-script = ExtResource("1_j4isj")
+script = ExtResource("1_v4lq7")
 names = Dictionary[int, StringName]({
 0: &"Mouth_31_0",
 1: &"Mouth_10_0",
@@ -71,52 +71,52 @@ names = Dictionary[int, StringName]({
 })
 
 [sub_resource type="Resource" id="Resource_pdste"]
-script = ExtResource("1_j4isj")
+script = ExtResource("1_v4lq7")
 names = Dictionary[int, StringName]({
 0: &"Eye_15_L"
 })
 
 [sub_resource type="Resource" id="Resource_h1yem"]
-script = ExtResource("1_j4isj")
+script = ExtResource("1_v4lq7")
 names = Dictionary[int, StringName]({
 0: &"Mouth_46_0"
 })
 
 [sub_resource type="Resource" id="Resource_xrpeq"]
-script = ExtResource("1_j4isj")
+script = ExtResource("1_v4lq7")
 names = Dictionary[int, StringName]({
 0: &"Mouth_48_0"
 })
 
 [sub_resource type="Resource" id="Resource_0j21f"]
-script = ExtResource("1_j4isj")
+script = ExtResource("1_v4lq7")
 names = Dictionary[int, StringName]({
 0: &"Eye_16_L"
 })
 
 [sub_resource type="Resource" id="Resource_x1wj0"]
-script = ExtResource("1_j4isj")
+script = ExtResource("1_v4lq7")
 names = Dictionary[int, StringName]({
 0: &"Mouth_26_0"
 })
 
 [sub_resource type="Resource" id="Resource_oqdgy"]
-script = ExtResource("1_j4isj")
+script = ExtResource("1_v4lq7")
 
 [sub_resource type="Resource" id="Resource_hxagu"]
-script = ExtResource("1_j4isj")
+script = ExtResource("1_v4lq7")
 names = Dictionary[int, StringName]({
 0: &"EyeBrow_1_L"
 })
 
 [sub_resource type="Resource" id="Resource_f5v4q"]
-script = ExtResource("1_j4isj")
+script = ExtResource("1_v4lq7")
 names = Dictionary[int, StringName]({
 0: &"Mouth_12_0"
 })
 
 [sub_resource type="Resource" id="Resource_qqvuq"]
-script = ExtResource("1_j4isj")
+script = ExtResource("1_v4lq7")
 names = Dictionary[int, StringName]({
 0: &"Mouth_1_0",
 1: &"Mouth_4_0",
@@ -124,93 +124,93 @@ names = Dictionary[int, StringName]({
 })
 
 [sub_resource type="Resource" id="Resource_hyyt3"]
-script = ExtResource("1_j4isj")
+script = ExtResource("1_v4lq7")
 names = Dictionary[int, StringName]({
 0: &"Mouth_19_0"
 })
 
 [sub_resource type="Resource" id="Resource_grmbi"]
-script = ExtResource("1_j4isj")
+script = ExtResource("1_v4lq7")
 names = Dictionary[int, StringName]({
 0: &"Mouth_18_0"
 })
 
 [sub_resource type="Resource" id="Resource_g7tt1"]
-script = ExtResource("1_j4isj")
+script = ExtResource("1_v4lq7")
 names = Dictionary[int, StringName]({
 0: &"Eye_12_L"
 })
 
 [sub_resource type="Resource" id="Resource_jnc4d"]
-script = ExtResource("1_j4isj")
+script = ExtResource("1_v4lq7")
 names = Dictionary[int, StringName]({
 0: &"Mouth_3_0"
 })
 
 [sub_resource type="Resource" id="Resource_314h2"]
-script = ExtResource("1_j4isj")
+script = ExtResource("1_v4lq7")
 names = Dictionary[int, StringName]({
 0: &"Mouth_2_0"
 })
 
 [sub_resource type="Resource" id="Resource_5q2pq"]
-script = ExtResource("1_j4isj")
+script = ExtResource("1_v4lq7")
 names = Dictionary[int, StringName]({
 0: &"Mouth_45_0"
 })
 
 [sub_resource type="Resource" id="Resource_ryyg1"]
-script = ExtResource("1_j4isj")
+script = ExtResource("1_v4lq7")
 names = Dictionary[int, StringName]({
 0: &"Mouth_47_0"
 })
 
 [sub_resource type="Resource" id="Resource_8hnc7"]
-script = ExtResource("1_j4isj")
+script = ExtResource("1_v4lq7")
 names = Dictionary[int, StringName]({
 0: &"Mouth_49_0"
 })
 
 [sub_resource type="Resource" id="Resource_eey2w"]
-script = ExtResource("1_j4isj")
+script = ExtResource("1_v4lq7")
 names = Dictionary[int, StringName]({
 0: &"Mouth_9_0"
 })
 
 [sub_resource type="Resource" id="Resource_fbyde"]
-script = ExtResource("1_j4isj")
+script = ExtResource("1_v4lq7")
 names = Dictionary[int, StringName]({
 0: &"Eye_5_L",
 1: &"Eye_8_L"
 })
 
 [sub_resource type="Resource" id="Resource_kqiyl"]
-script = ExtResource("1_j4isj")
+script = ExtResource("1_v4lq7")
 names = Dictionary[int, StringName]({
 0: &"Eye_5_R",
 1: &"Eye_8_R"
 })
 
 [sub_resource type="Resource" id="Resource_wm0ou"]
-script = ExtResource("1_j4isj")
+script = ExtResource("1_v4lq7")
 names = Dictionary[int, StringName]({
 0: &"Eye_2_L"
 })
 
 [sub_resource type="Resource" id="Resource_0fp72"]
-script = ExtResource("1_j4isj")
+script = ExtResource("1_v4lq7")
 names = Dictionary[int, StringName]({
 0: &"EyeBrow_21_R"
 })
 
 [sub_resource type="Resource" id="Resource_cj0su"]
-script = ExtResource("1_j4isj")
+script = ExtResource("1_v4lq7")
 names = Dictionary[int, StringName]({
 0: &"EyeBrow_21_L"
 })
 
 [sub_resource type="Resource" id="Resource_lew8n"]
-script = ExtResource("1_j4isj")
+script = ExtResource("1_v4lq7")
 names = Dictionary[int, StringName]({
 0: &"EyeBrow_14_R",
 1: &"EyeBrow_22_R",
@@ -218,7 +218,7 @@ names = Dictionary[int, StringName]({
 })
 
 [sub_resource type="Resource" id="Resource_cksdv"]
-script = ExtResource("1_j4isj")
+script = ExtResource("1_v4lq7")
 names = Dictionary[int, StringName]({
 0: &"EyeBrow_14_L",
 1: &"EyeBrow_22_L",
@@ -226,68 +226,68 @@ names = Dictionary[int, StringName]({
 })
 
 [sub_resource type="Resource" id="Resource_uigl3"]
-script = ExtResource("1_j4isj")
+script = ExtResource("1_v4lq7")
 names = Dictionary[int, StringName]({
 0: &"Mouth_50_0"
 })
 
 [sub_resource type="Resource" id="Resource_6via8"]
-script = ExtResource("1_j4isj")
+script = ExtResource("1_v4lq7")
 names = Dictionary[int, StringName]({
 0: &"Mouth_51_0"
 })
 
 [sub_resource type="Resource" id="Resource_u54d3"]
-script = ExtResource("1_j4isj")
+script = ExtResource("1_v4lq7")
 names = Dictionary[int, StringName]({
 0: &"Mouth_53_0"
 })
 
 [sub_resource type="Resource" id="Resource_82hj0"]
-script = ExtResource("1_j4isj")
+script = ExtResource("1_v4lq7")
 names = Dictionary[int, StringName]({
 0: &"Mouth_52_0"
 })
 
 [sub_resource type="Resource" id="Resource_g7q8q"]
-script = ExtResource("1_j4isj")
+script = ExtResource("1_v4lq7")
 names = Dictionary[int, StringName]({
 0: &"Mouth_54_0"
 })
 
 [sub_resource type="Resource" id="Resource_djo3n"]
-script = ExtResource("1_j4isj")
+script = ExtResource("1_v4lq7")
 names = Dictionary[int, StringName]({
 0: &"Mouth_55_0"
 })
 
 [sub_resource type="Resource" id="Resource_idp1r"]
-script = ExtResource("1_j4isj")
+script = ExtResource("1_v4lq7")
 names = Dictionary[int, StringName]({
 0: &"Mouth_13_0"
 })
 
 [sub_resource type="Resource" id="Resource_xhga2"]
-script = ExtResource("1_j4isj")
+script = ExtResource("1_v4lq7")
 names = Dictionary[int, StringName]({
 0: &"Mouth_41_0"
 })
 
 [sub_resource type="Resource" id="Resource_vdyiu"]
-script = ExtResource("1_j4isj")
+script = ExtResource("1_v4lq7")
 names = Dictionary[int, StringName]({
 0: &"EyeBrow_6_R",
 1: &"EyeBrow_12_R"
 })
 
 [sub_resource type="Resource" id="Resource_uqh3s"]
-script = ExtResource("1_j4isj")
+script = ExtResource("1_v4lq7")
 names = Dictionary[int, StringName]({
 0: &"EyeBrow_6_L"
 })
 
 [sub_resource type="Resource" id="Resource_o1qm7"]
-script = ExtResource("1_j4isj")
+script = ExtResource("1_v4lq7")
 names = Dictionary[int, StringName]({
 0: &"EyeBrow_13_L",
 1: &"EyeBrow_20_L",
@@ -295,7 +295,7 @@ names = Dictionary[int, StringName]({
 })
 
 [sub_resource type="Resource" id="Resource_0dwia"]
-script = ExtResource("1_j4isj")
+script = ExtResource("1_v4lq7")
 names = Dictionary[int, StringName]({
 0: &"EyeBrow_5_R",
 1: &"EyeBrow_15_R",
@@ -305,7 +305,7 @@ names = Dictionary[int, StringName]({
 })
 
 [sub_resource type="Resource" id="Resource_mp6gk"]
-script = ExtResource("1_j4isj")
+script = ExtResource("1_v4lq7")
 names = Dictionary[int, StringName]({
 0: &"EyeBrow_5_L",
 1: &"EyeBrow_15_L",
@@ -315,63 +315,63 @@ names = Dictionary[int, StringName]({
 })
 
 [sub_resource type="Resource" id="Resource_10qqr"]
-script = ExtResource("1_j4isj")
+script = ExtResource("1_v4lq7")
 names = Dictionary[int, StringName]({
 0: &"EyeBrow_18_L"
 })
 
 [sub_resource type="Resource" id="Resource_ra65q"]
-script = ExtResource("1_j4isj")
+script = ExtResource("1_v4lq7")
 names = Dictionary[int, StringName]({
 0: &"EyeBrow_24_L",
 1: &"EyeBrow_24_R"
 })
 
 [sub_resource type="Resource" id="Resource_1tg8t"]
-script = ExtResource("1_j4isj")
+script = ExtResource("1_v4lq7")
 names = Dictionary[int, StringName]({
 0: &"EyeBrow_23_L",
 1: &"EyeBrow_23_R"
 })
 
 [sub_resource type="Resource" id="Resource_pbher"]
-script = ExtResource("1_j4isj")
+script = ExtResource("1_v4lq7")
 names = Dictionary[int, StringName]({
 0: &"EyeBrow_17_R"
 })
 
 [sub_resource type="Resource" id="Resource_vv2qg"]
-script = ExtResource("1_j4isj")
+script = ExtResource("1_v4lq7")
 names = Dictionary[int, StringName]({
 0: &"EyeBrow_17_L"
 })
 
 [sub_resource type="Resource" id="Resource_63oft"]
-script = ExtResource("1_j4isj")
+script = ExtResource("1_v4lq7")
 names = Dictionary[int, StringName]({
 0: &"Eye_14_L"
 })
 
 [sub_resource type="Resource" id="Resource_1lcc8"]
-script = ExtResource("1_j4isj")
+script = ExtResource("1_v4lq7")
 names = Dictionary[int, StringName]({
 0: &"Eye_19_L"
 })
 
 [sub_resource type="Resource" id="Resource_1fn4s"]
-script = ExtResource("1_j4isj")
+script = ExtResource("1_v4lq7")
 names = Dictionary[int, StringName]({
 0: &"Eye_23_L"
 })
 
 [sub_resource type="Resource" id="Resource_qyp43"]
-script = ExtResource("1_j4isj")
+script = ExtResource("1_v4lq7")
 names = Dictionary[int, StringName]({
 0: &"Eye_2_R"
 })
 
 [sub_resource type="Resource" id="Resource_w6bci"]
-script = ExtResource("1_j4isj")
+script = ExtResource("1_v4lq7")
 names = Dictionary[int, StringName]({
 0: &"Eye_9_L",
 1: &"Eye_10_L",
@@ -380,8 +380,8 @@ names = Dictionary[int, StringName]({
 })
 
 [resource]
-script = ExtResource("2_rcgug")
-entities = Dictionary[StringName, ExtResource("1_j4isj")]({
+script = ExtResource("2_lmud1")
+entities = Dictionary[StringName, ExtResource("1_v4lq7")]({
 &"~~": SubResource("Resource_34x3k"),
 &"ω□": SubResource("Resource_ehxvn"),
 &"□": SubResource("Resource_13etn"),

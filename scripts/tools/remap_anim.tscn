@@ -1,0 +1,8 @@
+[gd_scene format=3 uid="uid://b2tm3tjnbs5km"]
+
+[ext_resource type="Script" uid="uid://cxan4vifra8sm" path="res://scripts/tools/remap_face_anim.gd" id="1_x2m6m"]
+
+[node name="Node3D" type="Node3D" unique_id=1876512593]
+
+[node name="Node3D" type="Node3D" parent="." unique_id=-1653135114]
+script = ExtResource("1_x2m6m")

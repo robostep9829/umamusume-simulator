@@ -65,12 +65,13 @@ func _update_character_mesh() -> void:
 	old.replace_by(new_mesh)
 	old.queue_free()
 	mesh = new_mesh
-	for child in mesh.get_children():
-		if child is SpringBoneSimulator3D:
-			child.setting_count = 0
+#	for child in mesh.get_children():
+#		if child is SpringBoneSimulator3D:
+#			child.setting_count = 0
 	if animation_tree:
 		animation_tree.set_active(false)
 		animation_tree.set_active(true)
+	$MorphController.wake()
 
 
 func _unhandled_input(event: InputEvent) -> void:

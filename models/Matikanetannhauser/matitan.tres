@@ -8,4 +8,5 @@ script = ExtResource("1_7ajgv")
 character = ExtResource("1_ua3s3")
 name = "Matikanetannhauser"
 series = "OG"
+face_mesh = &"003_mtl_chr1062_00_face_001"
 metadata/_custom_type_script = "uid://cn87jsps7noo4"

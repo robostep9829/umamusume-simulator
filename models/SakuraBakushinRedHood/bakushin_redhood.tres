@@ -8,4 +8,5 @@ script = ExtResource("1_5gyrv")
 character = ExtResource("1_ga0ng")
 name = "Sakura Bakushin (Red Hot Leader)"
 series = "OG"
+face_mesh = &"007_mtl_chr1041_50_face_001"
 metadata/_custom_type_script = "uid://cn87jsps7noo4"
