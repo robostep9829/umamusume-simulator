@@ -1,3 +1,4 @@
+@tool
 extends CharacterBody3D
 
 ## Movement tuning
@@ -30,6 +31,7 @@ extends CharacterBody3D
 @onready var camera_pivot: Node3D = $CameraPivot
 @onready var mesh: Node3D = $Skeleton3D
 @onready var spring: Node3D = $CameraPivot/SpringArm3D
+@onready var animation_tree: AnimationTree = $AnimationTree
 
 # Gravity pulled from project settings so it stays consistent
 var gravity: float = ProjectSettings.get_setting("physics/3d/default_gravity")
@@ -44,7 +46,8 @@ var is_sprinting: bool = false
 
 
 func _ready() -> void:
-	Input.mouse_mode = Input.MOUSE_MODE_CAPTURED
+	if not Engine.is_editor_hint():
+		Input.mouse_mode = Input.MOUSE_MODE_CAPTURED
 	_update_character_mesh()
 
 
@@ -65,10 +68,14 @@ func _update_character_mesh() -> void:
 	for child in mesh.get_children():
 		if child is SpringBoneSimulator3D:
 			child.setting_count = 0
+	if animation_tree:
+		animation_tree.set_active(false)
+		animation_tree.set_active(true)
 
 
 func _unhandled_input(event: InputEvent) -> void:
-	# Mouse look
+	if Engine.is_editor_hint():
+		return
 	if event is InputEventMouseMotion and Input.mouse_mode == Input.MOUSE_MODE_CAPTURED:
 		_yaw -= event.relative.x * mouse_sensitivity
 		_pitch -= event.relative.y * mouse_sensitivity
@@ -84,6 +91,8 @@ func _unhandled_input(event: InputEvent) -> void:
 
 
 func _physics_process(delta: float) -> void:
+	if Engine.is_editor_hint():
+		return
 	_update_camera()
 	_handle_movement(delta)
 
