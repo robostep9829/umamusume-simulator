@@ -56,15 +56,18 @@ func _ready() -> void:
 
 
 func wake() -> void:
-	var parent = get_parent()
+	var root := get_parent()
 	target_skeleton = get_node("../Skeleton3D")
 	var mesh_name := "007_mtl_chr1041_50_face_001"
 	
-	if "player_data" in parent:
-		var pd = parent.player_data
+	if root.has_method("get_player_data"):
+			var pd = root.get_player_data()
+			if pd and pd.face_mesh:
+				mesh_name = pd.face_mesh
+	elif "player_data" in root:
+		var pd = root.player_data
 		if pd and pd.face_mesh:
 			mesh_name = pd.face_mesh
-	else: return
 
 	face_mesh = target_skeleton.find_child(mesh_name)
 	if face_mesh == null:
@@ -78,7 +81,8 @@ func wake() -> void:
 
 	for property in _morph_values:
 		var value = _morph_values[property]
-		_blend_apply(property, value)
+		if value:
+			_blend_apply(property, value)
 
 
 func _blend_apply(property: StringName, value: float) -> void:

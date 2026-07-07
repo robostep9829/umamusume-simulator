@@ -61,10 +61,6 @@ environment = SubResource("Environment_jka67")
 [node name="MeshInstance3D" type="MeshInstance3D" parent="." unique_id=1668694097]
 mesh = SubResource("PlaneMesh_56iun")
 
-[node name="CharacterBody3D" parent="." unique_id=2027806480 instance=ExtResource("3_a0tk4")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2.0985637, 0, -0.9083092)
-player_data = ExtResource("4_r3fl7")
-
 [node name="MeshInstance3D2" type="MeshInstance3D" parent="." unique_id=1204056644]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2.944909, 0.6469058, 2.2527442)
 mesh = SubResource("CapsuleMesh_56iun")
@@ -81,3 +77,6 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.28020775, 0)
 [node name="CollisionShape3D" type="CollisionShape3D" parent="StaticBody3D" unique_id=193178486]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.27160394, 0)
 shape = SubResource("BoxShape3D_56iun")
+
+[node name="CharacterBody3D" parent="." unique_id=2027806480 instance=ExtResource("3_a0tk4")]
+player_data = ExtResource("4_r3fl7")
