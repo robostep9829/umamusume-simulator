@@ -1,0 +1,120 @@
+[remap]
+
+importer="scene"
+importer_version=1
+type="PackedScene"
+uid="uid://cnbkykqlflbp4"
+path="res://.godot/imported/matitan-retopo-names.glb-09fce38b353f377363d1857a766a9ddc.scn"
+
+[deps]
+
+source_file="res://models/Matikanetannhauser/matitan-retopo-names.glb"
+dest_files=["res://.godot/imported/matitan-retopo-names.glb-09fce38b353f377363d1857a766a9ddc.scn"]
+
+[params]
+
+nodes/root_type=""
+nodes/root_name=""
+nodes/root_script=null
+mesh_library/use_node_names_as_mesh_names=false
+array_mesh/deduplicate_surfaces=true
+nodes/apply_root_scale=true
+nodes/root_scale=1.0
+nodes/import_as_skeleton_bones=false
+nodes/use_name_suffixes=true
+nodes/use_node_type_suffixes=true
+meshes/ensure_tangents=true
+meshes/generate_lods=true
+meshes/create_shadow_meshes=true
+meshes/light_baking=1
+meshes/lightmap_texel_size=0.2
+meshes/force_disable_compression=false
+skins/use_named_skins=true
+animation/import=true
+animation/fps=30
+animation/trimming=false
+animation/remove_immutable_tracks=true
+animation/import_rest_as_RESET=false
+import_script/path=""
+materials/extract=0
+materials/extract_format=0
+materials/extract_path=""
+_subresources={
+"materials": {
+"mtl_bdy1062_00": {
+"use_external/enabled": true,
+"use_external/fallback_path": "res://models/Matikanetannhauser/Materials/mtl_bdy1062_00.tres",
+"use_external/path": "uid://bo8jhohlx1ucy"
+},
+"mtl_chr1062_00_eye": {
+"use_external/enabled": true,
+"use_external/fallback_path": "res://models/Matikanetannhauser/Materials/mtl_chr1062_00_eye.tres",
+"use_external/path": "uid://op0ou4ta5nq2"
+},
+"mtl_chr1062_00_face.001": {
+"use_external/enabled": true,
+"use_external/fallback_path": "res://models/Matikanetannhauser/Materials/mtl_chr1062_00_face.001.tres",
+"use_external/path": "uid://d348hlrvdkwa1"
+},
+"mtl_chr1062_00_hair": {
+"use_external/enabled": true,
+"use_external/fallback_path": "res://models/Matikanetannhauser/Materials/mtl_chr1062_00_hair.tres",
+"use_external/path": "uid://doax33x5c8rw3"
+},
+"mtl_tail0001_00": {
+"use_external/enabled": true,
+"use_external/fallback_path": "res://models/Matikanetannhauser/Materials/mtl_tail0001_00.tres",
+"use_external/path": "uid://dyt6s7lmqg64i"
+}
+},
+"meshes": {
+"matitan-retopo-names_1062 マチカネタンホイザ": {
+"generate/lightmap_uv": 0,
+"generate/lods": 0,
+"generate/shadow_meshes": 0,
+"lods/normal_merge_angle": 20.0,
+"save_to_file/enabled": true,
+"save_to_file/fallback_path": "res://models/Matikanetannhauser/Meshes/matitan-retopo-names_1062 マチカネタンホイザ.res",
+"save_to_file/path": "uid://df7ns3d24l4by"
+},
+"matitan-retopo-names_1062 マチカネタンホイザ_001": {
+"generate/lightmap_uv": 0,
+"generate/lods": 0,
+"generate/shadow_meshes": 0,
+"lods/normal_merge_angle": 20.0,
+"save_to_file/enabled": true,
+"save_to_file/fallback_path": "res://models/Matikanetannhauser/Meshes/matitan-retopo-names_1062 マチカネタンホイザ_001.res",
+"save_to_file/path": "uid://bc5obnt5374g8"
+},
+"matitan-retopo-names_1062 マチカネタンホイザ_004": {
+"generate/lightmap_uv": 0,
+"generate/lods": 0,
+"generate/shadow_meshes": 0,
+"lods/normal_merge_angle": 20.0,
+"save_to_file/enabled": true,
+"save_to_file/fallback_path": "res://models/Matikanetannhauser/Meshes/matitan-retopo-names_1062 マチカネタンホイザ_004.res",
+"save_to_file/path": "uid://h88csemuivlb"
+},
+"matitan-retopo-names_1062 マチカネタンホイザ_005": {
+"generate/lightmap_uv": 0,
+"generate/lods": 0,
+"generate/shadow_meshes": 0,
+"lods/normal_merge_angle": 20.0,
+"save_to_file/enabled": true,
+"save_to_file/fallback_path": "res://models/Matikanetannhauser/Meshes/matitan-retopo-names_1062 マチカネタンホイザ_005.res",
+"save_to_file/path": "uid://d270hkvbaudi1"
+},
+"matitan-retopo-names_1062 マチカネタンホイザ_006": {
+"generate/lightmap_uv": 0,
+"generate/lods": 0,
+"generate/shadow_meshes": 0,
+"lods/normal_merge_angle": 20.0,
+"save_to_file/enabled": true,
+"save_to_file/fallback_path": "res://models/Matikanetannhauser/Meshes/matitan-retopo-names_1062 マチカネタンホイザ_006.res",
+"save_to_file/path": "uid://csfee7mlhs5cu"
+}
+}
+}
+gltf/naming_version=2
+gltf/embedded_image_handling=1
+gltf/texture_map_mode=1
