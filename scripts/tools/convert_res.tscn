@@ -1,0 +1,8 @@
+[gd_scene format=3 uid="uid://dw0ts77qt1jo7"]
+
+[ext_resource type="Script" uid="uid://kmpylo41kyvo" path="res://scripts/tools/convert_morph_map.gd" id="1_4t0fy"]
+
+[node name="Node3D" type="Node3D" unique_id=1988610189]
+
+[node name="Node3D" type="Node3D" parent="." unique_id=56427810]
+script = ExtResource("1_4t0fy")
