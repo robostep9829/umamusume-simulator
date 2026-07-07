@@ -1,0 +1,11 @@
+[gd_resource type="Resource" script_class="PlayerData" format=3 uid="uid://r8q671j0bqg3"]
+
+[ext_resource type="Script" uid="uid://cn87jsps7noo4" path="res://scripts/data/player_data.gd" id="1_5gyrv"]
+[ext_resource type="PackedScene" uid="uid://bg01lnqig6mhg" path="res://models/SakuraBakushinRedHood/bakushin_skele.tscn" id="1_ga0ng"]
+
+[resource]
+script = ExtResource("1_5gyrv")
+character = ExtResource("1_ga0ng")
+name = "Sakura Bakushin (Red Hot Leader)"
+series = "OG"
+metadata/_custom_type_script = "uid://cn87jsps7noo4"

@@ -1,0 +1,7 @@
+[gd_resource type="Resource" script_class="PlayerDataTable" format=3 uid="uid://bgmq5vmuoets4"]
+
+[ext_resource type="Script" uid="uid://cn87jsps7noo4" path="res://scripts/data/player_data.gd" id="1_tudao"]
+[ext_resource type="Script" uid="uid://bvusfyn1ecqnd" path="res://scripts/data/player_data_table.gd" id="2_nyqg1"]
+
+[resource]
+script = ExtResource("2_nyqg1")

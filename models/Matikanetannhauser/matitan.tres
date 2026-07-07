@@ -1,0 +1,11 @@
+[gd_resource type="Resource" script_class="PlayerData" format=3 uid="uid://ck8dx66csso42"]
+
+[ext_resource type="Script" uid="uid://cn87jsps7noo4" path="res://scripts/data/player_data.gd" id="1_7ajgv"]
+[ext_resource type="PackedScene" uid="uid://lm4k2xo8nn7v" path="res://models/Matikanetannhauser/matitan_skele.tscn" id="1_ua3s3"]
+
+[resource]
+script = ExtResource("1_7ajgv")
+character = ExtResource("1_ua3s3")
+name = "Matikanetannhauser"
+series = "OG"
+metadata/_custom_type_script = "uid://cn87jsps7noo4"
