@@ -1,6 +1,6 @@
 using Godot;
 
-namespace UmamusumeSimulator;
+namespace UmamusumeSimulator.ui.controls;
 
 public partial class SprintTouchZone : Control
 {
