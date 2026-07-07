@@ -57,10 +57,9 @@ func _ready() -> void:
 
 func wake() -> void:
 	var parent = get_parent()
-
 	target_skeleton = get_node("../Skeleton3D")
-
 	var mesh_name := "007_mtl_chr1041_50_face_001"
+	
 	if "player_data" in parent:
 		var pd = parent.player_data
 		if pd and pd.face_mesh:
