@@ -3,7 +3,7 @@
 [ext_resource type="CompressedTexture3D" uid="uid://e573kqiepk0a" path="res://environment/tonemap/pbrNeutral.exr" id="1_noarx"]
 [ext_resource type="Texture2D" uid="uid://d07byxrqf6f45" path="res://worlds/gridmap/tile.png" id="2_jka67"]
 [ext_resource type="PackedScene" uid="uid://c11xkbxmyhcu5" path="res://prefabs/third_person.tscn" id="3_a0tk4"]
-[ext_resource type="Resource" uid="uid://r8q671j0bqg3" path="res://models/SakuraBakushinRedHood/bakushin_redhood.tres" id="4_r3fl7"]
+[ext_resource type="Resource" uid="uid://ck8dx66csso42" path="res://models/Matikanetannhauser/matitan.tres" id="3_r3fl7"]
 
 [sub_resource type="ProceduralSkyMaterial" id="ProceduralSkyMaterial_a0tk4"]
 ground_horizon_color = Color(0.66224277, 0.6717428, 0.6867428, 1)
@@ -78,7 +78,7 @@ shape = SubResource("BoxShape3D_56iun")
 [node name="CharacterBody3D" parent="." unique_id=2027806480 instance=ExtResource("3_a0tk4")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1.9129705, 0, -1.8550291)
 normal_spring_position = Vector3(-0.3, 0, 0)
-player_data = ExtResource("4_r3fl7")
+player_data = ExtResource("3_r3fl7")
 
 [node name="Node3D" type="Node3D" parent="." unique_id=739907998]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -160, 0, -160)

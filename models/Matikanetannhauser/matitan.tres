@@ -2,6 +2,156 @@
 
 [ext_resource type="Script" uid="uid://cn87jsps7noo4" path="res://scripts/data/player_data.gd" id="1_7ajgv"]
 [ext_resource type="PackedScene" uid="uid://lm4k2xo8nn7v" path="res://models/Matikanetannhauser/matitan_skele.tscn" id="1_ua3s3"]
+[ext_resource type="Script" uid="uid://bwsgev6cvsdb3" path="res://scripts/data/spring_bone/spring_bone_chain_settings.gd" id="3_l0kke"]
+[ext_resource type="Script" uid="uid://dr8kcyf8h8368" path="res://scripts/data/spring_bone/spring_bone_settings.gd" id="4_gl5p6"]
+
+[sub_resource type="Resource" id="Resource_awwa7"]
+script = ExtResource("3_l0kke")
+root_bone_name = &"Ear_01_R"
+end_bone_name = &"Ear_03_R"
+stiffness = 5.0
+metadata/_custom_type_script = "uid://bwsgev6cvsdb3"
+
+[sub_resource type="Resource" id="Resource_jwpld"]
+script = ExtResource("3_l0kke")
+root_bone_name = &"Ear_01_L"
+end_bone_name = &"Ear_03_L"
+stiffness = 5.0
+metadata/_custom_type_script = "uid://bwsgev6cvsdb3"
+
+[sub_resource type="Resource" id="Resource_jndov"]
+script = ExtResource("3_l0kke")
+root_bone_name = &"Sp_Hi_Tail0_B_00"
+end_bone_name = &"Sp_Hi_Tail0_B_04"
+metadata/_custom_type_script = "uid://bwsgev6cvsdb3"
+
+[sub_resource type="Resource" id="Resource_54c3e"]
+script = ExtResource("3_l0kke")
+root_bone_name = &"Sp_He_Ribbon0_L_00"
+end_bone_name = &"Sp_He_Ribbon0_L_02"
+gravity = 0.2
+metadata/_custom_type_script = "uid://bwsgev6cvsdb3"
+
+[sub_resource type="Resource" id="Resource_oruqs"]
+script = ExtResource("3_l0kke")
+root_bone_name = &"Sp_He_Ribbon0_R_00"
+end_bone_name = &"Sp_He_Ribbon0_R_02"
+gravity = 0.2
+metadata/_custom_type_script = "uid://bwsgev6cvsdb3"
+
+[sub_resource type="Resource" id="Resource_t4ynq"]
+script = ExtResource("3_l0kke")
+root_bone_name = &"Sp_Hi_MSkirt0_F_00"
+end_bone_name = &"Sp_Hi_MSkirt0_F_01"
+end_bone_length = 0.1
+extend_end_bone = true
+radius = 0.03
+rotation_axis = 0
+center_from = 2
+center_bone_name = &"Position"
+metadata/_custom_type_script = "uid://bwsgev6cvsdb3"
+
+[sub_resource type="Resource" id="Resource_h2eqf"]
+script = ExtResource("3_l0kke")
+root_bone_name = &"Sp_Hi_MSkirt0_FL_00"
+end_bone_name = &"Sp_Hi_MSkirt0_FL_01"
+end_bone_length = 0.1
+extend_end_bone = true
+rotation_axis = 0
+center_from = 2
+center_bone_name = &"Position"
+metadata/_custom_type_script = "uid://bwsgev6cvsdb3"
+
+[sub_resource type="Resource" id="Resource_ing2a"]
+script = ExtResource("3_l0kke")
+root_bone_name = &"Sp_Hi_MSkirt0_FLL_00"
+end_bone_name = &"Sp_Hi_MSkirt0_FLL_01"
+end_bone_length = 0.1
+extend_end_bone = true
+rotation_axis = 0
+center_from = 2
+center_bone_name = &"Position"
+metadata/_custom_type_script = "uid://bwsgev6cvsdb3"
+
+[sub_resource type="Resource" id="Resource_qmh1b"]
+script = ExtResource("3_l0kke")
+root_bone_name = &"Sp_Hi_MSkirt0_L_00"
+end_bone_name = &"Sp_Hi_MSkirt0_L_01"
+metadata/_custom_type_script = "uid://bwsgev6cvsdb3"
+
+[sub_resource type="Resource" id="Resource_jng6t"]
+script = ExtResource("3_l0kke")
+root_bone_name = &"Sp_Hi_MSkirt0_BL_00"
+end_bone_name = &"Sp_Hi_MSkirt0_BL_01"
+metadata/_custom_type_script = "uid://bwsgev6cvsdb3"
+
+[sub_resource type="Resource" id="Resource_wh5go"]
+script = ExtResource("3_l0kke")
+root_bone_name = &"Sp_Hi_MSkirt0_B_00"
+end_bone_name = &"Sp_Hi_MSkirt0_B_01"
+metadata/_custom_type_script = "uid://bwsgev6cvsdb3"
+
+[sub_resource type="Resource" id="Resource_72a83"]
+script = ExtResource("3_l0kke")
+root_bone_name = &"Sp_Hi_MSkirt0_BR_00"
+end_bone_name = &"Sp_Hi_MSkirt0_BR_01"
+metadata/_custom_type_script = "uid://bwsgev6cvsdb3"
+
+[sub_resource type="Resource" id="Resource_w1nfy"]
+script = ExtResource("3_l0kke")
+root_bone_name = &"Sp_Hi_MSkirt0_R_00"
+end_bone_name = &"Sp_Hi_MSkirt0_R_01"
+metadata/_custom_type_script = "uid://bwsgev6cvsdb3"
+
+[sub_resource type="Resource" id="Resource_2e581"]
+script = ExtResource("3_l0kke")
+root_bone_name = &"Sp_Hi_MSkirt0_FRR_00"
+end_bone_name = &"Sp_Hi_MSkirt0_FRR_01"
+end_bone_length = 0.1
+extend_end_bone = true
+rotation_axis = 0
+center_from = 2
+center_bone_name = &"Position"
+metadata/_custom_type_script = "uid://bwsgev6cvsdb3"
+
+[sub_resource type="Resource" id="Resource_t1ire"]
+script = ExtResource("3_l0kke")
+root_bone_name = &"Sp_Hi_MSkirt0_FR_00"
+end_bone_name = &"Sp_Hi_MSkirt0_FR_01"
+end_bone_length = 0.1
+rotation_axis = 0
+center_from = 2
+center_bone_name = &"Position"
+metadata/_custom_type_script = "uid://bwsgev6cvsdb3"
+
+[sub_resource type="Resource" id="Resource_l0kke"]
+script = ExtResource("3_l0kke")
+root_bone_name = &"Sp_Ch_Mantle0_L_00"
+end_bone_name = &"Sp_Ch_Mantle0_L_03"
+metadata/_custom_type_script = "uid://bwsgev6cvsdb3"
+
+[sub_resource type="Resource" id="Resource_gl5p6"]
+script = ExtResource("3_l0kke")
+root_bone_name = &"Sp_Ch_Mantle0_BL_00"
+end_bone_name = &"Sp_Ch_Mantle0_BL_03"
+metadata/_custom_type_script = "uid://bwsgev6cvsdb3"
+
+[sub_resource type="Resource" id="Resource_0a4ld"]
+script = ExtResource("3_l0kke")
+root_bone_name = &"Sp_Ch_Mantle0_BR_00"
+end_bone_name = &"Sp_Ch_Mantle0_BR_03"
+metadata/_custom_type_script = "uid://bwsgev6cvsdb3"
+
+[sub_resource type="Resource" id="Resource_evquy"]
+script = ExtResource("3_l0kke")
+root_bone_name = &"Sp_Ch_Mantle0_R_00"
+end_bone_name = &"Sp_Ch_Mantle0_R_03"
+metadata/_custom_type_script = "uid://bwsgev6cvsdb3"
+
+[sub_resource type="Resource" id="Resource_kut8y"]
+script = ExtResource("4_gl5p6")
+chains = Array[ExtResource("3_l0kke")]([SubResource("Resource_awwa7"), SubResource("Resource_jwpld"), SubResource("Resource_jndov"), SubResource("Resource_54c3e"), SubResource("Resource_oruqs"), SubResource("Resource_t4ynq"), SubResource("Resource_h2eqf"), SubResource("Resource_ing2a"), SubResource("Resource_qmh1b"), SubResource("Resource_jng6t"), SubResource("Resource_wh5go"), SubResource("Resource_72a83"), SubResource("Resource_w1nfy"), SubResource("Resource_2e581"), SubResource("Resource_t1ire"), SubResource("Resource_l0kke"), SubResource("Resource_gl5p6"), SubResource("Resource_0a4ld"), SubResource("Resource_evquy")])
+metadata/_custom_type_script = "uid://dr8kcyf8h8368"
 
 [resource]
 script = ExtResource("1_7ajgv")
@@ -9,4 +159,5 @@ character = ExtResource("1_ua3s3")
 name = "Matikanetannhauser"
 series = "OG"
 face_mesh = &"003_mtl_chr1062_00_face_001"
+spring_bone_settings = SubResource("Resource_kut8y")
 metadata/_custom_type_script = "uid://cn87jsps7noo4"

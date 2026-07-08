@@ -785,14 +785,14 @@ bones/28/rotation = Quaternion(-0.07638568, -0.0382874, 0.99613523, -0.020344272
 bones/29/rotation = Quaternion(3.8878696e-09, 0.99925625, -0.038562387, -2.2491925e-08)
 bones/32/rotation = Quaternion(-0.04226989, -0.06391248, 0.9965437, 0.032081764)
 bones/33/rotation = Quaternion(-2.5626796e-09, 0.999902, -0.014003182, -3.2254877e-09)
-bones/37/rotation = Quaternion(0.019248426, -0.038515203, 0.011736212, 0.9990037)
-bones/38/rotation = Quaternion(0.05383452, 0.0021641173, -0.0032896872, 0.9985421)
-bones/39/rotation = Quaternion(-0.014145383, 0.009621905, -0.073353976, 0.99715924)
-bones/40/rotation = Quaternion(-0.029889999, -0.074297585, -0.028313536, 0.99638593)
-bones/151/rotation = Quaternion(0.51157075, 0.5077453, 0.49609625, -0.4841267)
-bones/152/rotation = Quaternion(-0.03235294, 0.76896465, -0.62806636, 0.11480192)
+bones/37/rotation = Quaternion(0.017170565, -0.038557876, 0.011885833, 0.9990382)
+bones/38/rotation = Quaternion(0.051765658, 0.0021454107, -0.0030565432, 0.9986523)
+bones/39/rotation = Quaternion(-0.014741766, 0.009662936, -0.07328193, 0.9971555)
+bones/40/rotation = Quaternion(-0.02688083, -0.07323711, -0.029158482, 0.99652576)
+bones/151/rotation = Quaternion(0.5118525, 0.5046987, 0.4926558, -0.49048597)
+bones/152/rotation = Quaternion(-0.031730313, 0.7656669, -0.63199985, 0.1154277)
 bones/153/rotation = Quaternion(0.05927004, -0.70144904, 0.07269655, 0.7065208)
-bones/157/rotation = Quaternion(-0.13641047, 0.7327985, 0.09410678, 0.6599565)
+bones/157/rotation = Quaternion(-0.1355588, 0.73287916, 0.09335284, 0.66014946)
 bones/158/rotation = Quaternion(0.09648852, 0.028106209, -0.07992273, 0.9917219)
 bones/159/rotation = Quaternion(0.22888324, 0.0101114055, 0.022786824, 0.97313464)
 bones/160/rotation = Quaternion(0.06155485, 0.0023107529, 0.006156862, 0.99808204)
@@ -807,10 +807,10 @@ bones/168/rotation = Quaternion(0.3540552, -0.10336742, 0.040123764, 0.9286282)
 bones/169/rotation = Quaternion(0.045560773, -0.01295848, 0.005139708, 0.9988643)
 bones/170/rotation = Quaternion(-0.1390185, 0.7343632, 0.024049062, 0.6639323)
 bones/171/rotation = Quaternion(0.0023350716, 0.0011541694, 0.00010269882, 0.9999966)
-bones/174/rotation = Quaternion(0.47984073, -0.5429543, -0.48260236, -0.49198425)
-bones/175/rotation = Quaternion(0.1466807, 0.72401494, -0.6581427, -0.14538)
+bones/174/rotation = Quaternion(0.48042905, -0.54067725, -0.47827896, -0.49810165)
+bones/175/rotation = Quaternion(0.1458757, 0.7206372, -0.6619974, -0.145471)
 bones/176/rotation = Quaternion(0.09143032, 0.6998968, -0.08532488, 0.70321023)
-bones/178/rotation = Quaternion(-0.15649718, -0.7596989, -0.040885016, 0.62983704)
+bones/178/rotation = Quaternion(-0.157955, -0.76248294, -0.03907047, 0.6262138)
 bones/179/rotation = Quaternion(0.04744783, -0.040257186, 0.089868814, 0.99400795)
 bones/180/rotation = Quaternion(0.19515584, -0.04260878, 0.007841288, 0.9798149)
 bones/181/rotation = Quaternion(0.030147731, -0.0065822005, 0.0012114048, 0.99952304)
@@ -827,7 +827,7 @@ bones/191/rotation = Quaternion(-0.17194355, -0.7266339, -0.011914052, 0.6650539
 bones/192/rotation = Quaternion(0.0022044329, -0.0013450085, 0.00035551185, 0.9999966)
 
 [node name="FaceBind" type="ModifierBoneTarget3D" parent="Skeleton3D" unique_id=294106539]
-transform = Transform3D(0.9806513, 0.18031365, -0.076224566, -0.18051496, 0.9835629, 0.004297793, 0.07574659, 0.009545051, 0.9970814, 0.0026276777, 1.3197889, 0.009622813)
+transform = Transform3D(0.98069996, 0.18048592, -0.07518394, -0.1804419, 0.9835575, 0.007434152, 0.07528949, 0.006275665, 0.99714196, 0.002371333, 1.3198419, 0.007898279)
 bone_name = "Head"
 bone = 40
 
@@ -923,21 +923,21 @@ settings/2/enable_all_child_collisions = true
 settings/2/exclude_collision_count = 0
 
 [node name="SpringBoneCollisionCapsule3D" type="SpringBoneCollisionCapsule3D" parent="Skeleton3D/SpringBoneSimulator3D" unique_id=482899085]
-transform = Transform3D(-0.99797195, 0.049008474, -0.04062318, -0.04746891, -0.9981483, -0.03803444, -0.042411968, -0.036028955, 0.99845034, 0.07754415, 0.6941928, 0.0105171185)
+transform = Transform3D(-0.99797195, 0.049008474, -0.04062318, -0.04746891, -0.9981483, -0.03803444, -0.042411968, -0.036028955, 0.99845034, 0.078762844, 0.69533384, -0.019436393)
 bone_name = "Thigh_L"
 bone = 28
-position_offset = Vector3(0, 0.15, 0)
+position_offset = Vector3(0, 0.15, -0.03)
 rotation_offset = Quaternion(0, 0, 0, 1)
-radius = 0.055
+radius = 0.085
 height = 0.355
 
 [node name="SpringBoneCollisionCapsule3D2" type="SpringBoneCollisionCapsule3D" parent="Skeleton3D/SpringBoneSimulator3D" unique_id=1897055956]
-transform = Transform3D(-0.99785715, -0.061591785, 0.022082508, 0.05957082, -0.99478745, -0.08276057, 0.02706477, -0.08126776, 0.99632484, -0.07054924, 0.6938621, 0.01830922)
+transform = Transform3D(-0.99785715, -0.061591785, 0.022082508, 0.05957082, -0.99478745, -0.08276057, 0.02706477, -0.08126776, 0.99632484, -0.07121172, 0.69634485, -0.011580521)
 bone_name = "Thigh_R"
 bone = 32
-position_offset = Vector3(0, 0.15, 0)
+position_offset = Vector3(0, 0.15, -0.03)
 rotation_offset = Quaternion(0, 0, 0, 1)
-radius = 0.055
+radius = 0.085
 height = 0.355
 
 [node name="CameraPivot" type="Node3D" parent="." unique_id=58984794]
