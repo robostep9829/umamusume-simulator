@@ -84,1024 +84,1280 @@ player_data = ExtResource("4_r3fl7")
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -160, 0, -160)
 
 [node name="MeshInstance3D" type="MeshInstance3D" parent="Node3D" unique_id=1668694097]
+visibility_range_end = 71.38
 mesh = SubResource("PlaneMesh_56iun")
 
 [node name="MeshInstance3D2" type="MeshInstance3D" parent="Node3D" unique_id=182121764]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 20, 0, 0)
+visibility_range_end = 71.38
 mesh = SubResource("PlaneMesh_56iun")
 
 [node name="MeshInstance3D3" type="MeshInstance3D" parent="Node3D" unique_id=1917889150]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 20)
+visibility_range_end = 71.38
 mesh = SubResource("PlaneMesh_56iun")
 
 [node name="MeshInstance3D4" type="MeshInstance3D" parent="Node3D" unique_id=99234142]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 20, 0, 20)
+visibility_range_end = 71.38
 mesh = SubResource("PlaneMesh_56iun")
 
 [node name="MeshInstance3D5" type="MeshInstance3D" parent="Node3D" unique_id=1314275192]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 40, 0, 0)
+visibility_range_end = 71.38
 mesh = SubResource("PlaneMesh_56iun")
 
 [node name="MeshInstance3D6" type="MeshInstance3D" parent="Node3D" unique_id=725721395]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 60, 0, 0)
+visibility_range_end = 71.38
 mesh = SubResource("PlaneMesh_56iun")
 
 [node name="MeshInstance3D7" type="MeshInstance3D" parent="Node3D" unique_id=1125813096]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 40, 0, 20)
+visibility_range_end = 71.38
 mesh = SubResource("PlaneMesh_56iun")
 
 [node name="MeshInstance3D8" type="MeshInstance3D" parent="Node3D" unique_id=702933048]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 60, 0, 20)
+visibility_range_end = 71.38
 mesh = SubResource("PlaneMesh_56iun")
 
 [node name="MeshInstance3D9" type="MeshInstance3D" parent="Node3D" unique_id=2109277182]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 40)
+visibility_range_end = 71.38
 mesh = SubResource("PlaneMesh_56iun")
 
 [node name="MeshInstance3D10" type="MeshInstance3D" parent="Node3D" unique_id=325744394]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 20, 0, 40)
+visibility_range_end = 71.38
 mesh = SubResource("PlaneMesh_56iun")
 
 [node name="MeshInstance3D11" type="MeshInstance3D" parent="Node3D" unique_id=1301775912]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 60)
+visibility_range_end = 71.38
 mesh = SubResource("PlaneMesh_56iun")
 
 [node name="MeshInstance3D12" type="MeshInstance3D" parent="Node3D" unique_id=1472892190]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 20, 0, 60)
+visibility_range_end = 71.38
 mesh = SubResource("PlaneMesh_56iun")
 
 [node name="MeshInstance3D13" type="MeshInstance3D" parent="Node3D" unique_id=28813083]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 40, 0, 40)
+visibility_range_end = 71.38
 mesh = SubResource("PlaneMesh_56iun")
 
 [node name="MeshInstance3D14" type="MeshInstance3D" parent="Node3D" unique_id=1509304966]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 60, 0, 40)
+visibility_range_end = 71.38
 mesh = SubResource("PlaneMesh_56iun")
 
 [node name="MeshInstance3D15" type="MeshInstance3D" parent="Node3D" unique_id=2063569226]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 40, 0, 60)
+visibility_range_end = 71.38
 mesh = SubResource("PlaneMesh_56iun")
 
 [node name="MeshInstance3D16" type="MeshInstance3D" parent="Node3D" unique_id=138866132]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 60, 0, 60)
+visibility_range_end = 71.38
 mesh = SubResource("PlaneMesh_56iun")
 
 [node name="MeshInstance3D17" type="MeshInstance3D" parent="Node3D" unique_id=1126045858]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 80, 0, 0)
+visibility_range_end = 71.38
 mesh = SubResource("PlaneMesh_56iun")
 
 [node name="MeshInstance3D18" type="MeshInstance3D" parent="Node3D" unique_id=1446372030]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 100, 0, 0)
+visibility_range_end = 71.38
 mesh = SubResource("PlaneMesh_56iun")
 
 [node name="MeshInstance3D19" type="MeshInstance3D" parent="Node3D" unique_id=537600953]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 80, 0, 20)
+visibility_range_end = 71.38
 mesh = SubResource("PlaneMesh_56iun")
 
 [node name="MeshInstance3D20" type="MeshInstance3D" parent="Node3D" unique_id=1484074717]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 100, 0, 20)
+visibility_range_end = 71.38
 mesh = SubResource("PlaneMesh_56iun")
 
 [node name="MeshInstance3D21" type="MeshInstance3D" parent="Node3D" unique_id=753805149]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 120, 0, 0)
+visibility_range_end = 71.38
 mesh = SubResource("PlaneMesh_56iun")
 
 [node name="MeshInstance3D22" type="MeshInstance3D" parent="Node3D" unique_id=1490381228]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 140, 0, 0)
+visibility_range_end = 71.38
 mesh = SubResource("PlaneMesh_56iun")
 
 [node name="MeshInstance3D23" type="MeshInstance3D" parent="Node3D" unique_id=1550017605]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 120, 0, 20)
+visibility_range_end = 71.38
 mesh = SubResource("PlaneMesh_56iun")
 
 [node name="MeshInstance3D24" type="MeshInstance3D" parent="Node3D" unique_id=2080120777]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 140, 0, 20)
+visibility_range_end = 71.38
 mesh = SubResource("PlaneMesh_56iun")
 
 [node name="MeshInstance3D25" type="MeshInstance3D" parent="Node3D" unique_id=685322427]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 80, 0, 40)
+visibility_range_end = 71.38
 mesh = SubResource("PlaneMesh_56iun")
 
 [node name="MeshInstance3D26" type="MeshInstance3D" parent="Node3D" unique_id=476245164]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 100, 0, 40)
+visibility_range_end = 71.38
 mesh = SubResource("PlaneMesh_56iun")
 
 [node name="MeshInstance3D27" type="MeshInstance3D" parent="Node3D" unique_id=96570382]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 80, 0, 60)
+visibility_range_end = 71.38
 mesh = SubResource("PlaneMesh_56iun")
 
 [node name="MeshInstance3D28" type="MeshInstance3D" parent="Node3D" unique_id=1929359104]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 100, 0, 60)
+visibility_range_end = 71.38
 mesh = SubResource("PlaneMesh_56iun")
 
 [node name="MeshInstance3D29" type="MeshInstance3D" parent="Node3D" unique_id=834097001]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 120, 0, 40)
+visibility_range_end = 71.38
 mesh = SubResource("PlaneMesh_56iun")
 
 [node name="MeshInstance3D30" type="MeshInstance3D" parent="Node3D" unique_id=672432121]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 140, 0, 40)
+visibility_range_end = 71.38
 mesh = SubResource("PlaneMesh_56iun")
 
 [node name="MeshInstance3D31" type="MeshInstance3D" parent="Node3D" unique_id=1754762903]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 120, 0, 60)
+visibility_range_end = 71.38
 mesh = SubResource("PlaneMesh_56iun")
 
 [node name="MeshInstance3D32" type="MeshInstance3D" parent="Node3D" unique_id=1985467785]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 140, 0, 60)
+visibility_range_end = 71.38
 mesh = SubResource("PlaneMesh_56iun")
 
 [node name="MeshInstance3D33" type="MeshInstance3D" parent="Node3D" unique_id=546584805]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 80)
+visibility_range_end = 71.38
 mesh = SubResource("PlaneMesh_56iun")
 
 [node name="MeshInstance3D34" type="MeshInstance3D" parent="Node3D" unique_id=1947621979]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 20, 0, 80)
+visibility_range_end = 71.38
 mesh = SubResource("PlaneMesh_56iun")
 
 [node name="MeshInstance3D35" type="MeshInstance3D" parent="Node3D" unique_id=1991921232]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 100)
+visibility_range_end = 71.38
 mesh = SubResource("PlaneMesh_56iun")
 
 [node name="MeshInstance3D36" type="MeshInstance3D" parent="Node3D" unique_id=1227254880]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 20, 0, 100)
+visibility_range_end = 71.38
 mesh = SubResource("PlaneMesh_56iun")
 
 [node name="MeshInstance3D37" type="MeshInstance3D" parent="Node3D" unique_id=1015397266]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 40, 0, 80)
+visibility_range_end = 71.38
 mesh = SubResource("PlaneMesh_56iun")
 
 [node name="MeshInstance3D38" type="MeshInstance3D" parent="Node3D" unique_id=950515413]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 60, 0, 80)
+visibility_range_end = 71.38
 mesh = SubResource("PlaneMesh_56iun")
 
 [node name="MeshInstance3D39" type="MeshInstance3D" parent="Node3D" unique_id=69655340]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 40, 0, 100)
+visibility_range_end = 71.38
 mesh = SubResource("PlaneMesh_56iun")
 
 [node name="MeshInstance3D40" type="MeshInstance3D" parent="Node3D" unique_id=863441964]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 60, 0, 100)
+visibility_range_end = 71.38
 mesh = SubResource("PlaneMesh_56iun")
 
 [node name="MeshInstance3D41" type="MeshInstance3D" parent="Node3D" unique_id=1715405768]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 120)
+visibility_range_end = 71.38
 mesh = SubResource("PlaneMesh_56iun")
 
 [node name="MeshInstance3D42" type="MeshInstance3D" parent="Node3D" unique_id=1667204287]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 20, 0, 120)
+visibility_range_end = 71.38
 mesh = SubResource("PlaneMesh_56iun")
 
 [node name="MeshInstance3D43" type="MeshInstance3D" parent="Node3D" unique_id=1867627793]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 140)
+visibility_range_end = 71.38
 mesh = SubResource("PlaneMesh_56iun")
 
 [node name="MeshInstance3D44" type="MeshInstance3D" parent="Node3D" unique_id=1157722022]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 20, 0, 140)
+visibility_range_end = 71.38
 mesh = SubResource("PlaneMesh_56iun")
 
 [node name="MeshInstance3D45" type="MeshInstance3D" parent="Node3D" unique_id=731943430]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 40, 0, 120)
+visibility_range_end = 71.38
 mesh = SubResource("PlaneMesh_56iun")
 
 [node name="MeshInstance3D46" type="MeshInstance3D" parent="Node3D" unique_id=2014439417]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 60, 0, 120)
+visibility_range_end = 71.38
 mesh = SubResource("PlaneMesh_56iun")
 
 [node name="MeshInstance3D47" type="MeshInstance3D" parent="Node3D" unique_id=1834397413]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 40, 0, 140)
+visibility_range_end = 71.38
 mesh = SubResource("PlaneMesh_56iun")
 
 [node name="MeshInstance3D48" type="MeshInstance3D" parent="Node3D" unique_id=807657933]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 60, 0, 140)
+visibility_range_end = 71.38
 mesh = SubResource("PlaneMesh_56iun")
 
 [node name="MeshInstance3D49" type="MeshInstance3D" parent="Node3D" unique_id=1648133744]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 80, 0, 80)
+visibility_range_end = 71.38
 mesh = SubResource("PlaneMesh_56iun")
 
 [node name="MeshInstance3D50" type="MeshInstance3D" parent="Node3D" unique_id=1915177339]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 100, 0, 80)
+visibility_range_end = 71.38
 mesh = SubResource("PlaneMesh_56iun")
 
 [node name="MeshInstance3D51" type="MeshInstance3D" parent="Node3D" unique_id=422615661]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 80, 0, 100)
+visibility_range_end = 71.38
 mesh = SubResource("PlaneMesh_56iun")
 
 [node name="MeshInstance3D52" type="MeshInstance3D" parent="Node3D" unique_id=114460288]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 100, 0, 100)
+visibility_range_end = 71.38
 mesh = SubResource("PlaneMesh_56iun")
 
 [node name="MeshInstance3D53" type="MeshInstance3D" parent="Node3D" unique_id=1362398250]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 120, 0, 80)
+visibility_range_end = 71.38
 mesh = SubResource("PlaneMesh_56iun")
 
 [node name="MeshInstance3D54" type="MeshInstance3D" parent="Node3D" unique_id=1902012271]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 140, 0, 80)
+visibility_range_end = 71.38
 mesh = SubResource("PlaneMesh_56iun")
 
 [node name="MeshInstance3D55" type="MeshInstance3D" parent="Node3D" unique_id=2016043465]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 120, 0, 100)
+visibility_range_end = 71.38
 mesh = SubResource("PlaneMesh_56iun")
 
 [node name="MeshInstance3D56" type="MeshInstance3D" parent="Node3D" unique_id=1493087062]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 140, 0, 100)
+visibility_range_end = 71.38
 mesh = SubResource("PlaneMesh_56iun")
 
 [node name="MeshInstance3D57" type="MeshInstance3D" parent="Node3D" unique_id=713708507]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 80, 0, 120)
+visibility_range_end = 71.38
 mesh = SubResource("PlaneMesh_56iun")
 
 [node name="MeshInstance3D58" type="MeshInstance3D" parent="Node3D" unique_id=1891824793]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 100, 0, 120)
+visibility_range_end = 71.38
 mesh = SubResource("PlaneMesh_56iun")
 
 [node name="MeshInstance3D59" type="MeshInstance3D" parent="Node3D" unique_id=534887004]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 80, 0, 140)
+visibility_range_end = 71.38
 mesh = SubResource("PlaneMesh_56iun")
 
 [node name="MeshInstance3D60" type="MeshInstance3D" parent="Node3D" unique_id=549559520]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 100, 0, 140)
+visibility_range_end = 71.38
 mesh = SubResource("PlaneMesh_56iun")
 
 [node name="MeshInstance3D61" type="MeshInstance3D" parent="Node3D" unique_id=786951143]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 120, 0, 120)
+visibility_range_end = 71.38
 mesh = SubResource("PlaneMesh_56iun")
 
 [node name="MeshInstance3D62" type="MeshInstance3D" parent="Node3D" unique_id=1627441577]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 140, 0, 120)
+visibility_range_end = 71.38
 mesh = SubResource("PlaneMesh_56iun")
 
 [node name="MeshInstance3D63" type="MeshInstance3D" parent="Node3D" unique_id=758231352]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 120, 0, 140)
+visibility_range_end = 71.38
 mesh = SubResource("PlaneMesh_56iun")
 
 [node name="MeshInstance3D64" type="MeshInstance3D" parent="Node3D" unique_id=1938567056]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 140, 0, 140)
+visibility_range_end = 71.38
 mesh = SubResource("PlaneMesh_56iun")
 
 [node name="MeshInstance3D65" type="MeshInstance3D" parent="Node3D" unique_id=1718158630]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 160, 0, 0)
+visibility_range_end = 71.38
 mesh = SubResource("PlaneMesh_56iun")
 
 [node name="MeshInstance3D66" type="MeshInstance3D" parent="Node3D" unique_id=164180600]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 180, 0, 0)
+visibility_range_end = 71.38
 mesh = SubResource("PlaneMesh_56iun")
 
 [node name="MeshInstance3D67" type="MeshInstance3D" parent="Node3D" unique_id=1753868828]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 160, 0, 20)
+visibility_range_end = 71.38
 mesh = SubResource("PlaneMesh_56iun")
 
 [node name="MeshInstance3D68" type="MeshInstance3D" parent="Node3D" unique_id=244275198]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 180, 0, 20)
+visibility_range_end = 71.38
 mesh = SubResource("PlaneMesh_56iun")
 
 [node name="MeshInstance3D69" type="MeshInstance3D" parent="Node3D" unique_id=1401915588]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 200, 0, 0)
+visibility_range_end = 71.38
 mesh = SubResource("PlaneMesh_56iun")
 
 [node name="MeshInstance3D70" type="MeshInstance3D" parent="Node3D" unique_id=1273288982]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 220, 0, 0)
+visibility_range_end = 71.38
 mesh = SubResource("PlaneMesh_56iun")
 
 [node name="MeshInstance3D71" type="MeshInstance3D" parent="Node3D" unique_id=339312409]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 200, 0, 20)
+visibility_range_end = 71.38
 mesh = SubResource("PlaneMesh_56iun")
 
 [node name="MeshInstance3D72" type="MeshInstance3D" parent="Node3D" unique_id=1373021951]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 220, 0, 20)
+visibility_range_end = 71.38
 mesh = SubResource("PlaneMesh_56iun")
 
 [node name="MeshInstance3D73" type="MeshInstance3D" parent="Node3D" unique_id=712603146]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 160, 0, 40)
+visibility_range_end = 71.38
 mesh = SubResource("PlaneMesh_56iun")
 
 [node name="MeshInstance3D74" type="MeshInstance3D" parent="Node3D" unique_id=234843546]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 180, 0, 40)
+visibility_range_end = 71.38
 mesh = SubResource("PlaneMesh_56iun")
 
 [node name="MeshInstance3D75" type="MeshInstance3D" parent="Node3D" unique_id=1226977157]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 160, 0, 60)
+visibility_range_end = 71.38
 mesh = SubResource("PlaneMesh_56iun")
 
 [node name="MeshInstance3D76" type="MeshInstance3D" parent="Node3D" unique_id=2015005359]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 180, 0, 60)
+visibility_range_end = 71.38
 mesh = SubResource("PlaneMesh_56iun")
 
 [node name="MeshInstance3D77" type="MeshInstance3D" parent="Node3D" unique_id=324234520]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 200, 0, 40)
+visibility_range_end = 71.38
 mesh = SubResource("PlaneMesh_56iun")
 
 [node name="MeshInstance3D78" type="MeshInstance3D" parent="Node3D" unique_id=1709514213]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 220, 0, 40)
+visibility_range_end = 71.38
 mesh = SubResource("PlaneMesh_56iun")
 
 [node name="MeshInstance3D79" type="MeshInstance3D" parent="Node3D" unique_id=1894464612]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 200, 0, 60)
+visibility_range_end = 71.38
 mesh = SubResource("PlaneMesh_56iun")
 
 [node name="MeshInstance3D80" type="MeshInstance3D" parent="Node3D" unique_id=1938201961]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 220, 0, 60)
+visibility_range_end = 71.38
 mesh = SubResource("PlaneMesh_56iun")
 
 [node name="MeshInstance3D81" type="MeshInstance3D" parent="Node3D" unique_id=905025287]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 240, 0, 0)
+visibility_range_end = 71.38
 mesh = SubResource("PlaneMesh_56iun")
 
 [node name="MeshInstance3D82" type="MeshInstance3D" parent="Node3D" unique_id=1908450865]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 260, 0, 0)
+visibility_range_end = 71.38
 mesh = SubResource("PlaneMesh_56iun")
 
 [node name="MeshInstance3D83" type="MeshInstance3D" parent="Node3D" unique_id=1291984058]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 240, 0, 20)
+visibility_range_end = 71.38
 mesh = SubResource("PlaneMesh_56iun")
 
 [node name="MeshInstance3D84" type="MeshInstance3D" parent="Node3D" unique_id=581184829]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 260, 0, 20)
+visibility_range_end = 71.38
 mesh = SubResource("PlaneMesh_56iun")
 
 [node name="MeshInstance3D85" type="MeshInstance3D" parent="Node3D" unique_id=1046986068]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 280, 0, 0)
+visibility_range_end = 71.38
 mesh = SubResource("PlaneMesh_56iun")
 
 [node name="MeshInstance3D86" type="MeshInstance3D" parent="Node3D" unique_id=1897769548]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 300, 0, 0)
+visibility_range_end = 71.38
 mesh = SubResource("PlaneMesh_56iun")
 
 [node name="MeshInstance3D87" type="MeshInstance3D" parent="Node3D" unique_id=1095791142]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 280, 0, 20)
+visibility_range_end = 71.38
 mesh = SubResource("PlaneMesh_56iun")
 
 [node name="MeshInstance3D88" type="MeshInstance3D" parent="Node3D" unique_id=31744464]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 300, 0, 20)
+visibility_range_end = 71.38
 mesh = SubResource("PlaneMesh_56iun")
 
 [node name="MeshInstance3D89" type="MeshInstance3D" parent="Node3D" unique_id=1623872370]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 240, 0, 40)
+visibility_range_end = 71.38
 mesh = SubResource("PlaneMesh_56iun")
 
 [node name="MeshInstance3D90" type="MeshInstance3D" parent="Node3D" unique_id=590837324]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 260, 0, 40)
+visibility_range_end = 71.38
 mesh = SubResource("PlaneMesh_56iun")
 
 [node name="MeshInstance3D91" type="MeshInstance3D" parent="Node3D" unique_id=2042000676]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 240, 0, 60)
+visibility_range_end = 71.38
 mesh = SubResource("PlaneMesh_56iun")
 
 [node name="MeshInstance3D92" type="MeshInstance3D" parent="Node3D" unique_id=1760767530]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 260, 0, 60)
+visibility_range_end = 71.38
 mesh = SubResource("PlaneMesh_56iun")
 
 [node name="MeshInstance3D93" type="MeshInstance3D" parent="Node3D" unique_id=1083620671]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 280, 0, 40)
+visibility_range_end = 71.38
 mesh = SubResource("PlaneMesh_56iun")
 
 [node name="MeshInstance3D94" type="MeshInstance3D" parent="Node3D" unique_id=1526365871]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 300, 0, 40)
+visibility_range_end = 71.38
 mesh = SubResource("PlaneMesh_56iun")
 
 [node name="MeshInstance3D95" type="MeshInstance3D" parent="Node3D" unique_id=2036135446]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 280, 0, 60)
+visibility_range_end = 71.38
 mesh = SubResource("PlaneMesh_56iun")
 
 [node name="MeshInstance3D96" type="MeshInstance3D" parent="Node3D" unique_id=439605116]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 300, 0, 60)
+visibility_range_end = 71.38
 mesh = SubResource("PlaneMesh_56iun")
 
 [node name="MeshInstance3D97" type="MeshInstance3D" parent="Node3D" unique_id=1935995491]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 160, 0, 80)
+visibility_range_end = 71.38
 mesh = SubResource("PlaneMesh_56iun")
 
 [node name="MeshInstance3D98" type="MeshInstance3D" parent="Node3D" unique_id=1882313444]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 180, 0, 80)
+visibility_range_end = 71.38
 mesh = SubResource("PlaneMesh_56iun")
 
 [node name="MeshInstance3D99" type="MeshInstance3D" parent="Node3D" unique_id=667761570]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 160, 0, 100)
+visibility_range_end = 71.38
 mesh = SubResource("PlaneMesh_56iun")
 
 [node name="MeshInstance3D100" type="MeshInstance3D" parent="Node3D" unique_id=6654467]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 180, 0, 100)
+visibility_range_end = 71.38
 mesh = SubResource("PlaneMesh_56iun")
 
 [node name="MeshInstance3D101" type="MeshInstance3D" parent="Node3D" unique_id=2123669247]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 200, 0, 80)
+visibility_range_end = 71.38
 mesh = SubResource("PlaneMesh_56iun")
 
 [node name="MeshInstance3D102" type="MeshInstance3D" parent="Node3D" unique_id=15231988]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 220, 0, 80)
+visibility_range_end = 71.38
 mesh = SubResource("PlaneMesh_56iun")
 
 [node name="MeshInstance3D103" type="MeshInstance3D" parent="Node3D" unique_id=843142435]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 200, 0, 100)
+visibility_range_end = 71.38
 mesh = SubResource("PlaneMesh_56iun")
 
 [node name="MeshInstance3D104" type="MeshInstance3D" parent="Node3D" unique_id=2020363644]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 220, 0, 100)
+visibility_range_end = 71.38
 mesh = SubResource("PlaneMesh_56iun")
 
 [node name="MeshInstance3D105" type="MeshInstance3D" parent="Node3D" unique_id=322661949]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 160, 0, 120)
+visibility_range_end = 71.38
 mesh = SubResource("PlaneMesh_56iun")
 
 [node name="MeshInstance3D106" type="MeshInstance3D" parent="Node3D" unique_id=333221080]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 180, 0, 120)
+visibility_range_end = 71.38
 mesh = SubResource("PlaneMesh_56iun")
 
 [node name="MeshInstance3D107" type="MeshInstance3D" parent="Node3D" unique_id=1985785652]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 160, 0, 140)
+visibility_range_end = 71.38
 mesh = SubResource("PlaneMesh_56iun")
 
 [node name="MeshInstance3D108" type="MeshInstance3D" parent="Node3D" unique_id=150648647]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 180, 0, 140)
+visibility_range_end = 71.38
 mesh = SubResource("PlaneMesh_56iun")
 
 [node name="MeshInstance3D109" type="MeshInstance3D" parent="Node3D" unique_id=1651349666]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 200, 0, 120)
+visibility_range_end = 71.38
 mesh = SubResource("PlaneMesh_56iun")
 
 [node name="MeshInstance3D110" type="MeshInstance3D" parent="Node3D" unique_id=887844548]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 220, 0, 120)
+visibility_range_end = 71.38
 mesh = SubResource("PlaneMesh_56iun")
 
 [node name="MeshInstance3D111" type="MeshInstance3D" parent="Node3D" unique_id=877286043]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 200, 0, 140)
+visibility_range_end = 71.38
 mesh = SubResource("PlaneMesh_56iun")
 
 [node name="MeshInstance3D112" type="MeshInstance3D" parent="Node3D" unique_id=1201761009]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 220, 0, 140)
+visibility_range_end = 71.38
 mesh = SubResource("PlaneMesh_56iun")
 
 [node name="MeshInstance3D113" type="MeshInstance3D" parent="Node3D" unique_id=254264934]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 240, 0, 80)
+visibility_range_end = 71.38
 mesh = SubResource("PlaneMesh_56iun")
 
 [node name="MeshInstance3D114" type="MeshInstance3D" parent="Node3D" unique_id=500811567]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 260, 0, 80)
+visibility_range_end = 71.38
 mesh = SubResource("PlaneMesh_56iun")
 
 [node name="MeshInstance3D115" type="MeshInstance3D" parent="Node3D" unique_id=86601142]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 240, 0, 100)
+visibility_range_end = 71.38
 mesh = SubResource("PlaneMesh_56iun")
 
 [node name="MeshInstance3D116" type="MeshInstance3D" parent="Node3D" unique_id=1065768887]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 260, 0, 100)
+visibility_range_end = 71.38
 mesh = SubResource("PlaneMesh_56iun")
 
 [node name="MeshInstance3D117" type="MeshInstance3D" parent="Node3D" unique_id=1543252679]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 280, 0, 80)
+visibility_range_end = 71.38
 mesh = SubResource("PlaneMesh_56iun")
 
 [node name="MeshInstance3D118" type="MeshInstance3D" parent="Node3D" unique_id=347286977]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 300, 0, 80)
+visibility_range_end = 71.38
 mesh = SubResource("PlaneMesh_56iun")
 
 [node name="MeshInstance3D119" type="MeshInstance3D" parent="Node3D" unique_id=1374629441]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 280, 0, 100)
+visibility_range_end = 71.38
 mesh = SubResource("PlaneMesh_56iun")
 
 [node name="MeshInstance3D120" type="MeshInstance3D" parent="Node3D" unique_id=411268444]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 300, 0, 100)
+visibility_range_end = 71.38
 mesh = SubResource("PlaneMesh_56iun")
 
 [node name="MeshInstance3D121" type="MeshInstance3D" parent="Node3D" unique_id=2038357108]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 240, 0, 120)
+visibility_range_end = 71.38
 mesh = SubResource("PlaneMesh_56iun")
 
 [node name="MeshInstance3D122" type="MeshInstance3D" parent="Node3D" unique_id=800449706]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 260, 0, 120)
+visibility_range_end = 71.38
 mesh = SubResource("PlaneMesh_56iun")
 
 [node name="MeshInstance3D123" type="MeshInstance3D" parent="Node3D" unique_id=11428232]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 240, 0, 140)
+visibility_range_end = 71.38
 mesh = SubResource("PlaneMesh_56iun")
 
 [node name="MeshInstance3D124" type="MeshInstance3D" parent="Node3D" unique_id=886555565]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 260, 0, 140)
+visibility_range_end = 71.38
 mesh = SubResource("PlaneMesh_56iun")
 
 [node name="MeshInstance3D125" type="MeshInstance3D" parent="Node3D" unique_id=1732189902]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 280, 0, 120)
+visibility_range_end = 71.38
 mesh = SubResource("PlaneMesh_56iun")
 
 [node name="MeshInstance3D126" type="MeshInstance3D" parent="Node3D" unique_id=357489627]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 300, 0, 120)
+visibility_range_end = 71.38
 mesh = SubResource("PlaneMesh_56iun")
 
 [node name="MeshInstance3D127" type="MeshInstance3D" parent="Node3D" unique_id=1746110656]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 280, 0, 140)
+visibility_range_end = 71.38
 mesh = SubResource("PlaneMesh_56iun")
 
 [node name="MeshInstance3D128" type="MeshInstance3D" parent="Node3D" unique_id=1362666344]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 300, 0, 140)
+visibility_range_end = 71.38
 mesh = SubResource("PlaneMesh_56iun")
 
 [node name="MeshInstance3D129" type="MeshInstance3D" parent="Node3D" unique_id=178422223]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 160)
+visibility_range_end = 71.38
 mesh = SubResource("PlaneMesh_56iun")
 
 [node name="MeshInstance3D130" type="MeshInstance3D" parent="Node3D" unique_id=1331593061]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 20, 0, 160)
+visibility_range_end = 71.38
 mesh = SubResource("PlaneMesh_56iun")
 
 [node name="MeshInstance3D131" type="MeshInstance3D" parent="Node3D" unique_id=1611531795]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 180)
+visibility_range_end = 71.38
 mesh = SubResource("PlaneMesh_56iun")
 
 [node name="MeshInstance3D132" type="MeshInstance3D" parent="Node3D" unique_id=1518259060]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 20, 0, 180)
+visibility_range_end = 71.38
 mesh = SubResource("PlaneMesh_56iun")
 
 [node name="MeshInstance3D133" type="MeshInstance3D" parent="Node3D" unique_id=670695878]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 40, 0, 160)
+visibility_range_end = 71.38
 mesh = SubResource("PlaneMesh_56iun")
 
 [node name="MeshInstance3D134" type="MeshInstance3D" parent="Node3D" unique_id=426110844]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 60, 0, 160)
+visibility_range_end = 71.38
 mesh = SubResource("PlaneMesh_56iun")
 
 [node name="MeshInstance3D135" type="MeshInstance3D" parent="Node3D" unique_id=1590179347]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 40, 0, 180)
+visibility_range_end = 71.38
 mesh = SubResource("PlaneMesh_56iun")
 
 [node name="MeshInstance3D136" type="MeshInstance3D" parent="Node3D" unique_id=842641769]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 60, 0, 180)
+visibility_range_end = 71.38
 mesh = SubResource("PlaneMesh_56iun")
 
 [node name="MeshInstance3D137" type="MeshInstance3D" parent="Node3D" unique_id=415071442]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 200)
+visibility_range_end = 71.38
 mesh = SubResource("PlaneMesh_56iun")
 
 [node name="MeshInstance3D138" type="MeshInstance3D" parent="Node3D" unique_id=1304383727]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 20, 0, 200)
+visibility_range_end = 71.38
 mesh = SubResource("PlaneMesh_56iun")
 
 [node name="MeshInstance3D139" type="MeshInstance3D" parent="Node3D" unique_id=2144690408]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 220)
+visibility_range_end = 71.38
 mesh = SubResource("PlaneMesh_56iun")
 
 [node name="MeshInstance3D140" type="MeshInstance3D" parent="Node3D" unique_id=1230567336]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 20, 0, 220)
+visibility_range_end = 71.38
 mesh = SubResource("PlaneMesh_56iun")
 
 [node name="MeshInstance3D141" type="MeshInstance3D" parent="Node3D" unique_id=1665071573]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 40, 0, 200)
+visibility_range_end = 71.38
 mesh = SubResource("PlaneMesh_56iun")
 
 [node name="MeshInstance3D142" type="MeshInstance3D" parent="Node3D" unique_id=1164484342]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 60, 0, 200)
+visibility_range_end = 71.38
 mesh = SubResource("PlaneMesh_56iun")
 
 [node name="MeshInstance3D143" type="MeshInstance3D" parent="Node3D" unique_id=558174702]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 40, 0, 220)
+visibility_range_end = 71.38
 mesh = SubResource("PlaneMesh_56iun")
 
 [node name="MeshInstance3D144" type="MeshInstance3D" parent="Node3D" unique_id=1654420827]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 60, 0, 220)
+visibility_range_end = 71.38
 mesh = SubResource("PlaneMesh_56iun")
 
 [node name="MeshInstance3D145" type="MeshInstance3D" parent="Node3D" unique_id=872557832]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 80, 0, 160)
+visibility_range_end = 71.38
 mesh = SubResource("PlaneMesh_56iun")
 
 [node name="MeshInstance3D146" type="MeshInstance3D" parent="Node3D" unique_id=1514373959]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 100, 0, 160)
+visibility_range_end = 71.38
 mesh = SubResource("PlaneMesh_56iun")
 
 [node name="MeshInstance3D147" type="MeshInstance3D" parent="Node3D" unique_id=1524775221]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 80, 0, 180)
+visibility_range_end = 71.38
 mesh = SubResource("PlaneMesh_56iun")
 
 [node name="MeshInstance3D148" type="MeshInstance3D" parent="Node3D" unique_id=1472009475]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 100, 0, 180)
+visibility_range_end = 71.38
 mesh = SubResource("PlaneMesh_56iun")
 
 [node name="MeshInstance3D149" type="MeshInstance3D" parent="Node3D" unique_id=1277335470]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 120, 0, 160)
+visibility_range_end = 71.38
 mesh = SubResource("PlaneMesh_56iun")
 
 [node name="MeshInstance3D150" type="MeshInstance3D" parent="Node3D" unique_id=1287025077]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 140, 0, 160)
+visibility_range_end = 71.38
 mesh = SubResource("PlaneMesh_56iun")
 
 [node name="MeshInstance3D151" type="MeshInstance3D" parent="Node3D" unique_id=419143916]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 120, 0, 180)
+visibility_range_end = 71.38
 mesh = SubResource("PlaneMesh_56iun")
 
 [node name="MeshInstance3D152" type="MeshInstance3D" parent="Node3D" unique_id=336958847]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 140, 0, 180)
+visibility_range_end = 71.38
 mesh = SubResource("PlaneMesh_56iun")
 
 [node name="MeshInstance3D153" type="MeshInstance3D" parent="Node3D" unique_id=1647640776]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 80, 0, 200)
+visibility_range_end = 71.38
 mesh = SubResource("PlaneMesh_56iun")
 
 [node name="MeshInstance3D154" type="MeshInstance3D" parent="Node3D" unique_id=1332198998]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 100, 0, 200)
+visibility_range_end = 71.38
 mesh = SubResource("PlaneMesh_56iun")
 
 [node name="MeshInstance3D155" type="MeshInstance3D" parent="Node3D" unique_id=553441397]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 80, 0, 220)
+visibility_range_end = 71.38
 mesh = SubResource("PlaneMesh_56iun")
 
 [node name="MeshInstance3D156" type="MeshInstance3D" parent="Node3D" unique_id=1177149230]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 100, 0, 220)
+visibility_range_end = 71.38
 mesh = SubResource("PlaneMesh_56iun")
 
 [node name="MeshInstance3D157" type="MeshInstance3D" parent="Node3D" unique_id=1725567928]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 120, 0, 200)
+visibility_range_end = 71.38
 mesh = SubResource("PlaneMesh_56iun")
 
 [node name="MeshInstance3D158" type="MeshInstance3D" parent="Node3D" unique_id=2072707054]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 140, 0, 200)
+visibility_range_end = 71.38
 mesh = SubResource("PlaneMesh_56iun")
 
 [node name="MeshInstance3D159" type="MeshInstance3D" parent="Node3D" unique_id=371763194]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 120, 0, 220)
+visibility_range_end = 71.38
 mesh = SubResource("PlaneMesh_56iun")
 
 [node name="MeshInstance3D160" type="MeshInstance3D" parent="Node3D" unique_id=1454736539]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 140, 0, 220)
+visibility_range_end = 71.38
 mesh = SubResource("PlaneMesh_56iun")
 
 [node name="MeshInstance3D161" type="MeshInstance3D" parent="Node3D" unique_id=1971299656]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 240)
+visibility_range_end = 71.38
 mesh = SubResource("PlaneMesh_56iun")
 
 [node name="MeshInstance3D162" type="MeshInstance3D" parent="Node3D" unique_id=2038670922]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 20, 0, 240)
+visibility_range_end = 71.38
 mesh = SubResource("PlaneMesh_56iun")
 
 [node name="MeshInstance3D163" type="MeshInstance3D" parent="Node3D" unique_id=1364754318]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 260)
+visibility_range_end = 71.38
 mesh = SubResource("PlaneMesh_56iun")
 
 [node name="MeshInstance3D164" type="MeshInstance3D" parent="Node3D" unique_id=1112678261]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 20, 0, 260)
+visibility_range_end = 71.38
 mesh = SubResource("PlaneMesh_56iun")
 
 [node name="MeshInstance3D165" type="MeshInstance3D" parent="Node3D" unique_id=127043393]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 40, 0, 240)
+visibility_range_end = 71.38
 mesh = SubResource("PlaneMesh_56iun")
 
 [node name="MeshInstance3D166" type="MeshInstance3D" parent="Node3D" unique_id=1658649668]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 60, 0, 240)
+visibility_range_end = 71.38
 mesh = SubResource("PlaneMesh_56iun")
 
 [node name="MeshInstance3D167" type="MeshInstance3D" parent="Node3D" unique_id=649736808]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 40, 0, 260)
+visibility_range_end = 71.38
 mesh = SubResource("PlaneMesh_56iun")
 
 [node name="MeshInstance3D168" type="MeshInstance3D" parent="Node3D" unique_id=171359637]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 60, 0, 260)
+visibility_range_end = 71.38
 mesh = SubResource("PlaneMesh_56iun")
 
 [node name="MeshInstance3D169" type="MeshInstance3D" parent="Node3D" unique_id=256668281]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 280)
+visibility_range_end = 71.38
 mesh = SubResource("PlaneMesh_56iun")
 
 [node name="MeshInstance3D170" type="MeshInstance3D" parent="Node3D" unique_id=394156922]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 20, 0, 280)
+visibility_range_end = 71.38
 mesh = SubResource("PlaneMesh_56iun")
 
 [node name="MeshInstance3D171" type="MeshInstance3D" parent="Node3D" unique_id=1010134543]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 300)
+visibility_range_end = 71.38
 mesh = SubResource("PlaneMesh_56iun")
 
 [node name="MeshInstance3D172" type="MeshInstance3D" parent="Node3D" unique_id=509174614]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 20, 0, 300)
+visibility_range_end = 71.38
 mesh = SubResource("PlaneMesh_56iun")
 
 [node name="MeshInstance3D173" type="MeshInstance3D" parent="Node3D" unique_id=365415183]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 40, 0, 280)
+visibility_range_end = 71.38
 mesh = SubResource("PlaneMesh_56iun")
 
 [node name="MeshInstance3D174" type="MeshInstance3D" parent="Node3D" unique_id=1900790390]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 60, 0, 280)
+visibility_range_end = 71.38
 mesh = SubResource("PlaneMesh_56iun")
 
 [node name="MeshInstance3D175" type="MeshInstance3D" parent="Node3D" unique_id=1487633099]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 40, 0, 300)
+visibility_range_end = 71.38
 mesh = SubResource("PlaneMesh_56iun")
 
 [node name="MeshInstance3D176" type="MeshInstance3D" parent="Node3D" unique_id=69892766]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 60, 0, 300)
+visibility_range_end = 71.38
 mesh = SubResource("PlaneMesh_56iun")
 
 [node name="MeshInstance3D177" type="MeshInstance3D" parent="Node3D" unique_id=1515855590]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 80, 0, 240)
+visibility_range_end = 71.38
 mesh = SubResource("PlaneMesh_56iun")
 
 [node name="MeshInstance3D178" type="MeshInstance3D" parent="Node3D" unique_id=2055305332]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 100, 0, 240)
+visibility_range_end = 71.38
 mesh = SubResource("PlaneMesh_56iun")
 
 [node name="MeshInstance3D179" type="MeshInstance3D" parent="Node3D" unique_id=557405604]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 80, 0, 260)
+visibility_range_end = 71.38
 mesh = SubResource("PlaneMesh_56iun")
 
 [node name="MeshInstance3D180" type="MeshInstance3D" parent="Node3D" unique_id=85988946]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 100, 0, 260)
+visibility_range_end = 71.38
 mesh = SubResource("PlaneMesh_56iun")
 
 [node name="MeshInstance3D181" type="MeshInstance3D" parent="Node3D" unique_id=1668635528]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 120, 0, 240)
+visibility_range_end = 71.38
 mesh = SubResource("PlaneMesh_56iun")
 
 [node name="MeshInstance3D182" type="MeshInstance3D" parent="Node3D" unique_id=1372152211]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 140, 0, 240)
+visibility_range_end = 71.38
 mesh = SubResource("PlaneMesh_56iun")
 
 [node name="MeshInstance3D183" type="MeshInstance3D" parent="Node3D" unique_id=1205745226]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 120, 0, 260)
+visibility_range_end = 71.38
 mesh = SubResource("PlaneMesh_56iun")
 
 [node name="MeshInstance3D184" type="MeshInstance3D" parent="Node3D" unique_id=1449772967]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 140, 0, 260)
+visibility_range_end = 71.38
 mesh = SubResource("PlaneMesh_56iun")
 
 [node name="MeshInstance3D185" type="MeshInstance3D" parent="Node3D" unique_id=2083091420]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 80, 0, 280)
+visibility_range_end = 71.38
 mesh = SubResource("PlaneMesh_56iun")
 
 [node name="MeshInstance3D186" type="MeshInstance3D" parent="Node3D" unique_id=7702951]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 100, 0, 280)
+visibility_range_end = 71.38
 mesh = SubResource("PlaneMesh_56iun")
 
 [node name="MeshInstance3D187" type="MeshInstance3D" parent="Node3D" unique_id=555665293]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 80, 0, 300)
+visibility_range_end = 71.38
 mesh = SubResource("PlaneMesh_56iun")
 
 [node name="MeshInstance3D188" type="MeshInstance3D" parent="Node3D" unique_id=1855043431]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 100, 0, 300)
+visibility_range_end = 71.38
 mesh = SubResource("PlaneMesh_56iun")
 
 [node name="MeshInstance3D189" type="MeshInstance3D" parent="Node3D" unique_id=1692148640]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 120, 0, 280)
+visibility_range_end = 71.38
 mesh = SubResource("PlaneMesh_56iun")
 
 [node name="MeshInstance3D190" type="MeshInstance3D" parent="Node3D" unique_id=556813992]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 140, 0, 280)
+visibility_range_end = 71.38
 mesh = SubResource("PlaneMesh_56iun")
 
 [node name="MeshInstance3D191" type="MeshInstance3D" parent="Node3D" unique_id=1034920267]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 120, 0, 300)
+visibility_range_end = 71.38
 mesh = SubResource("PlaneMesh_56iun")
 
 [node name="MeshInstance3D192" type="MeshInstance3D" parent="Node3D" unique_id=403212179]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 140, 0, 300)
+visibility_range_end = 71.38
 mesh = SubResource("PlaneMesh_56iun")
 
 [node name="MeshInstance3D193" type="MeshInstance3D" parent="Node3D" unique_id=768791319]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 160, 0, 160)
+visibility_range_end = 71.38
 mesh = SubResource("PlaneMesh_56iun")
 
 [node name="MeshInstance3D194" type="MeshInstance3D" parent="Node3D" unique_id=105933092]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 180, 0, 160)
+visibility_range_end = 71.38
 mesh = SubResource("PlaneMesh_56iun")
 
 [node name="MeshInstance3D195" type="MeshInstance3D" parent="Node3D" unique_id=782241435]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 160, 0, 180)
+visibility_range_end = 71.38
 mesh = SubResource("PlaneMesh_56iun")
 
 [node name="MeshInstance3D196" type="MeshInstance3D" parent="Node3D" unique_id=802078793]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 180, 0, 180)
+visibility_range_end = 71.38
 mesh = SubResource("PlaneMesh_56iun")
 
 [node name="MeshInstance3D197" type="MeshInstance3D" parent="Node3D" unique_id=325644221]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 200, 0, 160)
+visibility_range_end = 71.38
 mesh = SubResource("PlaneMesh_56iun")
 
 [node name="MeshInstance3D198" type="MeshInstance3D" parent="Node3D" unique_id=1925446628]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 220, 0, 160)
+visibility_range_end = 71.38
 mesh = SubResource("PlaneMesh_56iun")
 
 [node name="MeshInstance3D199" type="MeshInstance3D" parent="Node3D" unique_id=919411428]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 200, 0, 180)
+visibility_range_end = 71.38
 mesh = SubResource("PlaneMesh_56iun")
 
 [node name="MeshInstance3D200" type="MeshInstance3D" parent="Node3D" unique_id=10038626]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 220, 0, 180)
+visibility_range_end = 71.38
 mesh = SubResource("PlaneMesh_56iun")
 
 [node name="MeshInstance3D201" type="MeshInstance3D" parent="Node3D" unique_id=665259022]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 160, 0, 200)
+visibility_range_end = 71.38
 mesh = SubResource("PlaneMesh_56iun")
 
 [node name="MeshInstance3D202" type="MeshInstance3D" parent="Node3D" unique_id=197979069]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 180, 0, 200)
+visibility_range_end = 71.38
 mesh = SubResource("PlaneMesh_56iun")
 
 [node name="MeshInstance3D203" type="MeshInstance3D" parent="Node3D" unique_id=1044672060]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 160, 0, 220)
+visibility_range_end = 71.38
 mesh = SubResource("PlaneMesh_56iun")
 
 [node name="MeshInstance3D204" type="MeshInstance3D" parent="Node3D" unique_id=996527327]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 180, 0, 220)
+visibility_range_end = 71.38
 mesh = SubResource("PlaneMesh_56iun")
 
 [node name="MeshInstance3D205" type="MeshInstance3D" parent="Node3D" unique_id=748102572]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 200, 0, 200)
+visibility_range_end = 71.38
 mesh = SubResource("PlaneMesh_56iun")
 
 [node name="MeshInstance3D206" type="MeshInstance3D" parent="Node3D" unique_id=1211865751]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 220, 0, 200)
+visibility_range_end = 71.38
 mesh = SubResource("PlaneMesh_56iun")
 
 [node name="MeshInstance3D207" type="MeshInstance3D" parent="Node3D" unique_id=434284293]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 200, 0, 220)
+visibility_range_end = 71.38
 mesh = SubResource("PlaneMesh_56iun")
 
 [node name="MeshInstance3D208" type="MeshInstance3D" parent="Node3D" unique_id=2066445705]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 220, 0, 220)
+visibility_range_end = 71.38
 mesh = SubResource("PlaneMesh_56iun")
 
 [node name="MeshInstance3D209" type="MeshInstance3D" parent="Node3D" unique_id=1074683327]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 240, 0, 160)
+visibility_range_end = 71.38
 mesh = SubResource("PlaneMesh_56iun")
 
 [node name="MeshInstance3D210" type="MeshInstance3D" parent="Node3D" unique_id=1637321311]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 260, 0, 160)
+visibility_range_end = 71.38
 mesh = SubResource("PlaneMesh_56iun")
 
 [node name="MeshInstance3D211" type="MeshInstance3D" parent="Node3D" unique_id=1347477786]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 240, 0, 180)
+visibility_range_end = 71.38
 mesh = SubResource("PlaneMesh_56iun")
 
 [node name="MeshInstance3D212" type="MeshInstance3D" parent="Node3D" unique_id=721623416]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 260, 0, 180)
+visibility_range_end = 71.38
 mesh = SubResource("PlaneMesh_56iun")
 
 [node name="MeshInstance3D213" type="MeshInstance3D" parent="Node3D" unique_id=1077704275]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 280, 0, 160)
+visibility_range_end = 71.38
 mesh = SubResource("PlaneMesh_56iun")
 
 [node name="MeshInstance3D214" type="MeshInstance3D" parent="Node3D" unique_id=1069552361]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 300, 0, 160)
+visibility_range_end = 71.38
 mesh = SubResource("PlaneMesh_56iun")
 
 [node name="MeshInstance3D215" type="MeshInstance3D" parent="Node3D" unique_id=1422338172]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 280, 0, 180)
+visibility_range_end = 71.38
 mesh = SubResource("PlaneMesh_56iun")
 
 [node name="MeshInstance3D216" type="MeshInstance3D" parent="Node3D" unique_id=443460562]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 300, 0, 180)
+visibility_range_end = 71.38
 mesh = SubResource("PlaneMesh_56iun")
 
 [node name="MeshInstance3D217" type="MeshInstance3D" parent="Node3D" unique_id=447546456]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 240, 0, 200)
+visibility_range_end = 71.38
 mesh = SubResource("PlaneMesh_56iun")
 
 [node name="MeshInstance3D218" type="MeshInstance3D" parent="Node3D" unique_id=146673749]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 260, 0, 200)
+visibility_range_end = 71.38
 mesh = SubResource("PlaneMesh_56iun")
 
 [node name="MeshInstance3D219" type="MeshInstance3D" parent="Node3D" unique_id=1709148523]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 240, 0, 220)
+visibility_range_end = 71.38
 mesh = SubResource("PlaneMesh_56iun")
 
 [node name="MeshInstance3D220" type="MeshInstance3D" parent="Node3D" unique_id=1340693804]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 260, 0, 220)
+visibility_range_end = 71.38
 mesh = SubResource("PlaneMesh_56iun")
 
 [node name="MeshInstance3D221" type="MeshInstance3D" parent="Node3D" unique_id=689367877]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 280, 0, 200)
+visibility_range_end = 71.38
 mesh = SubResource("PlaneMesh_56iun")
 
 [node name="MeshInstance3D222" type="MeshInstance3D" parent="Node3D" unique_id=2015738445]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 300, 0, 200)
+visibility_range_end = 71.38
 mesh = SubResource("PlaneMesh_56iun")
 
 [node name="MeshInstance3D223" type="MeshInstance3D" parent="Node3D" unique_id=1119302515]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 280, 0, 220)
+visibility_range_end = 71.38
 mesh = SubResource("PlaneMesh_56iun")
 
 [node name="MeshInstance3D224" type="MeshInstance3D" parent="Node3D" unique_id=1545319295]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 300, 0, 220)
+visibility_range_end = 71.38
 mesh = SubResource("PlaneMesh_56iun")
 
 [node name="MeshInstance3D225" type="MeshInstance3D" parent="Node3D" unique_id=708728752]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 160, 0, 240)
+visibility_range_end = 71.38
 mesh = SubResource("PlaneMesh_56iun")
 
 [node name="MeshInstance3D226" type="MeshInstance3D" parent="Node3D" unique_id=1406774575]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 180, 0, 240)
+visibility_range_end = 71.38
 mesh = SubResource("PlaneMesh_56iun")
 
 [node name="MeshInstance3D227" type="MeshInstance3D" parent="Node3D" unique_id=1512228462]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 160, 0, 260)
+visibility_range_end = 71.38
 mesh = SubResource("PlaneMesh_56iun")
 
 [node name="MeshInstance3D228" type="MeshInstance3D" parent="Node3D" unique_id=1659666884]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 180, 0, 260)
+visibility_range_end = 71.38
 mesh = SubResource("PlaneMesh_56iun")
 
 [node name="MeshInstance3D229" type="MeshInstance3D" parent="Node3D" unique_id=516622519]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 200, 0, 240)
+visibility_range_end = 71.38
 mesh = SubResource("PlaneMesh_56iun")
 
 [node name="MeshInstance3D230" type="MeshInstance3D" parent="Node3D" unique_id=274837405]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 220, 0, 240)
+visibility_range_end = 71.38
 mesh = SubResource("PlaneMesh_56iun")
 
 [node name="MeshInstance3D231" type="MeshInstance3D" parent="Node3D" unique_id=300047118]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 200, 0, 260)
+visibility_range_end = 71.38
 mesh = SubResource("PlaneMesh_56iun")
 
 [node name="MeshInstance3D232" type="MeshInstance3D" parent="Node3D" unique_id=8050033]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 220, 0, 260)
+visibility_range_end = 71.38
 mesh = SubResource("PlaneMesh_56iun")
 
 [node name="MeshInstance3D233" type="MeshInstance3D" parent="Node3D" unique_id=1968294578]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 160, 0, 280)
+visibility_range_end = 71.38
 mesh = SubResource("PlaneMesh_56iun")
 
 [node name="MeshInstance3D234" type="MeshInstance3D" parent="Node3D" unique_id=1541994871]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 180, 0, 280)
+visibility_range_end = 71.38
 mesh = SubResource("PlaneMesh_56iun")
 
 [node name="MeshInstance3D235" type="MeshInstance3D" parent="Node3D" unique_id=1983394202]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 160, 0, 300)
+visibility_range_end = 71.38
 mesh = SubResource("PlaneMesh_56iun")
 
 [node name="MeshInstance3D236" type="MeshInstance3D" parent="Node3D" unique_id=1934246276]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 180, 0, 300)
+visibility_range_end = 71.38
 mesh = SubResource("PlaneMesh_56iun")
 
 [node name="MeshInstance3D237" type="MeshInstance3D" parent="Node3D" unique_id=55834071]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 200, 0, 280)
+visibility_range_end = 71.38
 mesh = SubResource("PlaneMesh_56iun")
 
 [node name="MeshInstance3D238" type="MeshInstance3D" parent="Node3D" unique_id=996406003]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 220, 0, 280)
+visibility_range_end = 71.38
 mesh = SubResource("PlaneMesh_56iun")
 
 [node name="MeshInstance3D239" type="MeshInstance3D" parent="Node3D" unique_id=1051757432]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 200, 0, 300)
+visibility_range_end = 71.38
 mesh = SubResource("PlaneMesh_56iun")
 
 [node name="MeshInstance3D240" type="MeshInstance3D" parent="Node3D" unique_id=512384841]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 220, 0, 300)
+visibility_range_end = 71.38
 mesh = SubResource("PlaneMesh_56iun")
 
 [node name="MeshInstance3D241" type="MeshInstance3D" parent="Node3D" unique_id=1980508715]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 240, 0, 240)
+visibility_range_end = 71.38
 mesh = SubResource("PlaneMesh_56iun")
 
 [node name="MeshInstance3D242" type="MeshInstance3D" parent="Node3D" unique_id=1060553824]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 260, 0, 240)
+visibility_range_end = 71.38
 mesh = SubResource("PlaneMesh_56iun")
 
 [node name="MeshInstance3D243" type="MeshInstance3D" parent="Node3D" unique_id=927318527]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 240, 0, 260)
+visibility_range_end = 71.38
 mesh = SubResource("PlaneMesh_56iun")
 
 [node name="MeshInstance3D244" type="MeshInstance3D" parent="Node3D" unique_id=925719485]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 260, 0, 260)
+visibility_range_end = 71.38
 mesh = SubResource("PlaneMesh_56iun")
 
 [node name="MeshInstance3D245" type="MeshInstance3D" parent="Node3D" unique_id=246832806]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 280, 0, 240)
+visibility_range_end = 71.38
 mesh = SubResource("PlaneMesh_56iun")
 
 [node name="MeshInstance3D246" type="MeshInstance3D" parent="Node3D" unique_id=1070968808]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 300, 0, 240)
+visibility_range_end = 71.38
 mesh = SubResource("PlaneMesh_56iun")
 
 [node name="MeshInstance3D247" type="MeshInstance3D" parent="Node3D" unique_id=1444782020]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 280, 0, 260)
+visibility_range_end = 71.38
 mesh = SubResource("PlaneMesh_56iun")
 
 [node name="MeshInstance3D248" type="MeshInstance3D" parent="Node3D" unique_id=822731257]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 300, 0, 260)
+visibility_range_end = 71.38
 mesh = SubResource("PlaneMesh_56iun")
 
 [node name="MeshInstance3D249" type="MeshInstance3D" parent="Node3D" unique_id=156630087]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 240, 0, 280)
+visibility_range_end = 71.38
 mesh = SubResource("PlaneMesh_56iun")
 
 [node name="MeshInstance3D250" type="MeshInstance3D" parent="Node3D" unique_id=217125295]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 260, 0, 280)
+visibility_range_end = 71.38
 mesh = SubResource("PlaneMesh_56iun")
 
 [node name="MeshInstance3D251" type="MeshInstance3D" parent="Node3D" unique_id=1563188901]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 240, 0, 300)
+visibility_range_end = 71.38
 mesh = SubResource("PlaneMesh_56iun")
 
 [node name="MeshInstance3D252" type="MeshInstance3D" parent="Node3D" unique_id=330375715]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 260, 0, 300)
+visibility_range_end = 71.38
 mesh = SubResource("PlaneMesh_56iun")
 
 [node name="MeshInstance3D253" type="MeshInstance3D" parent="Node3D" unique_id=358474099]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 280, 0, 280)
+visibility_range_end = 71.38
 mesh = SubResource("PlaneMesh_56iun")
 
 [node name="MeshInstance3D254" type="MeshInstance3D" parent="Node3D" unique_id=964714878]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 300, 0, 280)
+visibility_range_end = 71.38
 mesh = SubResource("PlaneMesh_56iun")
 
 [node name="MeshInstance3D255" type="MeshInstance3D" parent="Node3D" unique_id=443957800]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 280, 0, 300)
+visibility_range_end = 71.38
 mesh = SubResource("PlaneMesh_56iun")
 
 [node name="MeshInstance3D256" type="MeshInstance3D" parent="Node3D" unique_id=584150213]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 300, 0, 300)
+visibility_range_end = 71.38
 mesh = SubResource("PlaneMesh_56iun")

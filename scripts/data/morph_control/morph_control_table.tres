@@ -1,442 +1,410 @@
-[gd_resource type="Resource" script_class="MorphControl" format=3 uid="uid://6ytpnesveeqh"]
+[gd_resource type="Resource" script_class="MorphControl" format=3 uid="uid://ljvwbivydehb"]
 
 [ext_resource type="Script" uid="uid://dhjm6qjraw5qs" path="res://scripts/data/morph_control/morph_control_entry.gd" id="1_v4lq7"]
 [ext_resource type="Script" uid="uid://ca3m1rx7dekka" path="res://scripts/data/morph_control/morph_control.gd" id="2_lmud1"]
 
-[sub_resource type="Resource" id="Resource_34x3k"]
+[sub_resource type="Resource" id="Resource_qalxi"]
 script = ExtResource("1_v4lq7")
 names = Dictionary[int, StringName]({
-0: &"Mouth_44_0",
-1: &"Mouth_11_0"
+0: &"Mouth_11_0(KanasiA)[M_Face]"
 })
 
-[sub_resource type="Resource" id="Resource_ehxvn"]
+[sub_resource type="Resource" id="Resource_plofa"]
 script = ExtResource("1_v4lq7")
 names = Dictionary[int, StringName]({
-0: &"Mouth_17_0"
+0: &"Mouth_17_0(KomariA)[M_Face]"
 })
 
-[sub_resource type="Resource" id="Resource_13etn"]
+[sub_resource type="Resource" id="Resource_rokn4"]
 script = ExtResource("1_v4lq7")
 names = Dictionary[int, StringName]({
-0: &"Mouth_15_0"
+0: &"Mouth_15_0(OdorokiB)[M_Face]"
 })
 
-[sub_resource type="Resource" id="Resource_5ey2v"]
+[sub_resource type="Resource" id="Resource_0b1o8"]
 script = ExtResource("1_v4lq7")
 names = Dictionary[int, StringName]({
-0: &"Mouth_16_0"
+0: &"Mouth_16_0(JitoA)[M_Face]"
 })
 
-[sub_resource type="Resource" id="Resource_jwqs3"]
+[sub_resource type="Resource" id="Resource_xhjp5"]
 script = ExtResource("1_v4lq7")
 names = Dictionary[int, StringName]({
-0: &"Mouth_5_0",
-1: &"Mouth_6_0",
-2: &"Mouth_7_0",
-3: &"Mouth_23_0"
+0: &"Mouth_23_0(TalkA_A_S)[M_Face]"
 })
 
-[sub_resource type="Resource" id="Resource_4rhyl"]
+[sub_resource type="Resource" id="Resource_nst2l"]
 script = ExtResource("1_v4lq7")
 names = Dictionary[int, StringName]({
-0: &"Mouth_25_0",
-1: &"Mouth_35_0",
-2: &"Mouth_36_0",
-3: &"Mouth_8_0"
+0: &"Mouth_25_0(TalkA_I_S)[M_Face]"
 })
 
-[sub_resource type="Resource" id="Resource_yi6hi"]
+[sub_resource type="Resource" id="Resource_6wmub"]
 script = ExtResource("1_v4lq7")
 names = Dictionary[int, StringName]({
-0: &"Mouth_28_0",
-1: &"Mouth_27_0"
+0: &"Mouth_27_0(TalkA_U_S)[M_Face]"
 })
 
-[sub_resource type="Resource" id="Resource_vne53"]
+[sub_resource type="Resource" id="Resource_fxmu0"]
 script = ExtResource("1_v4lq7")
 names = Dictionary[int, StringName]({
-0: &"Mouth_29_0",
-1: &"Mouth_30_0",
-2: &"Mouth_37_0",
-3: &"Mouth_33_0"
+0: &"Mouth_29_0(TalkA_E_S)[M_Face]"
 })
 
-[sub_resource type="Resource" id="Resource_fv57i"]
+[sub_resource type="Resource" id="Resource_75u8i"]
 script = ExtResource("1_v4lq7")
 names = Dictionary[int, StringName]({
-0: &"Mouth_31_0",
-1: &"Mouth_10_0",
-2: &"Mouth_14_0"
+0: &"Mouth_31_0(TalkA_O_S)[M_Face]"
 })
 
-[sub_resource type="Resource" id="Resource_pdste"]
+[sub_resource type="Resource" id="Resource_knj6f"]
 script = ExtResource("1_v4lq7")
 names = Dictionary[int, StringName]({
-0: &"Eye_15_L"
+0: &"Eye_15_L(JitoA)[M_Face]"
 })
 
-[sub_resource type="Resource" id="Resource_h1yem"]
+[sub_resource type="Resource" id="Resource_w1oph"]
 script = ExtResource("1_v4lq7")
 names = Dictionary[int, StringName]({
-0: &"Mouth_46_0"
+0: &"Mouth_46_0(TanC_L)[M_Face]"
 })
 
-[sub_resource type="Resource" id="Resource_xrpeq"]
+[sub_resource type="Resource" id="Resource_u5i66"]
 script = ExtResource("1_v4lq7")
 names = Dictionary[int, StringName]({
-0: &"Mouth_48_0"
+0: &"Mouth_48_0(TanC_R)[M_Face]"
 })
 
-[sub_resource type="Resource" id="Resource_0j21f"]
+[sub_resource type="Resource" id="Resource_1k302"]
 script = ExtResource("1_v4lq7")
 names = Dictionary[int, StringName]({
-0: &"Eye_16_L"
+0: &"Eye_16_L(KusyoA)[M_Face]"
 })
 
-[sub_resource type="Resource" id="Resource_x1wj0"]
+[sub_resource type="Resource" id="Resource_4l0tj"]
 script = ExtResource("1_v4lq7")
 names = Dictionary[int, StringName]({
-0: &"Mouth_26_0"
+0: &"Mouth_26_0(TalkA_I_L)[M_Face]"
 })
 
-[sub_resource type="Resource" id="Resource_oqdgy"]
-script = ExtResource("1_v4lq7")
-
-[sub_resource type="Resource" id="Resource_hxagu"]
+[sub_resource type="Resource" id="Resource_ugpso"]
 script = ExtResource("1_v4lq7")
 names = Dictionary[int, StringName]({
-0: &"EyeBrow_1_L"
+0: &"EyeBrow_1_R(WaraiA)[M_Face]"
 })
 
-[sub_resource type="Resource" id="Resource_f5v4q"]
+[sub_resource type="Resource" id="Resource_2c83v"]
 script = ExtResource("1_v4lq7")
 names = Dictionary[int, StringName]({
-0: &"Mouth_12_0"
+0: &"EyeBrow_1_L(WaraiA)[M_Face]"
 })
 
-[sub_resource type="Resource" id="Resource_qqvuq"]
+[sub_resource type="Resource" id="Resource_7iq3m"]
 script = ExtResource("1_v4lq7")
 names = Dictionary[int, StringName]({
-0: &"Mouth_1_0",
-1: &"Mouth_4_0",
-2: &"Mouth_22_0"
+0: &"Mouth_12_0(DoyaA)[M_Face]"
 })
 
-[sub_resource type="Resource" id="Resource_hyyt3"]
+[sub_resource type="Resource" id="Resource_6xkw8"]
 script = ExtResource("1_v4lq7")
 names = Dictionary[int, StringName]({
-0: &"Mouth_19_0"
+0: &"Mouth_1_0(Normal)[M_Face]"
 })
 
-[sub_resource type="Resource" id="Resource_grmbi"]
+[sub_resource type="Resource" id="Resource_p3gh7"]
 script = ExtResource("1_v4lq7")
 names = Dictionary[int, StringName]({
-0: &"Mouth_18_0"
+0: &"Mouth_19_0(KusyoA_R)[M_Face]"
 })
 
-[sub_resource type="Resource" id="Resource_g7tt1"]
+[sub_resource type="Resource" id="Resource_ys51h"]
 script = ExtResource("1_v4lq7")
 names = Dictionary[int, StringName]({
-0: &"Eye_12_L"
+0: &"Mouth_18_0(KusyoA_L)[M_Face]"
 })
 
-[sub_resource type="Resource" id="Resource_jnc4d"]
+[sub_resource type="Resource" id="Resource_b74rf"]
 script = ExtResource("1_v4lq7")
 names = Dictionary[int, StringName]({
-0: &"Mouth_3_0"
+0: &"Eye_12_L(OdorokiA)[M_Face]"
 })
 
-[sub_resource type="Resource" id="Resource_314h2"]
+[sub_resource type="Resource" id="Resource_dtn2n"]
 script = ExtResource("1_v4lq7")
 names = Dictionary[int, StringName]({
-0: &"Mouth_2_0"
+0: &"Mouth_3_0(CheekA_R)[M_Face]"
 })
 
-[sub_resource type="Resource" id="Resource_5q2pq"]
+[sub_resource type="Resource" id="Resource_xslvo"]
 script = ExtResource("1_v4lq7")
 names = Dictionary[int, StringName]({
-0: &"Mouth_45_0"
+0: &"Mouth_2_0(CheekA_L)[M_Face]"
 })
 
-[sub_resource type="Resource" id="Resource_ryyg1"]
+[sub_resource type="Resource" id="Resource_cl3gl"]
 script = ExtResource("1_v4lq7")
 names = Dictionary[int, StringName]({
-0: &"Mouth_47_0"
+0: &"Mouth_45_0(TanB)[M_Face]"
 })
 
-[sub_resource type="Resource" id="Resource_8hnc7"]
+[sub_resource type="Resource" id="Resource_opqkb"]
 script = ExtResource("1_v4lq7")
 names = Dictionary[int, StringName]({
-0: &"Mouth_49_0"
+0: &"Mouth_47_0(TanD_L)[M_Face]"
 })
 
-[sub_resource type="Resource" id="Resource_eey2w"]
+[sub_resource type="Resource" id="Resource_q8kwp"]
 script = ExtResource("1_v4lq7")
 names = Dictionary[int, StringName]({
-0: &"Mouth_9_0"
+0: &"Mouth_49_0(TanD_R)[M_Face]"
 })
 
-[sub_resource type="Resource" id="Resource_fbyde"]
+[sub_resource type="Resource" id="Resource_ch2k6"]
 script = ExtResource("1_v4lq7")
 names = Dictionary[int, StringName]({
-0: &"Eye_5_L",
-1: &"Eye_8_L"
+0: &"Mouth_9_0(IkariA)[M_Face]"
 })
 
-[sub_resource type="Resource" id="Resource_kqiyl"]
+[sub_resource type="Resource" id="Resource_hpmb3"]
 script = ExtResource("1_v4lq7")
 names = Dictionary[int, StringName]({
-0: &"Eye_5_R",
-1: &"Eye_8_R"
+0: &"Eye_8_L(WaraiD)[M_Face]"
 })
 
-[sub_resource type="Resource" id="Resource_wm0ou"]
+[sub_resource type="Resource" id="Resource_jj23t"]
 script = ExtResource("1_v4lq7")
 names = Dictionary[int, StringName]({
-0: &"Eye_2_L"
+0: &"Eye_8_R(WaraiD)[M_Face]"
 })
 
-[sub_resource type="Resource" id="Resource_0fp72"]
+[sub_resource type="Resource" id="Resource_pt6hw"]
 script = ExtResource("1_v4lq7")
 names = Dictionary[int, StringName]({
-0: &"EyeBrow_21_R"
+0: &"Eye_2_L(CloseA)[M_Face]"
 })
 
-[sub_resource type="Resource" id="Resource_cj0su"]
+[sub_resource type="Resource" id="Resource_73ljm"]
 script = ExtResource("1_v4lq7")
 names = Dictionary[int, StringName]({
-0: &"EyeBrow_21_L"
+0: &"EyeBrow_21_R(Offset_U)[M_Face]"
 })
 
-[sub_resource type="Resource" id="Resource_lew8n"]
+[sub_resource type="Resource" id="Resource_nsmce"]
 script = ExtResource("1_v4lq7")
 names = Dictionary[int, StringName]({
-0: &"EyeBrow_14_R",
-1: &"EyeBrow_22_R",
-2: &"EyeBrow_11_R"
+0: &"EyeBrow_21_L(Offset_U)[M_Face]"
 })
 
-[sub_resource type="Resource" id="Resource_cksdv"]
+[sub_resource type="Resource" id="Resource_yrjwd"]
 script = ExtResource("1_v4lq7")
 names = Dictionary[int, StringName]({
-0: &"EyeBrow_14_L",
-1: &"EyeBrow_22_L",
-2: &"EyeBrow_11_L"
+0: &"EyeBrow_11_R(JitoA)[M_Face]"
 })
 
-[sub_resource type="Resource" id="Resource_uigl3"]
+[sub_resource type="Resource" id="Resource_27e34"]
 script = ExtResource("1_v4lq7")
 names = Dictionary[int, StringName]({
-0: &"Mouth_50_0"
+0: &"EyeBrow_11_L(JitoA)[M_Face]"
 })
 
-[sub_resource type="Resource" id="Resource_6via8"]
+[sub_resource type="Resource" id="Resource_n0vbk"]
 script = ExtResource("1_v4lq7")
 names = Dictionary[int, StringName]({
-0: &"Mouth_51_0"
+0: &"Mouth_50_0(Offset_U)[M_Face]"
 })
 
-[sub_resource type="Resource" id="Resource_u54d3"]
+[sub_resource type="Resource" id="Resource_mhwjm"]
 script = ExtResource("1_v4lq7")
 names = Dictionary[int, StringName]({
-0: &"Mouth_53_0"
+0: &"Mouth_51_0(Offset_D)[M_Face]"
 })
 
-[sub_resource type="Resource" id="Resource_82hj0"]
+[sub_resource type="Resource" id="Resource_qhpcl"]
 script = ExtResource("1_v4lq7")
 names = Dictionary[int, StringName]({
-0: &"Mouth_52_0"
+0: &"Mouth_53_0(Offset_R)[M_Face]"
 })
 
-[sub_resource type="Resource" id="Resource_g7q8q"]
+[sub_resource type="Resource" id="Resource_ahqsg"]
 script = ExtResource("1_v4lq7")
 names = Dictionary[int, StringName]({
-0: &"Mouth_54_0"
+0: &"Mouth_52_0(Offset_L)[M_Face]"
 })
 
-[sub_resource type="Resource" id="Resource_djo3n"]
+[sub_resource type="Resource" id="Resource_qhf3v"]
 script = ExtResource("1_v4lq7")
 names = Dictionary[int, StringName]({
-0: &"Mouth_55_0"
+0: &"Mouth_54_0(Scale_U)[M_Face]"
 })
 
-[sub_resource type="Resource" id="Resource_idp1r"]
+[sub_resource type="Resource" id="Resource_t0gjt"]
 script = ExtResource("1_v4lq7")
 names = Dictionary[int, StringName]({
-0: &"Mouth_13_0"
+0: &"Mouth_55_0(Scale_D)[M_Face]"
 })
 
-[sub_resource type="Resource" id="Resource_xhga2"]
+[sub_resource type="Resource" id="Resource_dy74y"]
 script = ExtResource("1_v4lq7")
 names = Dictionary[int, StringName]({
-0: &"Mouth_41_0"
+0: &"Mouth_13_0(DereA)[M_Face]"
 })
 
-[sub_resource type="Resource" id="Resource_vdyiu"]
+[sub_resource type="Resource" id="Resource_guxe2"]
 script = ExtResource("1_v4lq7")
 names = Dictionary[int, StringName]({
-0: &"EyeBrow_6_R",
-1: &"EyeBrow_12_R"
+0: &"Mouth_41_0(DrivenA)[M_Face]"
 })
 
-[sub_resource type="Resource" id="Resource_uqh3s"]
+[sub_resource type="Resource" id="Resource_btbvw"]
 script = ExtResource("1_v4lq7")
 names = Dictionary[int, StringName]({
-0: &"EyeBrow_6_L"
+0: &"EyeBrow_6_R(KanasiA)[M_Face]"
 })
 
-[sub_resource type="Resource" id="Resource_o1qm7"]
+[sub_resource type="Resource" id="Resource_lwf6p"]
 script = ExtResource("1_v4lq7")
 names = Dictionary[int, StringName]({
-0: &"EyeBrow_13_L",
-1: &"EyeBrow_20_L",
-2: &"EyeBrow_10_L"
+0: &"EyeBrow_6_L(KanasiA)[M_Face]"
 })
 
-[sub_resource type="Resource" id="Resource_0dwia"]
+[sub_resource type="Resource" id="Resource_dircv"]
 script = ExtResource("1_v4lq7")
 names = Dictionary[int, StringName]({
-0: &"EyeBrow_5_R",
-1: &"EyeBrow_15_R",
-2: &"EyeBrow_16_R",
-3: &"EyeBrow_19_R",
-4: &"EyeBrow_7_R"
+0: &"EyeBrow_13_L(KusyoA)[M_Face]"
 })
 
-[sub_resource type="Resource" id="Resource_mp6gk"]
+[sub_resource type="Resource" id="Resource_1ohwj"]
 script = ExtResource("1_v4lq7")
 names = Dictionary[int, StringName]({
-0: &"EyeBrow_5_L",
-1: &"EyeBrow_15_L",
-2: &"EyeBrow_16_L",
-3: &"EyeBrow_19_L",
-4: &"EyeBrow_7_L"
+0: &"EyeBrow_5_R(IkariA)[M_Face]"
 })
 
-[sub_resource type="Resource" id="Resource_10qqr"]
+[sub_resource type="Resource" id="Resource_wgnlu"]
 script = ExtResource("1_v4lq7")
 names = Dictionary[int, StringName]({
-0: &"EyeBrow_18_L"
+0: &"EyeBrow_5_L(IkariA)[M_Face]"
 })
 
-[sub_resource type="Resource" id="Resource_ra65q"]
+[sub_resource type="Resource" id="Resource_6x0l0"]
 script = ExtResource("1_v4lq7")
 names = Dictionary[int, StringName]({
-0: &"EyeBrow_24_L",
-1: &"EyeBrow_24_R"
+0: &"EyeBrow_18_L(SeriousB)[M_Face]"
 })
 
-[sub_resource type="Resource" id="Resource_1tg8t"]
+[sub_resource type="Resource" id="Resource_jho85"]
 script = ExtResource("1_v4lq7")
 names = Dictionary[int, StringName]({
-0: &"EyeBrow_23_L",
-1: &"EyeBrow_23_R"
+0: &"EyeBrow_24_L(Offset_R)[M_Face]",
+1: &"EyeBrow_24_R(Offset_R)[M_Face]"
 })
 
-[sub_resource type="Resource" id="Resource_pbher"]
+[sub_resource type="Resource" id="Resource_pvd6u"]
 script = ExtResource("1_v4lq7")
 names = Dictionary[int, StringName]({
-0: &"EyeBrow_17_R"
+0: &"EyeBrow_23_L(Offset_L)[M_Face]",
+1: &"EyeBrow_23_R(Offset_L)[M_Face]"
 })
 
-[sub_resource type="Resource" id="Resource_vv2qg"]
+[sub_resource type="Resource" id="Resource_1h85f"]
 script = ExtResource("1_v4lq7")
 names = Dictionary[int, StringName]({
-0: &"EyeBrow_17_L"
+0: &"EyeBrow_17_R(SeriousA)[M_Face]"
 })
 
-[sub_resource type="Resource" id="Resource_63oft"]
+[sub_resource type="Resource" id="Resource_f76io"]
 script = ExtResource("1_v4lq7")
 names = Dictionary[int, StringName]({
-0: &"Eye_14_L"
+0: &"EyeBrow_17_L(SeriousA)[M_Face]"
 })
 
-[sub_resource type="Resource" id="Resource_1lcc8"]
+[sub_resource type="Resource" id="Resource_ebuam"]
 script = ExtResource("1_v4lq7")
 names = Dictionary[int, StringName]({
-0: &"Eye_19_L"
+0: &"Eye_14_L(OdorokiC)[M_Face]"
 })
 
-[sub_resource type="Resource" id="Resource_1fn4s"]
+[sub_resource type="Resource" id="Resource_wkq5q"]
 script = ExtResource("1_v4lq7")
 names = Dictionary[int, StringName]({
-0: &"Eye_23_L"
+0: &"Eye_19_L(DrivenA)[M_Face]"
 })
 
-[sub_resource type="Resource" id="Resource_qyp43"]
+[sub_resource type="Resource" id="Resource_mvpd1"]
 script = ExtResource("1_v4lq7")
 names = Dictionary[int, StringName]({
-0: &"Eye_2_R"
+0: &"Eye_23_L(SeriousA)[M_Face]"
 })
 
-[sub_resource type="Resource" id="Resource_w6bci"]
+[sub_resource type="Resource" id="Resource_o5cl0"]
 script = ExtResource("1_v4lq7")
 names = Dictionary[int, StringName]({
-0: &"Eye_9_L",
-1: &"Eye_10_L",
-2: &"Eye_11_L",
-3: &"Eye_18_L"
+0: &"Eye_2_R(CloseA)[M_Face]"
+})
+
+[sub_resource type="Resource" id="Resource_4ivtc"]
+script = ExtResource("1_v4lq7")
+names = Dictionary[int, StringName]({
+0: &"Eye_9_L(IkariA)[M_Face]"
 })
 
 [resource]
 script = ExtResource("2_lmud1")
 entities = Dictionary[StringName, ExtResource("1_v4lq7")]({
-&"~~": SubResource("Resource_34x3k"),
-&"ω□": SubResource("Resource_ehxvn"),
-&"□": SubResource("Resource_13etn"),
-&"▲": SubResource("Resource_5ey2v"),
-&"あ": SubResource("Resource_jwqs3"),
-&"い": SubResource("Resource_4rhyl"),
-&"う": SubResource("Resource_yi6hi"),
-&"え": SubResource("Resource_vne53"),
-&"お": SubResource("Resource_fv57i"),
-&"じと目": SubResource("Resource_pdste"),
-&"てへぺろ": SubResource("Resource_h1yem"),
-&"てへぺろ2": SubResource("Resource_xrpeq"),
-&"なごみ": SubResource("Resource_0j21f"),
-&"にぃー": SubResource("Resource_x1wj0"),
-&"にこり右": SubResource("Resource_oqdgy"),
-&"にこり左": SubResource("Resource_hxagu"),
-&"にっこり": SubResource("Resource_f5v4q"),
-&"にやり": SubResource("Resource_qqvuq"),
-&"にやり3": SubResource("Resource_hyyt3"),
-&"にやり２": SubResource("Resource_grmbi"),
-&"びっくり": SubResource("Resource_g7tt1"),
-&"ぷく～_右": SubResource("Resource_jnc4d"),
-&"ぷく～_左": SubResource("Resource_314h2"),
-&"ぺろっ": SubResource("Resource_5q2pq"),
-&"ぺろっ2": SubResource("Resource_ryyg1"),
-&"ぺろっ3": SubResource("Resource_8hnc7"),
-&"ん": SubResource("Resource_eey2w"),
-&"ウィンク": SubResource("Resource_fbyde"),
-&"ウィンク右": SubResource("Resource_kqiyl"),
-&"ウィンク２": SubResource("Resource_wm0ou"),
-&"上右": SubResource("Resource_0fp72"),
-&"上左": SubResource("Resource_cj0su"),
-&"下右": SubResource("Resource_lew8n"),
-&"下左": SubResource("Resource_cksdv"),
-&"口上": SubResource("Resource_uigl3"),
-&"口下": SubResource("Resource_6via8"),
-&"口右": SubResource("Resource_u54d3"),
-&"口左": SubResource("Resource_82hj0"),
-&"口横広げ": SubResource("Resource_g7q8q"),
-&"口横狭い": SubResource("Resource_djo3n"),
-&"口角上げ": SubResource("Resource_idp1r"),
-&"口角下げ": SubResource("Resource_xhga2"),
-&"困る右": SubResource("Resource_vdyiu"),
-&"困る左": SubResource("Resource_uqh3s"),
-&"困る２": SubResource("Resource_o1qm7"),
-&"怒り右": SubResource("Resource_0dwia"),
-&"怒り左": SubResource("Resource_mp6gk"),
-&"怒り２": SubResource("Resource_10qqr"),
-&"眉右": SubResource("Resource_ra65q"),
-&"眉左": SubResource("Resource_1tg8t"),
-&"真面目右": SubResource("Resource_pbher"),
-&"真面目左": SubResource("Resource_vv2qg"),
-&"瞳小": SubResource("Resource_63oft"),
-&"笑い目": SubResource("Resource_1lcc8"),
-&"笑い目２": SubResource("Resource_1fn4s"),
-&"ｳｨﾝｸ２右": SubResource("Resource_qyp43"),
-&"ｷﾘｯ": SubResource("Resource_w6bci")
+&"~~": SubResource("Resource_qalxi"),
+&"ω□": SubResource("Resource_plofa"),
+&"□": SubResource("Resource_rokn4"),
+&"▲": SubResource("Resource_0b1o8"),
+&"あ": SubResource("Resource_xhjp5"),
+&"い": SubResource("Resource_nst2l"),
+&"う": SubResource("Resource_6wmub"),
+&"え": SubResource("Resource_fxmu0"),
+&"お": SubResource("Resource_75u8i"),
+&"じと目": SubResource("Resource_knj6f"),
+&"てへぺろ": SubResource("Resource_w1oph"),
+&"てへぺろ2": SubResource("Resource_u5i66"),
+&"なごみ": SubResource("Resource_1k302"),
+&"にぃー": SubResource("Resource_4l0tj"),
+&"にこり右": SubResource("Resource_ugpso"),
+&"にこり左": SubResource("Resource_2c83v"),
+&"にっこり": SubResource("Resource_7iq3m"),
+&"にやり": SubResource("Resource_6xkw8"),
+&"にやり3": SubResource("Resource_p3gh7"),
+&"にやり２": SubResource("Resource_ys51h"),
+&"びっくり": SubResource("Resource_b74rf"),
+&"ぷく～_右": SubResource("Resource_dtn2n"),
+&"ぷく～_左": SubResource("Resource_xslvo"),
+&"ぺろっ": SubResource("Resource_cl3gl"),
+&"ぺろっ2": SubResource("Resource_opqkb"),
+&"ぺろっ3": SubResource("Resource_q8kwp"),
+&"ん": SubResource("Resource_ch2k6"),
+&"ウィンク": SubResource("Resource_hpmb3"),
+&"ウィンク右": SubResource("Resource_jj23t"),
+&"ウィンク２": SubResource("Resource_pt6hw"),
+&"上右": SubResource("Resource_73ljm"),
+&"上左": SubResource("Resource_nsmce"),
+&"下右": SubResource("Resource_yrjwd"),
+&"下左": SubResource("Resource_27e34"),
+&"口上": SubResource("Resource_n0vbk"),
+&"口下": SubResource("Resource_mhwjm"),
+&"口右": SubResource("Resource_qhpcl"),
+&"口左": SubResource("Resource_ahqsg"),
+&"口横広げ": SubResource("Resource_qhf3v"),
+&"口横狭い": SubResource("Resource_t0gjt"),
+&"口角上げ": SubResource("Resource_dy74y"),
+&"口角下げ": SubResource("Resource_guxe2"),
+&"困る右": SubResource("Resource_btbvw"),
+&"困る左": SubResource("Resource_lwf6p"),
+&"困る２": SubResource("Resource_dircv"),
+&"怒り右": SubResource("Resource_1ohwj"),
+&"怒り左": SubResource("Resource_wgnlu"),
+&"怒り２": SubResource("Resource_6x0l0"),
+&"眉右": SubResource("Resource_jho85"),
+&"眉左": SubResource("Resource_pvd6u"),
+&"真面目右": SubResource("Resource_1h85f"),
+&"真面目左": SubResource("Resource_f76io"),
+&"瞳小": SubResource("Resource_ebuam"),
+&"笑い目": SubResource("Resource_wkq5q"),
+&"笑い目２": SubResource("Resource_mvpd1"),
+&"ｳｨﾝｸ２右": SubResource("Resource_o5cl0"),
+&"ｷﾘｯ": SubResource("Resource_4ivtc")
 })

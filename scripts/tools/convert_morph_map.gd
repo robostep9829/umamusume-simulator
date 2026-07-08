@@ -43,7 +43,7 @@ func convert_():
 
 	file.close()
 
-	var out_path = "res://scripts/data/morph_control/morph_control.tres"
+	var out_path = "res://scripts/data/morph_control/morph_control_table.tres"
 	var result = ResourceSaver.save(morph_control, out_path)
 	if result == OK:
 		print("Saved ", morph_control.entities.size(), " entries to ", out_path)

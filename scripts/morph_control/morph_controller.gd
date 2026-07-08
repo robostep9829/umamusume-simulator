@@ -88,10 +88,8 @@ func wake() -> void:
 func _blend_apply(property: StringName, value: float) -> void:
 	if not morph_control.entities.has(property):
 		return
-	var raw_names = morph_control.entities[property].names.values()
-	for i in raw_names.slice(0, 1):
-		var fuzzy_names: Array[StringName] = blend_shape_cache.keys().filter(func(x): return i in x)
-		var fuzzy_name = fuzzy_names[0] if len(fuzzy_names) > 0 else &""
-		var remap_idx = blend_shape_cache.get(fuzzy_name, 0)
+	var raw_names: Array = morph_control.entities[property].names.values()
+	for i in raw_names:
+		var remap_idx = blend_shape_cache.get(i, 0)
 		face_mesh.set_blend_shape_value(remap_idx, value)
 	
