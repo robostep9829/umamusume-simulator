@@ -79,6 +79,26 @@ states/walk_spd/node = SubResource("AnimationNodeBlendTree_6x820")
 states/walk_spd/position = Vector2(608, 63)
 transitions = ["Start", "idle", SubResource("AnimationNodeStateMachineTransition_jmel8"), "idle", "walk_spd", SubResource("AnimationNodeStateMachineTransition_opy5f"), "walk_spd", "idle", SubResource("AnimationNodeStateMachineTransition_6yq1o"), "walk_spd", "sprint_spd", SubResource("AnimationNodeStateMachineTransition_24tiy"), "sprint_spd", "walk_spd", SubResource("AnimationNodeStateMachineTransition_knypi")]
 
+[sub_resource type="Animation" id="Animation_b1wfh"]
+length = 0.001
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath("MorphController:にやり")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 0,
+"values": [1.0]
+}
+
+[sub_resource type="AnimationLibrary" id="AnimationLibrary_6x820"]
+_data = {
+&"RESET": SubResource("Animation_b1wfh")
+}
+
 [node name="CharacterBody3D" type="CharacterBody3D" unique_id=2027806480]
 script = ExtResource("1_hfxtm")
 
@@ -93,14 +113,14 @@ bones/28/rotation = Quaternion(-0.07638568, -0.0382874, 0.99613523, -0.020344272
 bones/29/rotation = Quaternion(3.8878696e-09, 0.99925625, -0.038562387, -2.2491925e-08)
 bones/32/rotation = Quaternion(-0.04226989, -0.06391248, 0.9965437, 0.032081764)
 bones/33/rotation = Quaternion(-2.5626796e-09, 0.999902, -0.014003182, -3.2254877e-09)
-bones/37/rotation = Quaternion(0.01812892, -0.038538657, 0.011816978, 0.99902284)
-bones/38/rotation = Quaternion(0.052719276, 0.0021540246, -0.0031640278, 0.99860203)
-bones/39/rotation = Quaternion(-0.014690555, 0.009659416, -0.073288135, 0.9971559)
-bones/40/rotation = Quaternion(-0.029091705, -0.07363471, -0.028796244, 0.99644494)
-bones/151/rotation = Quaternion(0.5117243, 0.50615805, 0.49429935, -0.48745304)
-bones/152/rotation = Quaternion(-0.032027934, 0.76724374, -0.6301241, 0.11512984)
+bones/37/rotation = Quaternion(0.017383432, -0.03855361, 0.01187054, 0.9990349)
+bones/38/rotation = Quaternion(0.051977605, 0.002147328, -0.0030804249, 0.99864125)
+bones/39/rotation = Quaternion(-0.014586204, 0.009652232, -0.073300704, 0.9971565)
+bones/40/rotation = Quaternion(-0.025215346, -0.07329553, -0.029190172, 0.99656403)
+bones/151/rotation = Quaternion(0.5118837, 0.50426954, 0.49218017, -0.4913717)
+bones/152/rotation = Quaternion(-0.03164024, 0.76519203, -0.6325632, 0.11551647)
 bones/153/rotation = Quaternion(0.05927004, -0.70144904, 0.07269655, 0.7065208)
-bones/157/rotation = Quaternion(-0.13570738, 0.7328652, 0.09348432, 0.6601157)
+bones/157/rotation = Quaternion(-0.13567907, 0.73286766, 0.09345938, 0.66012233)
 bones/158/rotation = Quaternion(0.09648852, 0.028106209, -0.07992273, 0.9917219)
 bones/159/rotation = Quaternion(0.22888324, 0.0101114055, 0.022786824, 0.97313464)
 bones/160/rotation = Quaternion(0.06155485, 0.0023107529, 0.006156862, 0.99808204)
@@ -115,10 +135,10 @@ bones/168/rotation = Quaternion(0.3540552, -0.10336742, 0.040123764, 0.9286282)
 bones/169/rotation = Quaternion(0.045560773, -0.01295848, 0.005139708, 0.9988643)
 bones/170/rotation = Quaternion(-0.1390185, 0.7343632, 0.024049062, 0.6639323)
 bones/171/rotation = Quaternion(0.0023350716, 0.0011541694, 0.00010269882, 0.9999966)
-bones/174/rotation = Quaternion(0.48015457, -0.5417687, -0.48034468, -0.49518406)
-bones/175/rotation = Quaternion(0.14626001, 0.7222459, -0.660166, -0.14542945)
+bones/174/rotation = Quaternion(0.48050416, -0.540356, -0.4776786, -0.49895343)
+bones/175/rotation = Quaternion(0.14586546, 0.72060966, -0.66203046, -0.14546745)
 bones/176/rotation = Quaternion(0.09143032, 0.6998968, -0.08532488, 0.70321023)
-bones/178/rotation = Quaternion(-0.1572638, -0.76116425, -0.03993329, 0.6279352)
+bones/178/rotation = Quaternion(-0.15796676, -0.7625063, -0.039049685, 0.6261836)
 bones/179/rotation = Quaternion(0.04744783, -0.040257186, 0.089868814, 0.99400795)
 bones/180/rotation = Quaternion(0.19515584, -0.04260878, 0.007841288, 0.9798149)
 bones/181/rotation = Quaternion(0.030147731, -0.0065822005, 0.0012114048, 0.99952304)
@@ -135,7 +155,7 @@ bones/191/rotation = Quaternion(-0.17194355, -0.7266339, -0.011914052, 0.6650539
 bones/192/rotation = Quaternion(0.0022044329, -0.0013450085, 0.00035551185, 0.9999966)
 
 [node name="FaceBind" type="ModifierBoneTarget3D" parent="Skeleton3D" unique_id=294106539]
-transform = Transform3D(0.98071873, 0.1803808, -0.07518877, -0.18029213, 0.9835806, 0.00802242, 0.0754013, 0.0056882277, 0.99713707, 0.0024854247, 1.3198229, 0.008669594)
+transform = Transform3D(0.98061097, 0.1807146, -0.075792775, -0.1810081, 0.9834769, 0.0030360147, 0.075089075, 0.010741942, 0.99711883, 0.0023992374, 1.3198355, 0.008085102)
 bone_name = "Head"
 bone = 40
 
@@ -164,6 +184,7 @@ parameters/sprint_spd/sprint_speed/scale = 1.0
 parameters/walk_spd/walk_speed/scale = 1.0
 
 [node name="AnimationPlayer" type="AnimationPlayer" parent="." unique_id=614668737]
+libraries/ = SubResource("AnimationLibrary_6x820")
 libraries/Anim = ExtResource("3_6yq1o")
 libraries/celebration_face = ExtResource("4_b1wfh")
 
@@ -171,61 +192,61 @@ libraries/celebration_face = ExtResource("4_b1wfh")
 
 [node name="MorphController" type="Node" parent="." unique_id=1603089654]
 script = ExtResource("6_6x820")
-"にこり右" = null
-"にこり左" = null
-"真面目右" = null
-"真面目左" = null
-"困る右" = null
-"困る左" = null
-"困る２" = null
-"怒り右" = null
-"怒り左" = null
-"怒り２" = null
-"下右" = null
-"下左" = null
-"上右" = null
-"上左" = null
-"眉左" = null
-"眉右" = null
-"ｳｨﾝｸ２右" = null
-"ウィンク２" = null
-"ウィンク右" = null
-"ウィンク" = null
-"ｷﾘｯ" = null
-"なごみ" = null
-"びっくり" = null
-"じと目" = null
-"瞳小" = null
-"笑い目" = null
-"笑い目２" = null
-"ぷく～_左" = null
-"ぷく～_右" = null
-"ん" = null
-~~ = null
-"にっこり" = null
-"口角上げ" = null
-"□" = null
-"▲" = null
-"ω□" = null
-"にやり２" = null
-"にやり3" = null
-"にやり" = null
-"にぃー" = null
-"あ" = null
-"い" = null
-"う" = null
-"お" = null
-"え" = null
-"口角下げ" = null
-"ぺろっ" = null
-"てへぺろ" = null
-"ぺろっ2" = null
-"てへぺろ2" = null
-"ぺろっ3" = null
-"口上" = null
-"口下" = null
-"口左" = null
-"口右" = null
-"口横広げ" = null
-"口横狭い" = null
+"にこり右" = 0.0
+"にこり左" = 0.0
+"真面目右" = 0.0
+"真面目左" = 0.0
+"困る右" = 0.0
+"困る左" = 0.0
+"困る２" = 0.0
+"怒り右" = 0.0
+"怒り左" = 0.0
+"怒り２" = 0.0
+"下右" = 0.0
+"下左" = 0.0
+"上右" = 0.0
+"上左" = 0.0
+"眉左" = 0.0
+"眉右" = 0.0
+"ｳｨﾝｸ２右" = 0.0
+"ウィンク２" = 0.0
+"ウィンク右" = 0.0
+"ウィンク" = 0.0
+"ｷﾘｯ" = 0.0
+"なごみ" = 0.0
+"びっくり" = 0.0
+"じと目" = 0.0
+"瞳小" = 0.0
+"笑い目" = 0.0
+"笑い目２" = 0.0
+"ぷく～_左" = 0.0
+"ぷく～_右" = 0.0
+"ん" = 0.0
+~~ = 0.0
+"にっこり" = 0.0
+"口角上げ" = 0.0
+"□" = 0.0
+"▲" = 0.0
+"ω□" = 0.0
+"にやり２" = 0.0
+"にやり3" = 0.0
+"にやり" = 1.0
+"にぃー" = 0.0
+"あ" = 0.0
+"い" = 0.0
+"う" = 0.0
+"お" = 0.0
+"え" = 0.0
+"口角下げ" = 0.0
+"ぺろっ" = 0.0
+"てへぺろ" = 0.0
+"ぺろっ2" = 0.0
+"てへぺろ2" = 0.0
+"ぺろっ3" = 0.0
+"口上" = 0.0
+"口下" = 0.0
+"口左" = 0.0
+"口右" = 0.0
+"口横広げ" = 0.0
+"口横狭い" = 0.0
 metadata/_custom_type_script = "uid://clk0uh7sonsh2"

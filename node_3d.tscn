@@ -79,4 +79,5 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.27160394, 0)
 shape = SubResource("BoxShape3D_56iun")
 
 [node name="CharacterBody3D" parent="." unique_id=2027806480 instance=ExtResource("3_a0tk4")]
+normal_spring_position = Vector3(-0.3, 0, 0)
 player_data = ExtResource("4_r3fl7")

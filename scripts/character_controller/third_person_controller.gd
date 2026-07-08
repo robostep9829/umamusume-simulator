@@ -71,7 +71,7 @@ func _update_character_mesh() -> void:
 	if animation_tree:
 		animation_tree.set_active(false)
 		animation_tree.set_active(true)
-	#$MorphController.wake()
+	$MorphController.wake()
 
 
 func _unhandled_input(event: InputEvent) -> void:
