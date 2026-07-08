@@ -2,6 +2,132 @@
 
 [ext_resource type="Script" uid="uid://cn87jsps7noo4" path="res://scripts/data/player_data.gd" id="1_5gyrv"]
 [ext_resource type="PackedScene" uid="uid://bg01lnqig6mhg" path="res://models/SakuraBakushinRedHood/bakushin_skele.tscn" id="1_ga0ng"]
+[ext_resource type="Script" uid="uid://bwsgev6cvsdb3" path="res://scripts/data/spring_bone/spring_bone_chain_settings.gd" id="3_o3l4i"]
+[ext_resource type="Script" uid="uid://dr8kcyf8h8368" path="res://scripts/data/spring_bone/spring_bone_settings.gd" id="4_rk58g"]
+
+[sub_resource type="Resource" id="Resource_o3l4i"]
+script = ExtResource("3_o3l4i")
+root_bone_name = &"Ear_01_R"
+end_bone_name = &"Ear_03_R"
+stiffness = 5.0
+metadata/_custom_type_script = "uid://bwsgev6cvsdb3"
+
+[sub_resource type="Resource" id="Resource_rk58g"]
+script = ExtResource("3_o3l4i")
+root_bone_name = &"Ear_01_L"
+end_bone_name = &"Ear_03_L"
+stiffness = 5.0
+metadata/_custom_type_script = "uid://bwsgev6cvsdb3"
+
+[sub_resource type="Resource" id="Resource_b1wfh"]
+script = ExtResource("3_o3l4i")
+root_bone_name = &"Sp_Hi_Tail0_B_00"
+end_bone_name = &"Sp_Hi_Tail0_B_04"
+metadata/_custom_type_script = "uid://bwsgev6cvsdb3"
+
+[sub_resource type="Resource" id="Resource_kuvk5"]
+script = ExtResource("3_o3l4i")
+root_bone_name = &"Sp_He_Hair4_R_00"
+end_bone_name = &"Sp_He_Hair4_R_05"
+gravity = 0.2
+metadata/_custom_type_script = "uid://bwsgev6cvsdb3"
+
+[sub_resource type="Resource" id="Resource_0267k"]
+script = ExtResource("3_o3l4i")
+root_bone_name = &"Sp_He_Hair4_L_00"
+end_bone_name = &"Sp_He_Hair4_L_05"
+gravity = 0.2
+metadata/_custom_type_script = "uid://bwsgev6cvsdb3"
+
+[sub_resource type="Resource" id="Resource_d2akj"]
+script = ExtResource("3_o3l4i")
+root_bone_name = &"Sp_Hi_MSkirt0_F_00"
+end_bone_name = &"Sp_Hi_MSkirt0_F_01"
+end_bone_length = 0.1
+extend_end_bone = true
+radius = 0.03
+rotation_axis = 0
+center_from = 2
+center_bone_name = &"Position"
+metadata/_custom_type_script = "uid://bwsgev6cvsdb3"
+
+[sub_resource type="Resource" id="Resource_6x820"]
+script = ExtResource("3_o3l4i")
+root_bone_name = &"Sp_Hi_MSkirt0_FL_00"
+end_bone_name = &"Sp_Hi_MSkirt0_FL_01"
+end_bone_length = 0.1
+extend_end_bone = true
+rotation_axis = 0
+center_from = 2
+center_bone_name = &"Position"
+metadata/_custom_type_script = "uid://bwsgev6cvsdb3"
+
+[sub_resource type="Resource" id="Resource_4diic"]
+script = ExtResource("3_o3l4i")
+root_bone_name = &"Sp_Hi_MSkirt0_FLL_00"
+end_bone_name = &"Sp_Hi_MSkirt0_FLL_01"
+end_bone_length = 0.1
+extend_end_bone = true
+rotation_axis = 0
+center_from = 2
+center_bone_name = &"Position"
+metadata/_custom_type_script = "uid://bwsgev6cvsdb3"
+
+[sub_resource type="Resource" id="Resource_24tiy"]
+script = ExtResource("3_o3l4i")
+root_bone_name = &"Sp_Hi_MSkirt0_L_00"
+end_bone_name = &"Sp_Hi_MSkirt0_L_01"
+metadata/_custom_type_script = "uid://bwsgev6cvsdb3"
+
+[sub_resource type="Resource" id="Resource_knypi"]
+script = ExtResource("3_o3l4i")
+root_bone_name = &"Sp_Hi_MSkirt0_BL_00"
+end_bone_name = &"Sp_Hi_MSkirt0_BL_01"
+metadata/_custom_type_script = "uid://bwsgev6cvsdb3"
+
+[sub_resource type="Resource" id="Resource_lmbca"]
+script = ExtResource("3_o3l4i")
+root_bone_name = &"Sp_Hi_MSkirt0_B_00"
+end_bone_name = &"Sp_Hi_MSkirt0_B_01"
+metadata/_custom_type_script = "uid://bwsgev6cvsdb3"
+
+[sub_resource type="Resource" id="Resource_r1env"]
+script = ExtResource("3_o3l4i")
+root_bone_name = &"Sp_Hi_MSkirt0_BR_00"
+end_bone_name = &"Sp_Hi_MSkirt0_BR_01"
+metadata/_custom_type_script = "uid://bwsgev6cvsdb3"
+
+[sub_resource type="Resource" id="Resource_01eba"]
+script = ExtResource("3_o3l4i")
+root_bone_name = &"Sp_Hi_MSkirt0_R_00"
+end_bone_name = &"Sp_Hi_MSkirt0_R_01"
+metadata/_custom_type_script = "uid://bwsgev6cvsdb3"
+
+[sub_resource type="Resource" id="Resource_xi8kb"]
+script = ExtResource("3_o3l4i")
+root_bone_name = &"Sp_Hi_MSkirt0_FRR_00"
+end_bone_name = &"Sp_Hi_MSkirt0_FRR_01"
+end_bone_length = 0.1
+extend_end_bone = true
+rotation_axis = 0
+center_from = 2
+center_bone_name = &"Position"
+metadata/_custom_type_script = "uid://bwsgev6cvsdb3"
+
+[sub_resource type="Resource" id="Resource_i47us"]
+script = ExtResource("3_o3l4i")
+root_bone_name = &"Sp_Hi_MSkirt0_FR_00"
+end_bone_name = &"Sp_Hi_MSkirt0_FR_01"
+end_bone_length = 0.1
+rotation_axis = 0
+center_from = 2
+center_bone_name = &"Position"
+metadata/_custom_type_script = "uid://bwsgev6cvsdb3"
+
+[sub_resource type="Resource" id="Resource_8s5t5"]
+script = ExtResource("4_rk58g")
+chains = Array[ExtResource("3_o3l4i")]([SubResource("Resource_o3l4i"), SubResource("Resource_rk58g"), SubResource("Resource_b1wfh"), SubResource("Resource_kuvk5"), SubResource("Resource_0267k"), SubResource("Resource_d2akj"), SubResource("Resource_6x820"), SubResource("Resource_4diic"), SubResource("Resource_24tiy"), SubResource("Resource_knypi"), SubResource("Resource_lmbca"), SubResource("Resource_r1env"), SubResource("Resource_01eba"), SubResource("Resource_xi8kb"), SubResource("Resource_i47us")])
+metadata/_custom_type_script = "uid://dr8kcyf8h8368"
 
 [resource]
 script = ExtResource("1_5gyrv")
@@ -9,4 +135,5 @@ character = ExtResource("1_ga0ng")
 name = "Sakura Bakushin (Red Hot Leader)"
 series = "OG"
 face_mesh = &"007_mtl_chr1041_50_face_001"
+spring_bone_settings = SubResource("Resource_8s5t5")
 metadata/_custom_type_script = "uid://cn87jsps7noo4"

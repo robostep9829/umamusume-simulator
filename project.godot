@@ -15,6 +15,10 @@ run/main_scene="uid://c7v3y38mem6h8"
 config/features=PackedStringArray("4.7", "C#", "Mobile")
 config/icon="res://icon.svg"
 
+[autoload]
+
+adreno_scaler="*res://scripts/autoload/graphics.gd"
+
 [display]
 
 window/stretch/mode="canvas_items"
@@ -76,3 +80,5 @@ common/physics_interpolation=true
 rendering_device/driver.windows="d3d12"
 renderer/rendering_method="mobile"
 textures/vram_compression/import_etc2_astc=true
+anti_aliasing/quality/msaa_3d=2
+anti_aliasing/screen_space_roughness_limiter/enabled=false

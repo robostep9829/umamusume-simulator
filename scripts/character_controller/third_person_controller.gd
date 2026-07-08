@@ -29,7 +29,7 @@ extends CharacterBody3D
 
 # Cached node references
 @onready var camera_pivot: Node3D = $CameraPivot
-@onready var mesh: Node3D = $Skeleton3D
+@onready var skeleton: Node3D = $Skeleton3D
 @onready var spring: Node3D = $CameraPivot/SpringArm3D
 @onready var animation_tree: AnimationTree = $AnimationTree
 
@@ -64,10 +64,13 @@ func _update_character_mesh() -> void:
 	var new_mesh: Node3D = player_data.character.instantiate()
 	old.replace_by(new_mesh)
 	old.queue_free()
-	mesh = new_mesh
-#	for child in mesh.get_children():
-#		if child is SpringBoneSimulator3D:
-#			child.setting_count = 0
+	skeleton = new_mesh
+	
+	if player_data.spring_bone_settings:
+		for child in skeleton.get_children():
+			if child is SpringBoneSimulator3D:
+				player_data.spring_bone_settings.apply_to(child)
+				break
 	if animation_tree:
 		animation_tree.set_active(false)
 		animation_tree.set_active(true)
@@ -148,6 +151,6 @@ func _handle_movement(delta: float) -> void:
 	# Rotate the mesh to face movement direction
 	if direction != Vector3.ZERO:
 		var target_yaw := atan2(direction.x, direction.z)
-		mesh.rotation.y = lerp_angle(mesh.rotation.y, target_yaw, rotation_speed * delta)
+		skeleton.rotation.y = lerp_angle(skeleton.rotation.y, target_yaw, rotation_speed * delta)
 	
 	move_and_slide()
