@@ -38,7 +38,6 @@ func apply_to(simulator: SpringBoneSimulator3D) -> void:
 		simulator.set_center_node(i, c.center_node)
 		simulator.set_individual_config(i, c.individual_config)
 		simulator.set_enable_all_child_collisions(i, true)
-		#simulator.set_collision_path(i, 0, NodePath("SpringBoneCollisionCapsule3D"))
 		if c.individual_config:
 			var joint_count: int = simulator.get_joint_count(i)
 			for j in mini(c.joint_stiffness.size(), joint_count):
