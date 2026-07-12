@@ -5,5 +5,8 @@
 [resource]
 resource_name = "mtl_chr1062_00_hair"
 albedo_texture = ExtResource("1_ujv25")
+metallic = 1.0
 roughness = 0.5
+anisotropy_enabled = true
+anisotropy = 1.0
 metadata/_gltf_primary_texture_coord = 0

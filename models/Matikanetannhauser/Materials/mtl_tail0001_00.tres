@@ -5,5 +5,4 @@
 [resource]
 resource_name = "mtl_tail0001_00"
 albedo_texture = ExtResource("1_oej34")
-roughness = 0.5
 metadata/_gltf_primary_texture_coord = 0
