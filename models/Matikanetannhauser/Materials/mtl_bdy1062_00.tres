@@ -1,8 +1,19 @@
 [gd_resource type="StandardMaterial3D" format=3 uid="uid://bo8jhohlx1ucy"]
 
-[ext_resource type="Texture2D" uid="uid://0qb3bbv72bdd" path="res://models/Matikanetannhauser/matitan-retopo-names_tex_bdy1062_00_diff.png" id="1_0jhiu"]
+[ext_resource type="Texture2D" uid="uid://bgq57gw3hs0y2" path="res://models/Matikanetannhauser/baked tex/tex_bdy1062_00_base_alpha.png" id="1_2rdf8"]
+[ext_resource type="Texture2D" uid="uid://8tlo0i55s2ji" path="res://models/Matikanetannhauser/baked tex/mtl_bdy1062_00 Metallic.png" id="2_2rdf8"]
+[ext_resource type="Texture2D" uid="uid://b7ev2djm03gw2" path="res://models/Matikanetannhauser/baked tex/mtl_bdy1062_00 Normal.png" id="3_2cmn1"]
+[ext_resource type="Texture2D" uid="uid://dvfnwduc7yjr6" path="res://models/Matikanetannhauser/baked tex/mtl_bdy1062_00 Roughness.png" id="4_4ly6v"]
 
 [resource]
 resource_name = "mtl_bdy1062_00"
-albedo_texture = ExtResource("1_0jhiu")
+transparency = 2
+alpha_scissor_threshold = 0.5
+alpha_antialiasing_mode = 0
+albedo_texture = ExtResource("1_2rdf8")
+metallic = 1.0
+metallic_texture = ExtResource("2_2rdf8")
+roughness_texture = ExtResource("4_4ly6v")
+normal_enabled = true
+normal_texture = ExtResource("3_2cmn1")
 metadata/_gltf_primary_texture_coord = 0

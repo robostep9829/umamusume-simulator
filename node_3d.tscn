@@ -22,6 +22,7 @@ fog_density = 0.02
 fog_sky_affect = 0.54
 adjustment_enabled = true
 adjustment_contrast = 0.45
+adjustment_saturation = 0.8
 adjustment_color_correction = ExtResource("1_noarx")
 
 [sub_resource type="CapsuleMesh" id="CapsuleMesh_56iun"]
