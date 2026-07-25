@@ -11,7 +11,7 @@ config_version=5
 [application]
 
 config/name="Umamusume Simulator"
-run/main_scene="uid://c7v3y38mem6h8"
+run/main_scene="uid://dko8lei0ev8o7"
 config/features=PackedStringArray("4.7", "C#", "Mobile")
 config/icon="res://icon.svg"
 

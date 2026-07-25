@@ -1,29 +1,51 @@
 [gd_resource type="ShaderMaterial" format=3 uid="uid://cyf877vmtffqu"]
 
-[ext_resource type="Shader" uid="uid://ro7mrp7ejas3" path="res://worlds/uma_island/materials/water.gdshader" id="1_bxmnr"]
+[ext_resource type="Shader" uid="uid://barnq2wf0o8px" path="res://worlds/uma_island/materials/water_realistic.gdshader" id="1_bxmnr"]
+
+[sub_resource type="FastNoiseLite" id="FastNoiseLite_d0rwb"]
+noise_type = 2
+frequency = 0.0034
+fractal_octaves = 3
+
+[sub_resource type="NoiseTexture2D" id="NoiseTexture2D_bxmnr"]
+noise = SubResource("FastNoiseLite_d0rwb")
+seamless = true
+as_normal_map = true
+seamless_blend_skirt = 0.512
+bump_strength = 23.9
+
+[sub_resource type="FastNoiseLite" id="FastNoiseLite_bc2aj"]
+frequency = 0.0012
+
+[sub_resource type="NoiseTexture2D" id="NoiseTexture2D_l3pfr"]
+noise = SubResource("FastNoiseLite_bc2aj")
+seamless = true
+as_normal_map = true
+seamless_blend_skirt = 0.421
+bump_strength = 23.6
 
 [resource]
 render_priority = 0
 shader = ExtResource("1_bxmnr")
-shader_parameter/wave_amplitude = 0.4
-shader_parameter/wave_frequency = 1.72
-shader_parameter/wave_speed = 1.5
-shader_parameter/wave_direction = Vector2(1, 0)
-shader_parameter/wave_amplitude_2 = 0.25
-shader_parameter/wave_frequency_2 = 3.5
-shader_parameter/wave_speed_2 = 2.0
-shader_parameter/wave_direction_2 = Vector2(0.5, 0.541)
-shader_parameter/steepness = 3.005
-shader_parameter/noise_scale = 0.026
-shader_parameter/wave_noise = 0.732
-shader_parameter/deep_color = Color(0.003, 0.016, 0.063, 1)
-shader_parameter/shallow_color = Color(0.012, 0.09, 0.153, 1)
-shader_parameter/depth_scale = 2.0
-shader_parameter/fresnel_power = 4.0
-shader_parameter/fresnel_intensity = 0.6
-shader_parameter/roughness_value = 0.08
-shader_parameter/specular_value = 0.7
-shader_parameter/foam_color = Color(1, 1, 1, 1)
-shader_parameter/foam_threshold = 0.6
-shader_parameter/foam_intensity = 0.5
-shader_parameter/foam_depth = 0.5
+shader_parameter/absorptioncolour = Color(0.022499997, 0.058625, 0.15, 1)
+shader_parameter/absorptionmultiplier = 0.019
+shader_parameter/AirIOR = 1.0
+shader_parameter/IOR = 1.33
+shader_parameter/sampler1speed = Vector2(0.02, 0)
+shader_parameter/sampler2speed = Vector2(0, 0.02)
+shader_parameter/samplermix = 0.5
+shader_parameter/samplerscale = Vector2(0.1, 0.1)
+shader_parameter/normal1tex = SubResource("NoiseTexture2D_bxmnr")
+shader_parameter/normal2tex = SubResource("NoiseTexture2D_l3pfr")
+shader_parameter/normalstrength = 1.66999996267216
+shader_parameter/heightstrength = 0.0
+shader_parameter/refraction_type = 0
+shader_parameter/simple_refraction_amount = 0.1
+shader_parameter/traced_refraction_far_clip = 50.0
+shader_parameter/traced_refraction_steps = 512
+shader_parameter/edge_size = 0.36999999172975995
+shader_parameter/foam_or_fade = true
+shader_parameter/ssr_type = 0
+shader_parameter/traced_ssr_far_clip = 50.0
+shader_parameter/traced_ssr_steps = 512
+shader_parameter/ssr_screen_fade = 0.05
