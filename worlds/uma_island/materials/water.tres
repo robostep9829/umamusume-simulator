@@ -1,6 +1,6 @@
 [gd_resource type="ShaderMaterial" format=3 uid="uid://cyf877vmtffqu"]
 
-[ext_resource type="Shader" uid="uid://barnq2wf0o8px" path="res://worlds/uma_island/materials/water_realistic.gdshader" id="1_bxmnr"]
+[ext_resource type="Shader" uid="uid://cjiyqpt4aj2pf" path="res://worlds/uma_island/materials/water_simple.gdshader" id="1_bxmnr"]
 
 [sub_resource type="FastNoiseLite" id="FastNoiseLite_d0rwb"]
 noise_type = 2
@@ -28,9 +28,7 @@ bump_strength = 23.6
 render_priority = 0
 shader = ExtResource("1_bxmnr")
 shader_parameter/absorptioncolour = Color(0.022499997, 0.058625, 0.15, 1)
-shader_parameter/absorptionmultiplier = 0.019
-shader_parameter/AirIOR = 1.0
-shader_parameter/IOR = 1.33
+shader_parameter/absorptionmultiplier = 1.0
 shader_parameter/sampler1speed = Vector2(0.02, 0)
 shader_parameter/sampler2speed = Vector2(0, 0.02)
 shader_parameter/samplermix = 0.5
@@ -38,14 +36,3 @@ shader_parameter/samplerscale = Vector2(0.1, 0.1)
 shader_parameter/normal1tex = SubResource("NoiseTexture2D_bxmnr")
 shader_parameter/normal2tex = SubResource("NoiseTexture2D_l3pfr")
 shader_parameter/normalstrength = 1.66999996267216
-shader_parameter/heightstrength = 0.0
-shader_parameter/refraction_type = 0
-shader_parameter/simple_refraction_amount = 0.1
-shader_parameter/traced_refraction_far_clip = 50.0
-shader_parameter/traced_refraction_steps = 512
-shader_parameter/edge_size = 0.36999999172975995
-shader_parameter/foam_or_fade = true
-shader_parameter/ssr_type = 0
-shader_parameter/traced_ssr_far_clip = 50.0
-shader_parameter/traced_ssr_steps = 512
-shader_parameter/ssr_screen_fade = 0.05
