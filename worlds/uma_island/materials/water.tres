@@ -1,0 +1,21 @@
+[gd_resource type="ShaderMaterial" format=3 uid="uid://cyf877vmtffqu"]
+
+[ext_resource type="Shader" uid="uid://ro7mrp7ejas3" path="res://worlds/uma_island/materials/water.gdshader" id="1_bxmnr"]
+
+[resource]
+render_priority = 0
+shader = ExtResource("1_bxmnr")
+shader_parameter/wave_height = 0.5
+shader_parameter/wave_frequency = 1.3090000589176198
+shader_parameter/wave_speed = 1.0
+shader_parameter/shallow_color = Color(0.1, 0.55, 0.58, 1)
+shader_parameter/deep_color = Color(0.02, 0.08, 0.3, 1)
+shader_parameter/depth_scale = 6.0
+shader_parameter/fresnel_power = 4.0
+shader_parameter/fresnel_intensity = 0.8
+shader_parameter/foam_threshold = 0.65
+shader_parameter/foam_color = Color(1, 1, 1, 1)
+shader_parameter/foam_intensity = 0.5
+shader_parameter/roughness = 0.670000031825
+shader_parameter/detail_scale = 6.0
+shader_parameter/detail_strength = 0.35
