@@ -2079,6 +2079,7 @@ skin = SubResource("Skin_cbbb0")
 skeleton = NodePath("..")
 
 [node name="007_mtl_chr1041_50_face_001" type="MeshInstance3D" parent="." unique_id=804798748]
+layers = 5
 gi_mode = 2
 mesh = ExtResource("2_ocjca")
 skin = SubResource("Skin_cbbb0")
