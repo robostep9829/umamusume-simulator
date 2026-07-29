@@ -1,8 +1,8 @@
 shader_type spatial;
 
 // --- Layer 1: Sand (base) ---
-uniform sampler2D sand_albedo : source_color, filter_linear_mipmap_anisotropic;
-uniform sampler2D sand_roughness : hint_default_white, filter_linear_mipmap_anisotropic;
+uniform sampler2D sand_albedo : source_color, filter_linear_mipmap;
+uniform sampler2D sand_roughness : hint_default_white, filter_linear_mipmap;
 uniform sampler2D sand_normal : hint_normal;
 uniform vec2 sand_uv_scale = vec2(10.0);
 
