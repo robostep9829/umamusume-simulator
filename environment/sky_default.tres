@@ -1,0 +1,17 @@
+[gd_resource type="Sky" format=3 uid="uid://coqbbfksjyjus"]
+
+[sub_resource type="FastNoiseLite" id="FastNoiseLite_7lyiw"]
+frequency = 0.0353
+fractal_octaves = 2
+
+[sub_resource type="NoiseTexture2D" id="NoiseTexture2D_vdgfc"]
+noise = SubResource("FastNoiseLite_7lyiw")
+seamless = true
+
+[sub_resource type="ProceduralSkyMaterial" id="ProceduralSkyMaterial_a0tk4"]
+sky_cover = SubResource("NoiseTexture2D_vdgfc")
+ground_horizon_color = Color(0.66224277, 0.6717428, 0.6867428, 1)
+
+[resource]
+sky_material = SubResource("ProceduralSkyMaterial_a0tk4")
+process_mode = 1
