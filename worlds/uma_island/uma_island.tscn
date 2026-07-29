@@ -20670,7 +20670,6 @@ shape = SubResource("ConcavePolygonShape3D_gn1vy")
 
 [node name="uma-island-track" type="Node3D" parent="." unique_id=638521425]
 transform = Transform3D(200, 0, 0, 0, 200, 0, 0, 0, 200, 0, 0, 0)
-visible = false
 
 [node name="TrackRing" type="MeshInstance3D" parent="uma-island-track" unique_id=302441577]
 visible = false
@@ -20679,7 +20678,7 @@ mesh = SubResource("ArrayMesh_1s6q0")
 
 [node name="Decal" type="Decal" parent="uma-island-track" unique_id=1088370471]
 transform = Transform3D(1.5793887, 0, 0, 0, 1, 0, 0, 0, 1.5793887, 0.12577459, 0, 0.03171372)
-size = Vector3(0.305, 0.66, 0.305)
+size = Vector3(0.305, 0.06, 0.305)
 texture_albedo = ExtResource("1_sxp0x")
 cull_mask = 2
 
