@@ -7,6 +7,7 @@
 [ext_resource type="Texture2D" uid="uid://d07byxrqf6f45" path="res://worlds/gridmap/tile.png" id="4_1s6q0"]
 [ext_resource type="Material" uid="uid://cyf877vmtffqu" path="res://worlds/uma_island/materials/water.tres" id="5_4ygcm"]
 [ext_resource type="Environment" uid="uid://cwd3w67jcb3xr" path="res://environment/new_environment.tres" id="6_1s6q0"]
+[ext_resource type="Texture2D" uid="uid://chp4pwhwghyy7" path="res://worlds/uma_island/tex/track/track_alb_thin.png" id="8_bxm4f"]
 [ext_resource type="Script" uid="uid://bk4gyp2sd1ylo" path="res://scripts/tools/place_reflection_probes.gd" id="script_probes"]
 
 [sub_resource type="ArrayMesh" id="ArrayMesh_yyi2b"]
@@ -14851,6 +14852,10 @@ _surfaces = [{
 blend_shape_mode = 0
 shadow_mesh = SubResource("ArrayMesh_1t0h6")
 
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_waqk3"]
+transparency = 1
+albedo_texture = ExtResource("8_bxm4f")
+
 [node name="Node3D" type="Node3D" unique_id=677487348]
 script = ExtResource("script_probes")
 terrain_parent_path = NodePath("uma-island")
@@ -14858,6 +14863,7 @@ min_surface_height = 0.0
 probe_size = Vector3(32, 10, 32)
 
 [node name="uma-island" type="Node3D" parent="." unique_id=1596346892]
+process_mode = 4
 transform = Transform3D(200, 0, 0, 0, 200, 0, 0, 0, 200, 0, 0, 0)
 
 [node name="Grid" type="MeshInstance3D" parent="uma-island" unique_id=2066041603]
@@ -17265,6 +17271,7 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 21.98837, 2.0478241, 8.293295
 player_data = ExtResource("3_38n0f")
 
 [node name="water" type="Node3D" parent="." unique_id=162068864]
+process_mode = 4
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -160, 0, -160)
 
 [node name="MeshInstance3D" type="MeshInstance3D" parent="water" unique_id=2059595232]
@@ -19067,6 +19074,7 @@ directional_shadow_max_distance = 6.0
 environment = ExtResource("6_1s6q0")
 
 [node name="island-col" type="StaticBody3D" parent="." unique_id=1730721046]
+visible = false
 
 [node name="CollisionShape3D2" type="CollisionShape3D" parent="island-col" unique_id=1732204117]
 transform = Transform3D(200, 0, 0, 0, 200, 0, 0, 0, 200, 0, 0, 0)
@@ -20675,6 +20683,7 @@ transform = Transform3D(200, 0, 0, 0, 200, 0, 0, 0, 200, 0, 0, 0)
 visible = false
 cast_shadow = 0
 mesh = SubResource("ArrayMesh_1s6q0")
+surface_material_override/0 = SubResource("StandardMaterial3D_waqk3")
 
 [node name="Decal" type="Decal" parent="uma-island-track" unique_id=1088370471]
 transform = Transform3D(1.5793887, 0, 0, 0, 1, 0, 0, 0, 1.5793887, 0.12577459, 0, 0.03171372)
@@ -20683,6 +20692,7 @@ texture_albedo = ExtResource("1_sxp0x")
 cull_mask = 2
 
 [node name="ReflectionProbes" type="Node3D" parent="." unique_id=31126656]
+process_mode = 4
 visible = false
 
 [node name="Probe_1_2" type="ReflectionProbe" parent="ReflectionProbes" unique_id=1680900672]

@@ -1,17 +1,11 @@
 [gd_resource type="Sky" format=3 uid="uid://coqbbfksjyjus"]
 
-[sub_resource type="FastNoiseLite" id="FastNoiseLite_7lyiw"]
-frequency = 0.0353
-fractal_octaves = 2
+[ext_resource type="Texture2D" uid="uid://c5u38qohs4ikd" path="res://environment/hdri/sky.hdr" id="1_7lyiw"]
 
-[sub_resource type="NoiseTexture2D" id="NoiseTexture2D_vdgfc"]
-noise = SubResource("FastNoiseLite_7lyiw")
-seamless = true
-
-[sub_resource type="ProceduralSkyMaterial" id="ProceduralSkyMaterial_a0tk4"]
-sky_cover = SubResource("NoiseTexture2D_vdgfc")
-ground_horizon_color = Color(0.66224277, 0.6717428, 0.6867428, 1)
+[sub_resource type="PanoramaSkyMaterial" id="PanoramaSkyMaterial_56iun"]
+panorama = ExtResource("1_7lyiw")
+filter = false
 
 [resource]
-sky_material = SubResource("ProceduralSkyMaterial_a0tk4")
+sky_material = SubResource("PanoramaSkyMaterial_56iun")
 process_mode = 1
