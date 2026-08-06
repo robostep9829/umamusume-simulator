@@ -1,19 +1,19 @@
 shader_type spatial;
-render_mode world_vertex_coords, cull_disabled, depth_draw_always;
+render_mode world_vertex_coords, shadows_disabled;
 
-uniform vec3 absorptioncolour : source_color;
-uniform float absorptionmultiplier = 1.0;
+uniform lowp vec3 absorptioncolour : source_color;
+uniform lowp float absorptionmultiplier = 1.0;
 
-uniform vec2 sampler1speed = vec2(0.02, 0.0);
-uniform vec2 sampler2speed = vec2(0.0, 0.02);
+uniform lowp vec2 sampler1speed = vec2(0.02, 0.0);
+uniform lowp vec2 sampler2speed = vec2(0.0, 0.02);
 uniform float samplermix : hint_range(0.0, 1.0, 0.1) = 0.5;
-uniform vec2 samplerscale = vec2(0.1);
-uniform sampler2D normal1tex : filter_linear_mipmap_anisotropic, hint_normal;
-uniform sampler2D normal2tex : filter_linear_mipmap_anisotropic, hint_normal;
-uniform float normalstrength : hint_range(0.0, 5.0, 0.01) = 1.0;
+uniform lowp vec2 samplerscale = vec2(0.1);
+uniform sampler2D normal1tex : filter_linear_mipmap, hint_normal;
+uniform sampler2D normal2tex : filter_linear_mipmap, hint_normal;
+uniform lowp float normalstrength : hint_range(0.0, 5.0, 0.01) = 1.0;
 
-varying vec2 uv_custom;
-varying vec2 uv2_custom;
+varying lowp vec2 uv_custom;
+varying lowp vec2 uv2_custom;
 
 void vertex() {
 	uv_custom = VERTEX.xz * samplerscale + (sampler1speed * TIME);
