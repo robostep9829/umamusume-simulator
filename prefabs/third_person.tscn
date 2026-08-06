@@ -785,14 +785,14 @@ bones/28/rotation = Quaternion(-0.07638568, -0.0382874, 0.99613523, -0.020344272
 bones/29/rotation = Quaternion(3.8878696e-09, 0.99925625, -0.038562387, -2.2491925e-08)
 bones/32/rotation = Quaternion(-0.04226989, -0.06391248, 0.9965437, 0.032081764)
 bones/33/rotation = Quaternion(-2.5626796e-09, 0.999902, -0.014003182, -3.2254877e-09)
-bones/37/rotation = Quaternion(0.024121141, -0.038417056, 0.011385982, 0.99890584)
-bones/38/rotation = Quaternion(0.058681376, 0.0022078364, -0.0038360648, 0.99826705)
-bones/39/rotation = Quaternion(-0.01167547, 0.009451918, -0.0736521, 0.9971709)
-bones/40/rotation = Quaternion(-0.026631452, -0.07821468, -0.025815766, 0.99624646)
-bones/151/rotation = Quaternion(0.51074725, 0.5148391, 0.5041736, -0.46892112)
-bones/152/rotation = Quaternion(-0.03381441, 0.77666444, -0.61871696, 0.11330673)
+bones/37/rotation = Quaternion(0.019247375, -0.038515225, 0.011736287, 0.99900377)
+bones/38/rotation = Quaternion(0.053833477, 0.0021641077, -0.0032895694, 0.99854213)
+bones/39/rotation = Quaternion(-0.01414584, 0.009621938, -0.073353924, 0.9971593)
+bones/40/rotation = Quaternion(-0.02988949, -0.074296966, -0.028313966, 0.99638593)
+bones/151/rotation = Quaternion(0.5115709, 0.5077439, 0.49609464, -0.4841296)
+bones/152/rotation = Quaternion(-0.032352637, 0.76896304, -0.6280682, 0.114802204)
 bones/153/rotation = Quaternion(0.05927004, -0.70144904, 0.07269655, 0.7065208)
-bones/157/rotation = Quaternion(-0.1396509, 0.732482, 0.09697599, 0.6592143)
+bones/157/rotation = Quaternion(-0.1364098, 0.7327986, 0.09410619, 0.6599566)
 bones/158/rotation = Quaternion(0.09648852, 0.028106209, -0.07992273, 0.9917219)
 bones/159/rotation = Quaternion(0.22888324, 0.0101114055, 0.022786824, 0.97313464)
 bones/160/rotation = Quaternion(0.06155485, 0.0023107529, 0.006156862, 0.99808204)
@@ -807,10 +807,10 @@ bones/168/rotation = Quaternion(0.3540552, -0.10336742, 0.040123764, 0.9286282)
 bones/169/rotation = Quaternion(0.045560773, -0.01295848, 0.005139708, 0.9988643)
 bones/170/rotation = Quaternion(-0.1390185, 0.7343632, 0.024049062, 0.6639323)
 bones/171/rotation = Quaternion(0.0023350716, 0.0011541694, 0.00010269882, 0.9999966)
-bones/174/rotation = Quaternion(0.47829247, -0.54821634, -0.4927711, -0.47735924)
-bones/175/rotation = Quaternion(0.14855096, 0.73191464, -0.6489764, -0.1451324)
+bones/174/rotation = Quaternion(0.479841, -0.54295325, -0.48260033, -0.4919871)
+bones/175/rotation = Quaternion(0.14668031, 0.72401327, -0.65814465, -0.14538005)
 bones/176/rotation = Quaternion(0.09143032, 0.6998968, -0.08532488, 0.70321023)
-bones/178/rotation = Quaternion(-0.15303525, -0.75304425, -0.045144755, 0.63833106)
+bones/178/rotation = Quaternion(-0.15649791, -0.7597002, -0.04088416, 0.6298353)
 bones/179/rotation = Quaternion(0.04744783, -0.040257186, 0.089868814, 0.99400795)
 bones/180/rotation = Quaternion(0.19515584, -0.04260878, 0.007841288, 0.9798149)
 bones/181/rotation = Quaternion(0.030147731, -0.0065822005, 0.0012114048, 0.99952304)
@@ -825,30 +825,6 @@ bones/189/rotation = Quaternion(0.33954066, 0.039240763, 0.011499882, 0.93970215
 bones/190/rotation = Quaternion(0.016478373, 0.0019043831, 0.00055816764, 0.99986225)
 bones/191/rotation = Quaternion(-0.17194355, -0.7266339, -0.011914052, 0.6650539)
 bones/192/rotation = Quaternion(0.0022044329, -0.0013450085, 0.00035551185, 0.9999966)
-
-[node name="FaceBind" type="ModifierBoneTarget3D" parent="Skeleton3D" unique_id=294106539]
-process_mode = 4
-transform = Transform3D(0.9801301, 0.17926437, -0.08490735, -0.18195842, 0.98298675, -0.025067925, 0.07896899, 0.040019453, 0.9960734, 0.003248861, 1.3195901, 0.013776876)
-bone_name = "Head"
-bone = 40
-
-[node name="AreaLight3D" type="AreaLight3D" parent="Skeleton3D/FaceBind" unique_id=602266349]
-transform = Transform3D(-0.9804235, 0.18111752, 0.07723996, -0.1797894, -0.98341566, 0.023873504, 0.08028281, 0.009519173, 0.99672705, 0.07977013, 0.042482615, 0.33028468)
-visible = false
-light_color = Color(1, 0.9328333, 0.87, 1)
-light_energy = 0.4
-light_size = 0.603
-light_cull_mask = 4293918724
-area_range = 0.411
-area_size = Vector2(0.52, 0.52)
-
-[node name="SpotLight3D" type="SpotLight3D" parent="Skeleton3D/FaceBind" unique_id=351268302]
-transform = Transform3D(0.9999995, -0.00075366, 0.00039754063, 0.00075039547, 0.9999672, 0.008062385, -0.00040358305, -0.008062076, 0.9999674, 0.027381495, 0.012211442, 0.3505319)
-visible = false
-light_color = Color(1, 0.93333334, 0.87058824, 1)
-light_energy = 0.1
-light_cull_mask = 4293918724
-spot_range = 0.47
 
 [node name="SpringBoneSimulator3D" type="SpringBoneSimulator3D" parent="Skeleton3D" unique_id=1007465840]
 setting_count = 3
