@@ -2163,11 +2163,13 @@ bones/214/rotation = Quaternion(0, 0, 0, 1)
 bones/214/scale = Vector3(1, 1, 1)
 
 [node name="000_mtl_bdy1062_00" type="MeshInstance3D" parent="." unique_id=1443047591]
+gi_mode = 2
 mesh = ExtResource("1_fcesk")
 skin = SubResource("Skin_v027o")
 skeleton = NodePath("..")
 
 [node name="003_mtl_chr1062_00_face_001" type="MeshInstance3D" parent="." unique_id=533138627]
+gi_mode = 2
 mesh = ExtResource("2_vvpkw")
 skin = SubResource("Skin_v027o")
 skeleton = NodePath("..")
@@ -2320,6 +2322,7 @@ skeleton = NodePath("..")
 "blend_shapes/Mouth_56_0(LowAngle)[M_Face]" = 0.0
 
 [node name="004_mtl_chr1062_00_eye" type="MeshInstance3D" parent="." unique_id=624463362]
+gi_mode = 2
 mesh = ExtResource("3_s4n3r")
 skin = SubResource("Skin_v027o")
 skeleton = NodePath("..")
@@ -2349,6 +2352,7 @@ skeleton = NodePath("..")
 "blend_shapes/Eye_22_L(EyeHideA)[M_Face]" = 0.0
 
 [node name="005_mtl_chr1062_00_hair" type="MeshInstance3D" parent="." unique_id=1583265373]
+gi_mode = 2
 mesh = ExtResource("4_cpa5x")
 skin = SubResource("Skin_v027o")
 skeleton = NodePath("..")
@@ -2386,6 +2390,7 @@ skeleton = NodePath("..")
 "blend_shapes/Ear_16_L(Roll)[M_Hair]" = 0.0
 
 [node name="006_mtl_tail0001_00" type="MeshInstance3D" parent="." unique_id=1222274565]
+gi_mode = 2
 mesh = ExtResource("5_bluev")
 skin = SubResource("Skin_v027o")
 skeleton = NodePath("..")

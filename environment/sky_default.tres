@@ -9,3 +9,4 @@ filter = false
 [resource]
 sky_material = SubResource("PanoramaSkyMaterial_56iun")
 process_mode = 1
+radiance_size = 1

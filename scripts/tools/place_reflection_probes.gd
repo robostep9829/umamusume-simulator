@@ -13,6 +13,7 @@ extends Node3D
 @export var min_surface_height: float = -1000.0
 
 @export_group("Probe Settings")
+@export_enum("ReflectionProbe", "LightmapProbe") var probe_type: int = 0
 @export var probe_size: Vector3 = Vector3(20, 10, 20)
 
 @export_group("Actions")
@@ -35,7 +36,7 @@ func place_probes() -> void:
 	clear_probes()
 
 	var probes_container := Node3D.new()
-	probes_container.name = "ReflectionProbes"
+	probes_container.name = "Probes"
 	add_child(probes_container, true)
 	probes_container.set_owner(get_tree().edited_scene_root)
 
@@ -52,19 +53,25 @@ func place_probes() -> void:
 			if surface_y == null or surface_y < min_surface_height:
 				continue
 
-			var probe := ReflectionProbe.new()
+			var probe: Node3D
+			if probe_type == 0:
+				var rp := ReflectionProbe.new()
+				rp.size = probe_size
+				probe = rp
+			else:
+				probe = LightmapProbe.new()
+
 			probe.name = "Probe_%d_%d" % [ix, iz]
 			probe.position = Vector3(x, surface_y + probe_height_offset, z)
-			probe.size = probe_size
 			probes_container.add_child(probe, true)
 			probe.set_owner(get_tree().edited_scene_root)
 			count += 1
 
-	print("Placed %d reflection probes." % count)
+	print("Placed %d %s probes." % [count, "reflection" if probe_type == 0 else "lightmap"])
 
 
 func clear_probes() -> void:
-	var existing := get_node_or_null("ReflectionProbes")
+	var existing := get_node_or_null("Probes")
 	if existing:
 		existing.queue_free()
 
