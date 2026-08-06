@@ -2,9 +2,9 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://dku3flso2pw15"
-path.bptc="res://.godot/imported/terrain_red_01_diff_1k.jpg-8aa471b0151c5a9535c02465023d2909.bptc.ctex"
-path.astc="res://.godot/imported/terrain_red_01_diff_1k.jpg-8aa471b0151c5a9535c02465023d2909.astc.ctex"
+uid="uid://7njy45lngunk"
+path.bptc="res://.godot/imported/terrain_red_01_diffpack_1k.png-d8de532801b72fd8853b366d5ae2479d.bptc.ctex"
+path.astc="res://.godot/imported/terrain_red_01_diffpack_1k.png-d8de532801b72fd8853b366d5ae2479d.astc.ctex"
 metadata={
 "imported_formats": ["s3tc_bptc", "etc2_astc"],
 "vram_texture": true
@@ -12,8 +12,8 @@ metadata={
 
 [deps]
 
-source_file="res://worlds/uma_island/tex/layers/dirt/terrain_red_01_diff_1k.jpg"
-dest_files=["res://.godot/imported/terrain_red_01_diff_1k.jpg-8aa471b0151c5a9535c02465023d2909.bptc.ctex", "res://.godot/imported/terrain_red_01_diff_1k.jpg-8aa471b0151c5a9535c02465023d2909.astc.ctex"]
+source_file="res://worlds/uma_island/tex/layers/dirt/terrain_red_01_diffpack_1k.png"
+dest_files=["res://.godot/imported/terrain_red_01_diffpack_1k.png-d8de532801b72fd8853b366d5ae2479d.bptc.ctex", "res://.godot/imported/terrain_red_01_diffpack_1k.png-d8de532801b72fd8853b366d5ae2479d.astc.ctex"]
 
 [params]
 

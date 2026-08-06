@@ -1,26 +1,23 @@
 shader_type spatial;
 
 // --- Layer 1: Sand (base) ---
+// albedo .rgb = color, .a = roughness
 uniform sampler2D sand_albedo : source_color, filter_linear_mipmap;
-uniform sampler2D sand_roughness : hint_default_white, filter_linear_mipmap;
 uniform sampler2D sand_normal : hint_normal;
 uniform lowp vec2 sand_uv_scale = vec2(10.0);
 
 // --- Layer 2: Dirt ---
-uniform sampler2D dirt_albedo : source_color, filter_linear_mipmap_anisotropic;
-uniform sampler2D dirt_roughness : hint_default_white, filter_linear_mipmap_anisotropic;
+uniform sampler2D dirt_albedo : source_color, filter_linear_mipmap;
 uniform sampler2D dirt_normal : hint_normal;
 uniform lowp vec2 dirt_uv_scale = vec2(8.0);
 
 // --- Layer 3: Grass ---
-uniform sampler2D grass_albedo : source_color, filter_linear_mipmap_anisotropic;
-uniform sampler2D grass_roughness : hint_default_white, filter_linear_mipmap_anisotropic;
+uniform sampler2D grass_albedo : source_color, filter_linear_mipmap;
 uniform sampler2D grass_normal : hint_normal;
 uniform lowp vec2 grass_uv_scale = vec2(6.0);
 
 // --- Layer 4: Stone ---
-uniform sampler2D stone_albedo : source_color, filter_linear_mipmap_anisotropic;
-uniform sampler2D stone_roughness : hint_default_white, filter_linear_mipmap_anisotropic;
+uniform sampler2D stone_albedo : source_color, filter_linear_mipmap;
 uniform sampler2D stone_normal : hint_normal;
 uniform lowp vec2 stone_uv_scale = vec2(4.0);
 
@@ -45,26 +42,30 @@ void fragment() {
 
 	if (sand_mask > mask_eps) {
 		total_mask += sand_mask;
-		albedo += texture(sand_albedo, UV * sand_uv_scale).rgb * sand_mask;
-		rough += texture(sand_roughness, UV * sand_uv_scale).r * sand_mask;
+		vec4 s = texture(sand_albedo, UV * sand_uv_scale);
+		albedo += s.rgb * sand_mask;
+		rough += s.a * sand_mask;
 		blended_normal += (texture(sand_normal, UV * sand_uv_scale).rgb * 2.0 - 1.0) * sand_mask;
 	}
 	if (dirt_mask > mask_eps) {
 		total_mask += dirt_mask;
-		albedo += texture(dirt_albedo, UV * dirt_uv_scale).rgb * dirt_mask;
-		rough += texture(dirt_roughness, UV * dirt_uv_scale).r * dirt_mask;
+		vec4 d = texture(dirt_albedo, UV * dirt_uv_scale);
+		albedo += d.rgb * dirt_mask;
+		rough += d.a * dirt_mask;
 		blended_normal += (texture(dirt_normal, UV * dirt_uv_scale).rgb * 2.0 - 1.0) * dirt_mask;
 	}
 	if (grass_mask > mask_eps) {
 		total_mask += grass_mask;
-		albedo += texture(grass_albedo, UV * grass_uv_scale).rgb * grass_mask;
-		rough += texture(grass_roughness, UV * grass_uv_scale).r * grass_mask;
+		vec4 g = texture(grass_albedo, UV * grass_uv_scale);
+		albedo += g.rgb * grass_mask;
+		rough += g.a * grass_mask;
 		blended_normal += (texture(grass_normal, UV * grass_uv_scale).rgb * 2.0 - 1.0) * grass_mask;
 	}
 	if (stone_mask > mask_eps) {
 		total_mask += stone_mask;
-		albedo += texture(stone_albedo, UV * stone_uv_scale).rgb * stone_mask;
-		rough += texture(stone_roughness, UV * stone_uv_scale).r * stone_mask;
+		vec4 t = texture(stone_albedo, UV * stone_uv_scale);
+		albedo += t.rgb * stone_mask;
+		rough += t.a * stone_mask;
 		blended_normal += (texture(stone_normal, UV * stone_uv_scale).rgb * 2.0 - 1.0) * stone_mask;
 	}
 

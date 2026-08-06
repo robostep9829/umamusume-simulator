@@ -1,13 +1,11 @@
 [gd_resource type="ShaderMaterial" format=3 uid="uid://6cjxkjrcfikm"]
 
 [ext_resource type="Shader" uid="uid://ecpcm1fdvqry" path="res://worlds/uma_island/materials/uma_island_terrain.gdshader" id="1_ojfwa"]
-[ext_resource type="Texture2D" uid="uid://dku3flso2pw15" path="res://worlds/uma_island/tex/layers/dirt/terrain_red_01_diff_1k.jpg" id="2_vomn8"]
-[ext_resource type="Texture2D" uid="uid://dqng367njeayv" path="res://worlds/uma_island/tex/layers/grass/forrest_ground_01_diff_corr_1k.jpg" id="3_2do17"]
+[ext_resource type="Texture2D" uid="uid://7njy45lngunk" path="res://worlds/uma_island/tex/layers/dirt/terrain_red_01_diffpack_1k.png" id="2_ojfwa"]
 [ext_resource type="Texture2D" uid="uid://b5j7t2darkcoq" path="res://worlds/uma_island/tex/layers/dirt/terrain_red_01_nor_gl_recomp_1k.exr" id="3_4t7ip"]
 [ext_resource type="Texture2D" uid="uid://bgts1xajdlops" path="res://worlds/uma_island/tex/splatmaps/splatmap_comb.png" id="4_2do17"]
-[ext_resource type="Texture2D" uid="uid://c6w1iqw07edi7" path="res://worlds/uma_island/tex/layers/dirt/terrain_red_01_rough_1k.jpg" id="4_i5urd"]
+[ext_resource type="Texture2D" uid="uid://cuvlgiuuxsw0r" path="res://worlds/uma_island/tex/layers/grass/forrest_ground_01_diffpack_corr_1k.png" id="4_vomn8"]
 [ext_resource type="Texture2D" uid="uid://dyfsm6e01tuat" path="res://worlds/uma_island/tex/layers/grass/forrest_ground_01_nor_gl_1k-recomp.exr" id="6_2sg58"]
-[ext_resource type="Texture2D" uid="uid://dba7db5wdqc7r" path="res://worlds/uma_island/tex/layers/grass/forrest_ground_01_rough_1k.jpg" id="7_7qgiv"]
 
 [sub_resource type="Gradient" id="Gradient_1icho"]
 offsets = PackedFloat32Array(0)
@@ -28,12 +26,10 @@ render_priority = 0
 shader = ExtResource("1_ojfwa")
 shader_parameter/sand_albedo = SubResource("GradientTexture1D_wc52q")
 shader_parameter/sand_uv_scale = Vector2(1, 1)
-shader_parameter/dirt_albedo = ExtResource("2_vomn8")
-shader_parameter/dirt_roughness = ExtResource("4_i5urd")
+shader_parameter/dirt_albedo = ExtResource("2_ojfwa")
 shader_parameter/dirt_normal = ExtResource("3_4t7ip")
 shader_parameter/dirt_uv_scale = Vector2(60, 60)
-shader_parameter/grass_albedo = ExtResource("3_2do17")
-shader_parameter/grass_roughness = ExtResource("7_7qgiv")
+shader_parameter/grass_albedo = ExtResource("4_vomn8")
 shader_parameter/grass_normal = ExtResource("6_2sg58")
 shader_parameter/grass_uv_scale = Vector2(20, 20)
 shader_parameter/stone_albedo = SubResource("GradientTexture1D_v4ian")
