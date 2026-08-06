@@ -1,0 +1,9 @@
+[gd_resource type="StandardMaterial3D" format=3 uid="uid://cngf66gdqkvb5"]
+
+[ext_resource type="Texture2D" uid="uid://dohv8enr0oym0" path="res://worlds/uma_island/tex/track/track_alb.png" id="1_rv365"]
+
+[resource]
+transparency = 1
+albedo_texture = ExtResource("1_rv365")
+z_clip_scale = 0.96
+proximity_fade_distance = 0.01
