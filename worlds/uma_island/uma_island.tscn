@@ -21861,6 +21861,7 @@ shape = SubResource("ConcavePolygonShape3D_gn1vy")
 [node name="uma-island-track" type="Node3D" parent="." unique_id=638521425]
 process_mode = 4
 transform = Transform3D(200, 0, 0, 0, 200, 0, 0, 0, 200, 0, 0, 0)
+visible = false
 
 [node name="TrackRing" type="MeshInstance3D" parent="uma-island-track" unique_id=302441577]
 visible = false
@@ -22060,25 +22061,31 @@ process_mode = 4
 transform = Transform3D(200, 0, 0, 0, 200, 0, 0, 0, 200, 0, 0.001, 0)
 
 [node name="TrackOverlay" type="MeshInstance3D" parent="track_overlay" unique_id=1406327199]
+cast_shadow = 0
 mesh = SubResource("ArrayMesh_fa37t")
 surface_material_override/0 = ExtResource("10_cc07c")
 
 [node name="TrackOverlay_001" type="MeshInstance3D" parent="track_overlay" unique_id=1509313156]
+cast_shadow = 0
 mesh = SubResource("ArrayMesh_bs3xs")
 surface_material_override/0 = ExtResource("10_cc07c")
 
 [node name="TrackOverlay_002" type="MeshInstance3D" parent="track_overlay" unique_id=1981198113]
+cast_shadow = 0
 mesh = SubResource("ArrayMesh_yocre")
 surface_material_override/0 = ExtResource("10_cc07c")
 
 [node name="TrackOverlay_003" type="MeshInstance3D" parent="track_overlay" unique_id=1675328741]
+cast_shadow = 0
 mesh = SubResource("ArrayMesh_rixpt")
 surface_material_override/0 = ExtResource("10_cc07c")
 
 [node name="TrackOverlay_004" type="MeshInstance3D" parent="track_overlay" unique_id=606147710]
+cast_shadow = 0
 mesh = SubResource("ArrayMesh_btxc1")
 surface_material_override/0 = ExtResource("10_cc07c")
 
 [node name="TrackOverlay_005" type="MeshInstance3D" parent="track_overlay" unique_id=329360131]
+cast_shadow = 0
 mesh = SubResource("ArrayMesh_m07ey")
 surface_material_override/0 = ExtResource("10_cc07c")
