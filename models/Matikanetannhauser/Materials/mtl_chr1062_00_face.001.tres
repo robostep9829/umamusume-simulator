@@ -6,6 +6,7 @@
 [resource]
 albedo_texture = ExtResource("1_xfhtx")
 orm_texture = ExtResource("2_8hkdv")
+normal_enabled = true
 ao_enabled = true
 backlight_enabled = true
 backlight = Color(0.32156864, 0.19607843, 0.19607843, 1)

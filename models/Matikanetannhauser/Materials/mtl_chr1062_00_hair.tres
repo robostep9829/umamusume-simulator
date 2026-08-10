@@ -2,7 +2,7 @@
 
 [ext_resource type="Texture2D" uid="uid://kqs6u5mj7too" path="res://models/Matikanetannhauser/baked hair/hair_alb.png" id="1_up1b8"]
 [ext_resource type="Texture2D" uid="uid://boqn3viehyruj" path="res://models/Matikanetannhauser/baked hair/hair_orm.png" id="2_b3q8g"]
-[ext_resource type="Texture2D" uid="uid://cutf5kgke27oh" path="res://models/Matikanetannhauser/baked hair/hair_nrm.png" id="2_d7msn"]
+[ext_resource type="Texture2D" uid="uid://dqv6pxkpvgaix" path="res://models/Matikanetannhauser/baked hair/hair_nrm_subdiv.png" id="2_d7msn"]
 
 [resource]
 transparency = 2
@@ -12,7 +12,5 @@ albedo_texture = ExtResource("1_up1b8")
 orm_texture = ExtResource("2_b3q8g")
 normal_enabled = true
 normal_texture = ExtResource("2_d7msn")
-anisotropy_enabled = true
-anisotropy = 0.75
 ao_enabled = true
 backlight_enabled = true
