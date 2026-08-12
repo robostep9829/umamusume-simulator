@@ -773,26 +773,28 @@ _data = {
 
 [node name="CharacterBody3D" type="CharacterBody3D" unique_id=2027806480]
 script = ExtResource("1_hfxtm")
+auto_run_delay = null
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="." unique_id=313055436]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.80444336, 0)
 shape = SubResource("CapsuleShape3D_56iun")
 
 [node name="Skeleton3D" parent="." unique_id=355244752 instance=ExtResource("1_0gmjo")]
+transform = Transform3D(-1, 0, -8.742278e-08, 0, 1, 0, 8.742278e-08, 0, -1, 0, 0, 0)
 bones/1/position = Vector3(0.0041508004, 0.8699021, 0.022103)
 bones/1/rotation = Quaternion(-0.021225601, 0.055094063, 0.0043319594, 0.9982462)
 bones/28/rotation = Quaternion(-0.07638568, -0.0382874, 0.99613523, -0.020344272)
 bones/29/rotation = Quaternion(3.8878696e-09, 0.99925625, -0.038562387, -2.2491925e-08)
 bones/32/rotation = Quaternion(-0.04226989, -0.06391248, 0.9965437, 0.032081764)
 bones/33/rotation = Quaternion(-2.5626796e-09, 0.999902, -0.014003182, -3.2254877e-09)
-bones/37/rotation = Quaternion(0.019247375, -0.038515225, 0.011736287, 0.99900377)
-bones/38/rotation = Quaternion(0.053833477, 0.0021641077, -0.0032895694, 0.99854213)
-bones/39/rotation = Quaternion(-0.01414584, 0.009621938, -0.073353924, 0.9971593)
-bones/40/rotation = Quaternion(-0.02988949, -0.074296966, -0.028313966, 0.99638593)
-bones/151/rotation = Quaternion(0.5115709, 0.5077439, 0.49609464, -0.4841296)
-bones/152/rotation = Quaternion(-0.032352637, 0.76896304, -0.6280682, 0.114802204)
+bones/37/rotation = Quaternion(0.024120536, -0.03841702, 0.01138601, 0.9989058)
+bones/38/rotation = Quaternion(0.05868076, 0.0022078296, -0.0038359978, 0.998267)
+bones/39/rotation = Quaternion(-0.011682431, 0.009452398, -0.07365126, 0.9971709)
+bones/40/rotation = Quaternion(-0.026576642, -0.078216314, -0.025817817, 0.99624765)
+bones/151/rotation = Quaternion(0.5107599, 0.51472557, 0.5040473, -0.46916756)
+bones/152/rotation = Quaternion(-0.03379423, 0.7765598, -0.6188455, 0.113326944)
 bones/153/rotation = Quaternion(0.05927004, -0.70144904, 0.07269655, 0.7065208)
-bones/157/rotation = Quaternion(-0.1364098, 0.7327986, 0.09410619, 0.6599566)
+bones/157/rotation = Quaternion(-0.13962387, 0.73248464, 0.096952066, 0.6592205)
 bones/158/rotation = Quaternion(0.09648852, 0.028106209, -0.07992273, 0.9917219)
 bones/159/rotation = Quaternion(0.22888324, 0.0101114055, 0.022786824, 0.97313464)
 bones/160/rotation = Quaternion(0.06155485, 0.0023107529, 0.006156862, 0.99808204)
@@ -807,10 +809,10 @@ bones/168/rotation = Quaternion(0.3540552, -0.10336742, 0.040123764, 0.9286282)
 bones/169/rotation = Quaternion(0.045560773, -0.01295848, 0.005139708, 0.9988643)
 bones/170/rotation = Quaternion(-0.1390185, 0.7343632, 0.024049062, 0.6639323)
 bones/171/rotation = Quaternion(0.0023350716, 0.0011541694, 0.00010269882, 0.9999966)
-bones/174/rotation = Quaternion(0.479841, -0.54295325, -0.48260033, -0.4919871)
-bones/175/rotation = Quaternion(0.14668031, 0.72401327, -0.65814465, -0.14538005)
+bones/174/rotation = Quaternion(0.47831675, -0.54813236, -0.49261078, -0.47759682)
+bones/175/rotation = Quaternion(0.14853787, 0.73186153, -0.64903885, -0.14513353)
 bones/176/rotation = Quaternion(0.09143032, 0.6998968, -0.08532488, 0.70321023)
-bones/178/rotation = Quaternion(-0.15649791, -0.7597002, -0.04088416, 0.6298353)
+bones/178/rotation = Quaternion(-0.15305866, -0.75308985, -0.045115154, 0.6382739)
 bones/179/rotation = Quaternion(0.04744783, -0.040257186, 0.089868814, 0.99400795)
 bones/180/rotation = Quaternion(0.19515584, -0.04260878, 0.007841288, 0.9798149)
 bones/181/rotation = Quaternion(0.030147731, -0.0065822005, 0.0012114048, 0.99952304)
@@ -827,6 +829,7 @@ bones/191/rotation = Quaternion(-0.17194355, -0.7266339, -0.011914052, 0.6650539
 bones/192/rotation = Quaternion(0.0022044329, -0.0013450085, 0.00035551185, 0.9999966)
 
 [node name="SpringBoneSimulator3D" type="SpringBoneSimulator3D" parent="Skeleton3D" unique_id=1007465840]
+mutable_bone_axes = false
 setting_count = 3
 settings/0/root_bone_name = "Sp_Hi_MSkirt0_F_00"
 settings/0/root_bone = 8
@@ -911,7 +914,7 @@ settings/2/enable_all_child_collisions = true
 settings/2/exclude_collision_count = 0
 
 [node name="SpringBoneCollisionCapsule3D" type="SpringBoneCollisionCapsule3D" parent="Skeleton3D/SpringBoneSimulator3D" unique_id=482899085]
-transform = Transform3D(-0.99797195, 0.049008474, -0.04062318, -0.04746891, -0.9981483, -0.03803444, -0.042411968, -0.036028955, 0.99845034, 0.078762844, 0.69533384, -0.019436393)
+transform = Transform3D(-0.99797195, 0.049008474, -0.04062318, -0.04746891, -0.9981483, -0.03803444, -0.042411968, -0.036028955, 0.99845034, 0.078762844, 0.69533384, -0.019436391)
 bone_name = "Thigh_L"
 bone = 28
 position_offset = Vector3(0, 0.15, -0.03)
@@ -920,7 +923,7 @@ radius = 0.085
 height = 0.355
 
 [node name="SpringBoneCollisionCapsule3D2" type="SpringBoneCollisionCapsule3D" parent="Skeleton3D/SpringBoneSimulator3D" unique_id=1897055956]
-transform = Transform3D(-0.99785715, -0.061591785, 0.022082508, 0.05957082, -0.99478745, -0.08276057, 0.02706477, -0.08126776, 0.99632484, -0.07121172, 0.69634485, -0.011580521)
+transform = Transform3D(-0.99785715, -0.061591785, 0.022082508, 0.05957082, -0.99478745, -0.08276057, 0.02706477, -0.08126776, 0.99632484, -0.07121172, 0.69634485, -0.011580518)
 bone_name = "Thigh_R"
 bone = 32
 position_offset = Vector3(0, 0.15, -0.03)

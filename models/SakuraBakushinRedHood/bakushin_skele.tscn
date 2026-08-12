@@ -629,6 +629,7 @@ bind/205/bone = -1
 bind/205/pose = Transform3D(1, -1.9852335e-22, -2.3557763e-20, -1.817288e-21, 1.0000001, -5.81137e-07, -2.5080106e-20, -7.227063e-07, 0.9999999, 1.7778516e-15, -0.4895082, 0.21044703)
 
 [node name="Skeleton3D" type="Skeleton3D" unique_id=355244752]
+transform = Transform3D(-1, 0, 8.742278e-08, 0, 1, 0, -8.742278e-08, 0, -1, 0, 0, 0)
 bones/0/name = "Position"
 bones/0/parent = -1
 bones/0/rest = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0)

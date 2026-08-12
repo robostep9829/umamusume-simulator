@@ -1,0 +1,13 @@
+[gd_scene format=3 uid="uid://c7railingseg01t"]
+
+[ext_resource type="Mesh" path="res://worlds/scrolling_track/railing/railing.obj" id="1_railm"]
+
+[node name="RailingSegment" type="Node3D"]
+
+[node name="RailingLeft" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -2.5, 0, 0)
+mesh = ExtResource("1_railm")
+
+[node name="RailingRight" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2.5, 0, 0)
+mesh = ExtResource("1_railm")

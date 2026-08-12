@@ -126,6 +126,7 @@ metadata/_custom_type_script = "uid://bwsgev6cvsdb3"
 
 [sub_resource type="Resource" id="Resource_8s5t5"]
 script = ExtResource("4_rk58g")
+mutable_bone_axes = false
 chains = Array[ExtResource("3_o3l4i")]([SubResource("Resource_o3l4i"), SubResource("Resource_rk58g"), SubResource("Resource_b1wfh"), SubResource("Resource_kuvk5"), SubResource("Resource_0267k"), SubResource("Resource_d2akj"), SubResource("Resource_6x820"), SubResource("Resource_4diic"), SubResource("Resource_24tiy"), SubResource("Resource_knypi"), SubResource("Resource_lmbca"), SubResource("Resource_r1env"), SubResource("Resource_01eba"), SubResource("Resource_xi8kb"), SubResource("Resource_i47us")])
 metadata/_custom_type_script = "uid://dr8kcyf8h8368"
 

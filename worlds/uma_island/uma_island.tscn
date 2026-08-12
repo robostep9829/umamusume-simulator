@@ -2378,6 +2378,7 @@ surface_material_override/0 = ExtResource("1_u60ir")
 
 [node name="CharacterBody3D" parent="." unique_id=2027806480 instance=ExtResource("3_4ygcm")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 21.98837, 2.0478241, 8.293295)
+auto_run_delay = 0.0
 player_data = ExtResource("4_bxm4f")
 
 [node name="DirectionalLight3D" type="DirectionalLight3D" parent="." unique_id=560499100]

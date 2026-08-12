@@ -8,6 +8,10 @@ extends CharacterBody3D
 @export var jump_velocity: float = 4.5
 @export var rotation_speed: float = 12.0
 
+# Auto run: after N seconds without any movement input the character runs
+# forward on its own. Pressing "move_back" interrupts it. 0 disables.
+@export var auto_run_delay: float = 0.0
+
 ## Camera tuning
 @export var mouse_sensitivity: float = 0.003
 @export var min_pitch: float = -60.0   # look down limit (degrees)
@@ -43,6 +47,10 @@ var _pitch: float = 0.0
 # Sprint tracking
 var _sprint_timer: float = 0.0
 var is_sprinting: bool = false
+
+# Auto run tracking
+var _idle_time: float = 0.0
+var auto_forward: bool = false
 
 
 func _ready() -> void:
@@ -107,6 +115,33 @@ func _update_camera() -> void:
 	camera_pivot.rotation.x = _pitch
 
 
+## Auto run: idle counter. Any directional input resets the clock; only
+## "move_back" cancels an auto-run that is already in progress.
+func _apply_auto_run(input_dir: Vector2, delta: float) -> Vector2:
+	if auto_run_delay <= 0.0:
+		return input_dir
+	var any_move := (
+		Input.is_action_pressed("move_forward")
+		or Input.is_action_pressed("move_back")
+		or Input.is_action_pressed("move_left")
+		or Input.is_action_pressed("move_right")
+	)
+	if any_move:
+		_idle_time = 0.0
+	else:
+		_idle_time += delta
+		if _idle_time >= auto_run_delay:
+			auto_forward = true
+	if Input.is_action_just_pressed("move_back"):
+		auto_forward = false
+		_idle_time = 0.0
+	# Force forward input while auto-running (unless the player is actively
+	# holding backward, which already cancelled it this frame).
+	if auto_forward and input_dir.y >= 0.0:
+		return Vector2(input_dir.x, -1.0)
+	return input_dir
+
+
 func _handle_movement(delta: float) -> void:
 	# Apply gravity
 	if not is_on_floor():
@@ -118,6 +153,7 @@ func _handle_movement(delta: float) -> void:
 
 	# Read input as a 2D vector (WASD by default)
 	var input_dir: Vector2 = Input.get_vector("move_left", "move_right", "move_forward", "move_back")
+	input_dir = _apply_auto_run(input_dir, delta)
 
 	# Convert input into a direction relative to where the camera faces
 	var direction := Vector3.ZERO
@@ -130,7 +166,7 @@ func _handle_movement(delta: float) -> void:
 		direction = (forward * -input_dir.y + right * input_dir.x).normalized()
 
 	# Choose speed based on sprint input
-	is_sprinting = Input.is_action_pressed("sprint")
+	is_sprinting = Input.is_action_pressed("sprint") or auto_forward
 	var speed := sprint_speed if is_sprinting else move_speed
 
 	if is_sprinting:
