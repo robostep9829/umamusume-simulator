@@ -1,0 +1,9 @@
+[gd_resource type="Resource" script_class="TrackLevel" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/scrolling/track_level.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+elements = Array[int]([0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0])
+is_closed = false
+turn_direction = -1

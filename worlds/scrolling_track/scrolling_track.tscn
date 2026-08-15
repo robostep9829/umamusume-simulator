@@ -12,6 +12,7 @@
 [node name="TrackManager" type="Node3D" parent="." unique_id=10000001 node_paths=PackedStringArray("player")]
 script = ExtResource("1_mana")
 player = NodePath("../Player")
+infinite = true
 straight_min = 1
 straight_max = 3
 

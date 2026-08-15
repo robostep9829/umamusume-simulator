@@ -1,0 +1,15 @@
+[gd_resource type="Resource" script_class="TrackSegment" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/scrolling/track_segment.gd" id="1"]
+[ext_resource type="Mesh" path="res://worlds/scrolling_track/floor_segments/floor_turn_left_5deg.obj" id="2"]
+
+[resource]
+script = ExtResource("1")
+kind = 1
+mesh = ExtResource("2")
+width = 30.0
+height = 0.4
+length = 104.7
+radius = 1200.0
+turn_degrees = 5.0
+direction = -1
