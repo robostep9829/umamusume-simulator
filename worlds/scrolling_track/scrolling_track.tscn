@@ -1,29 +1,19 @@
 [gd_scene format=3 uid="uid://dc0k480wwg0ah"]
 
 [ext_resource type="Script" uid="uid://b2d0mm5iuvwk1" path="res://scripts/scrolling/track_manager.gd" id="1_mana"]
-[ext_resource type="PackedScene" uid="uid://nu81qv34pb5t" path="res://prefabs/track/railing_segment.tscn" id="2_segm"]
 [ext_resource type="PackedScene" uid="uid://c11xkbxmyhcu5" path="res://prefabs/third_person.tscn" id="3_play"]
 [ext_resource type="Environment" uid="uid://cwd3w67jcb3xr" path="res://environment/new_environment.tres" id="4_la2pr"]
 [ext_resource type="Resource" uid="uid://ck8dx66csso42" path="res://models/Matikanetannhauser/matitan.tres" id="4_pdat"]
-
-[sub_resource type="BoxShape3D" id="BoxShape3D_floor"]
-size = Vector3(200, 0.4, 400)
 
 [sub_resource type="CylinderMesh" id="CylinderMesh_waqk3"]
 
 [node name="ScrollingTrack" type="Node3D" unique_id=97728838]
 
-[node name="TrackManager" type="Node3D" parent="." unique_id=10000001 node_paths=PackedStringArray("player", "ground")]
+[node name="TrackManager" type="Node3D" parent="." unique_id=10000001 node_paths=PackedStringArray("player")]
 script = ExtResource("1_mana")
-segment_scene = ExtResource("2_segm")
 player = NodePath("../Player")
-ground = NodePath("../Ground")
-
-[node name="Ground" type="StaticBody3D" parent="." unique_id=10000002]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.2, 0)
-
-[node name="CollisionShape3D" type="CollisionShape3D" parent="Ground" unique_id=10000003]
-shape = SubResource("BoxShape3D_floor")
+straight_min = 1
+straight_max = 3
 
 [node name="Player" parent="." unique_id=10000006 instance=ExtResource("3_play")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2, 0)

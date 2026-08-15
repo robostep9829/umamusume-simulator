@@ -3,7 +3,7 @@ extends CharacterBody3D
 
 ## Movement tuning
 @export var move_speed: float = 1.6
-@export var sprint_speed: float = 7.0
+@export var sprint_speed: float = 20.0
 @export var acceleration: float = 10.0
 @export var jump_velocity: float = 4.5
 @export var rotation_speed: float = 12.0
