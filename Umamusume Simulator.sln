@@ -1,6 +1,6 @@
 ﻿Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 2012
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Umamusume Simulator", "Umamusume Simulator.csproj", "{938463A5-CB81-47BA-A0F1-C60B2881FB4D}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Umamusume Simulator", "Umamusume Simulator.csproj", "{C2F6ACFE-C693-4567-B380-A91782476942}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -9,11 +9,11 @@ Global
 	ExportRelease|Any CPU = ExportRelease|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{938463A5-CB81-47BA-A0F1-C60B2881FB4D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{938463A5-CB81-47BA-A0F1-C60B2881FB4D}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{938463A5-CB81-47BA-A0F1-C60B2881FB4D}.ExportDebug|Any CPU.ActiveCfg = ExportDebug|Any CPU
-		{938463A5-CB81-47BA-A0F1-C60B2881FB4D}.ExportDebug|Any CPU.Build.0 = ExportDebug|Any CPU
-		{938463A5-CB81-47BA-A0F1-C60B2881FB4D}.ExportRelease|Any CPU.ActiveCfg = ExportRelease|Any CPU
-		{938463A5-CB81-47BA-A0F1-C60B2881FB4D}.ExportRelease|Any CPU.Build.0 = ExportRelease|Any CPU
+		{C2F6ACFE-C693-4567-B380-A91782476942}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C2F6ACFE-C693-4567-B380-A91782476942}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C2F6ACFE-C693-4567-B380-A91782476942}.ExportDebug|Any CPU.ActiveCfg = ExportDebug|Any CPU
+		{C2F6ACFE-C693-4567-B380-A91782476942}.ExportDebug|Any CPU.Build.0 = ExportDebug|Any CPU
+		{C2F6ACFE-C693-4567-B380-A91782476942}.ExportRelease|Any CPU.ActiveCfg = ExportRelease|Any CPU
+		{C2F6ACFE-C693-4567-B380-A91782476942}.ExportRelease|Any CPU.Build.0 = ExportRelease|Any CPU
 	EndGlobalSection
 EndGlobal
