@@ -274,6 +274,7 @@ func _create_pool(parent: Node) -> void:
 		var node := StaticBody3D.new()
 		var mi := MeshInstance3D.new()
 		mi.name = "Mesh"
+		mi.visibility_range_end = 500.0
 		var cs := CollisionShape3D.new()
 		cs.name = "Collision"
 		cs.position.y = -straight_segment.height * 0.5
