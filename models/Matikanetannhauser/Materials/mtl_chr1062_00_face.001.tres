@@ -4,6 +4,7 @@
 [ext_resource type="Texture2D" uid="uid://c44f7ews2jfcm" path="res://models/Matikanetannhauser/baked face/face orm.png" id="2_8hkdv"]
 
 [resource]
+render_priority = -1
 albedo_texture = ExtResource("1_xfhtx")
 orm_texture = ExtResource("2_8hkdv")
 normal_enabled = true

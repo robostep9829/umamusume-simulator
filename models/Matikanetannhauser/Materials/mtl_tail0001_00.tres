@@ -3,6 +3,7 @@
 [ext_resource type="Texture2D" uid="uid://2hdj4rpisiu7" path="res://models/Matikanetannhauser/matitan-retopo-names_tex_tail0001_00_1062_diff.png" id="1_oej34"]
 
 [resource]
+render_priority = -1
 albedo_texture = ExtResource("1_oej34")
 normal_enabled = true
 ao_enabled = true

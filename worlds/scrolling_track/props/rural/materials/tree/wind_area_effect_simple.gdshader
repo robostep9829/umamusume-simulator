@@ -1,5 +1,5 @@
 shader_type spatial;
-render_mode blend_mix, depth_draw_opaque, cull_disabled, world_vertex_coords, shadows_disabled;
+render_mode cull_disabled, world_vertex_coords, shadows_disabled;
 
 uniform sampler2D texture_albedo : source_color, filter_linear_mipmap, repeat_enable;
 uniform vec4 albedo : source_color = vec4(1.0);
@@ -29,6 +29,7 @@ vec3 rotate_around(vec3 v, vec3 axis, float angle) {
 void vertex() {
 	vec3 instance_origin = (MODEL_MATRIX * vec4(0.0, 0.0, 0.0, 1.0)).xyz;
 	vec3 leaf_axis = normalize((MODEL_MATRIX * vec4(0.0, 1.0, 0.0, 0.0)).xyz);
+	vec3 leaf_normal = normalize((MODEL_MATRIX * vec4(NORMAL, 0.0)).xyz);
 
 	wind_sample = sample_wind(instance_origin);
 
@@ -46,10 +47,20 @@ void vertex() {
 			float angle = wind_bend * clamp(wind_len / wind_strength, 0.0, 1.0);
 			vec3 offset = VERTEX - instance_origin;
 			VERTEX = instance_origin + rotate_around(offset, axis, angle);
+
+			vec3 world_normal = rotate_around(leaf_normal, axis, angle);
+			NORMAL = normalize((inverse(MODEL_MATRIX) * vec4(world_normal, 0.0)).xyz);
 		}
 	}
 }
 
 void fragment() {
-	ALBEDO = albedo.rgb * texture(texture_albedo, UV).rgb;
+	vec4 alb_full = texture(texture_albedo, UV);
+	ALBEDO = albedo.rgb * alb_full.rgb;
+	//ALPHA = alb_full.w;
+	//ALPHA_SCISSOR_THRESHOLD = 0.5;
+	if (!FRONT_FACING) {
+		NORMAL = -NORMAL;
+	}
+	//ALBEDO = vec3(float(FRONT_FACING));
 }

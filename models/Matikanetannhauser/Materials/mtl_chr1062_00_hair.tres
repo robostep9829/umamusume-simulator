@@ -5,6 +5,7 @@
 [ext_resource type="Texture2D" uid="uid://dqv6pxkpvgaix" path="res://models/Matikanetannhauser/baked hair/hair_nrm_subdiv.png" id="2_d7msn"]
 
 [resource]
+render_priority = -1
 transparency = 2
 alpha_scissor_threshold = 0.5
 alpha_antialiasing_mode = 0

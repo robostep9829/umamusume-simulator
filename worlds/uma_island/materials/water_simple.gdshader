@@ -39,5 +39,5 @@ void fragment() {
 	ROUGHNESS = mix(0.3, 0.0, fresnel);
 	METALLIC = 0.0;
 	SPECULAR = 0.5;
-	ALPHA = 1.0;
+	//ALPHA = 1.0;
 }
