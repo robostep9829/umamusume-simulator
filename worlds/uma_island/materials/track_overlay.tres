@@ -3,6 +3,7 @@
 [ext_resource type="Texture2D" uid="uid://dohv8enr0oym0" path="res://worlds/uma_island/tex/track/track_alb.png" id="1_rv365"]
 
 [resource]
+render_priority = -1
 transparency = 3
 alpha_hash_scale = 1.0
 alpha_antialiasing_mode = 0

@@ -18,9 +18,9 @@ noise = SubResource("FastNoiseLite_6isqc")
 seamless = true
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_bxmnr"]
-render_priority = 0
+render_priority = -1
 shader = ExtResource("8_6isqc")
-shader_parameter/albedo = Color(1, 1, 1, 1)
+shader_parameter/albedo = Color(0.16433334, 0.34, 0, 1)
 shader_parameter/wind_mask = SubResource("NoiseTexture2D_bxmnr")
 shader_parameter/wind_strength = 10.0
 shader_parameter/wind_speed = 6.0

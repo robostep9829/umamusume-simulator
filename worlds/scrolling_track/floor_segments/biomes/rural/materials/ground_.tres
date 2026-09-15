@@ -1,0 +1,40 @@
+[gd_resource type="Shader" format=3 uid="uid://bt1d5adyshmc6"]
+
+[resource]
+code = "shader_type spatial;
+uniform sampler2D tex_grass : source_color, filter_linear_mipmap, repeat_enable;
+uniform sampler2D tex_sand : source_color, filter_linear_mipmap, repeat_enable;
+uniform sampler2D tex_layers : filter_linear_mipmap, repeat_enable;
+
+uniform sampler2D nrm_grass : hint_normal, filter_linear_mipmap;
+uniform sampler2D nrm_sand : hint_normal, filter_linear_mipmap;
+
+
+
+//void vertex() {
+	//// Called for every vertex the material is visible on.
+//}
+
+void fragment() {
+	// Called for every pixel the material is visible on.c
+	vec4 grass = texture(tex_grass, UV * vec2(8.0));
+	vec4 sand = texture(tex_sand, UV * vec2(4.0));
+	
+	vec4 grass_n = texture(nrm_grass, UV * vec2(8.0));
+	vec4 sand_n = texture(nrm_sand, UV * vec2(4.0));
+	
+	float layers = texture(tex_layers, UV).r;
+	
+	ALBEDO = mix(grass.rgb, sand.rgb, layers);
+	ROUGHNESS = mix(grass.w, sand.w, layers);
+	//SPECULAR = 1.0;
+	NORMAL_MAP = mix(grass_n.rgb, sand_n.rgb, layers);
+	//NORMAL_MAP = sand_n.rgb;
+	//NORMAL_MAP_DEPTH = 1.0;
+}
+
+//void light() {
+//	// Called for every pixel for every light affecting the material.
+//	// Uncomment to replace the default light processing function with this one.
+//}
+"
