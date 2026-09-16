@@ -5,23 +5,10 @@
 [ext_resource type="Environment" uid="uid://cwd3w67jcb3xr" path="res://environment/new_environment.tres" id="4_la2pr"]
 [ext_resource type="Resource" uid="uid://ck8dx66csso42" path="res://models/Matikanetannhauser/matitan.tres" id="4_pdat"]
 [ext_resource type="ArrayMesh" uid="uid://dxbpehg82cytg" path="res://worlds/scrolling_track/floor_segments/floor_straight.obj" id="5_7g5pp"]
-[ext_resource type="Shader" uid="uid://bt1d5adyshmc6" path="res://worlds/scrolling_track/floor_segments/biomes/rural/materials/ground_.tres" id="6_7g5pp"]
-[ext_resource type="Texture2D" uid="uid://dyfsm6e01tuat" path="res://worlds/uma_island/tex/layers/grass/forrest_ground_01_nor_gl_1k-recomp.exr" id="7_kvml8"]
-[ext_resource type="Texture2D" uid="uid://cuvlgiuuxsw0r" path="res://worlds/uma_island/tex/layers/grass/forrest_ground_01_diffpack_corr_1k.png" id="7_u41i3"]
-[ext_resource type="Texture2D" uid="uid://wt7lcdvdwbrb" path="res://worlds/scrolling_track/floor_segments/biomes/rural/tex/sand_02_nor_gl_1k_recomp.exr" id="8_7xr46"]
-[ext_resource type="Texture2D" uid="uid://bgmf13atu0jrd" path="res://worlds/scrolling_track/floor_segments/biomes/rural/tex/track-map.png" id="8_nkql3"]
-[ext_resource type="Texture2D" uid="uid://dldrrp8ci0lmg" path="res://worlds/scrolling_track/floor_segments/biomes/rural/tex/sand_02_diff_rough_1k.png" id="9_u41i3"]
+[ext_resource type="Material" uid="uid://c8xsq2iw3ca2h" path="res://worlds/scrolling_track/floor_segments/biomes/rural/materials/ground.tres" id="6_7g5pp"]
+[ext_resource type="ArrayMesh" uid="uid://cmmwpaw4ojxm1" path="res://worlds/scrolling_track/floor_segments/floor_turn_left_5deg.obj" id="7_i1jpn"]
 
 [sub_resource type="CylinderMesh" id="CylinderMesh_waqk3"]
-
-[sub_resource type="ShaderMaterial" id="ShaderMaterial_rahhg"]
-render_priority = 0
-shader = ExtResource("6_7g5pp")
-shader_parameter/tex_grass = ExtResource("7_u41i3")
-shader_parameter/tex_sand = ExtResource("9_u41i3")
-shader_parameter/tex_layers = ExtResource("8_nkql3")
-shader_parameter/nrm_grass = ExtResource("7_kvml8")
-shader_parameter/nrm_sand = ExtResource("8_7xr46")
 
 [node name="ScrollingTrack" type="Node3D" unique_id=97728838]
 
@@ -57,6 +44,13 @@ visible = false
 mesh = SubResource("CylinderMesh_waqk3")
 
 [node name="FloorStraight" type="MeshInstance3D" parent="." unique_id=1591104222]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1, -2, 1)
+process_mode = 4
 mesh = ExtResource("5_7g5pp")
-surface_material_override/0 = SubResource("ShaderMaterial_rahhg")
+surface_material_override/0 = ExtResource("6_7g5pp")
+
+[node name="FloorTurnLeft5Deg" type="MeshInstance3D" parent="." unique_id=1006989938]
+process_mode = 4
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -100)
+material_override = ExtResource("6_7g5pp")
+mesh = ExtResource("7_i1jpn")
+surface_material_override/0 = ExtResource("6_7g5pp")

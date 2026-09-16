@@ -1,15 +1,28 @@
-[gd_resource type="Resource" script_class="TrackSegment" load_steps=2 format=3]
+[gd_resource type="Resource" script_class="TrackSegment" format=4 uid="uid://havhfmyt2wn0"]
 
-[ext_resource type="Script" path="res://scripts/scrolling/track_segment.gd" id="1"]
-[ext_resource type="Mesh" path="res://worlds/scrolling_track/floor_segments/floor_turn_left_5deg.obj" id="2"]
+[ext_resource type="Script" uid="uid://k4ptfmmb2irt" path="res://scripts/scrolling/track_segment.gd" id="1"]
+[ext_resource type="Material" uid="uid://c8xsq2iw3ca2h" path="res://worlds/scrolling_track/floor_segments/biomes/rural/materials/ground.tres" id="1_iey40"]
+
+[sub_resource type="ArrayMesh" id="ArrayMesh_rkaqk"]
+_surfaces = [{
+"aabb": AABB(-19.509277, -8e-06, -105.894226, 34.509277, 1e-05, 105.894226),
+"attribute_data": PackedByteArray("//93qv9/wamU/+C//391vv9/0ZT//0rVlP8slf9//3+U/8J//39l05T/ler/f1bolP////9/KP0="),
+"format": 34896613399,
+"index_count": 36,
+"index_data": PackedByteArray("AAABAAIAAgABAAMAAAAEAAEAAgADAAUABgAEAAAABgAHAAQACAAHAAYABQADAAkABQAJAAoACgAJAAsACgALAAwADAALAA0A"),
+"material": ExtResource("1_iey40"),
+"name": "Arc.002",
+"primitive": 3,
+"uv_scale": Vector4(0.601562, 2.113282, 0, 0),
+"vertex_count": 14,
+"vertex_data": PackedByteArray("Lvz/f5Gq/z+7Hf9/raz/P2r3Zmbgf/8/FRlmZgqD/z+FIDKzVdb/P7/wzEw2Vf8/Cv8ys0fV/z9zIczM////P///zMz///8/kxLMTG1Z/z8s6JkZlSr/PzcKmRnaL/8/st0AAAAA/z8AAAAAUgb/P33//H5//wB/mf81f63/XX+X/zB/pP9Lf6j/UX+n/1F/lf8rf4D/AX9n/9F+Vv+uflf/r35s/9l+")
+}]
+blend_shape_mode = 0
 
 [resource]
 script = ExtResource("1")
 kind = 1
-mesh = ExtResource("2")
-width = 30.0
-height = 0.4
+mesh = SubResource("ArrayMesh_rkaqk")
 length = 104.7
 radius = 1200.0
 turn_degrees = 5.0
-direction = -1

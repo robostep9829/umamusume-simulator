@@ -9,28 +9,28 @@ uniform sampler2D tex_layers : filter_linear_mipmap, repeat_enable;
 uniform sampler2D nrm_grass : hint_normal, filter_linear_mipmap;
 uniform sampler2D nrm_sand : hint_normal, filter_linear_mipmap;
 
+uniform sampler2D noise_grass : filter_linear_mipmap, hint_default_black, repeat_enable;
+uniform sampler2D noise_sand : filter_linear_mipmap, hint_default_black, repeat_enable;
 
-
-//void vertex() {
-	//// Called for every vertex the material is visible on.
-//}
 
 void fragment() {
+	float layers = texture(tex_layers, UV).r;
 	// Called for every pixel the material is visible on.c
 	vec4 grass = texture(tex_grass, UV * vec2(8.0));
-	vec4 sand = texture(tex_sand, UV * vec2(4.0));
-	
 	vec4 grass_n = texture(nrm_grass, UV * vec2(8.0));
-	vec4 sand_n = texture(nrm_sand, UV * vec2(4.0));
+	float grass_r = texture(noise_grass, UV + NODE_POSITION_WORLD.xy ).r;
 	
-	float layers = texture(tex_layers, UV).r;
+	vec4 sand = texture(tex_sand, UV * vec2(4.0));
+	vec4 sand_n = texture(nrm_sand, UV * vec2(4.0));
+	float sand_r = texture(noise_sand, UV + NODE_POSITION_WORLD.xy ).r;
+	
 	
 	ALBEDO = mix(grass.rgb, sand.rgb, layers);
-	ROUGHNESS = mix(grass.w, sand.w, layers);
+	ROUGHNESS = mix(grass.w, sand.w, layers) - mix(grass_r, sand_r, layers);
+	ROUGHNESS = clamp(ROUGHNESS, 0.0, 1.0);
 	//SPECULAR = 1.0;
 	NORMAL_MAP = mix(grass_n.rgb, sand_n.rgb, layers);
 	//NORMAL_MAP = sand_n.rgb;
-	//NORMAL_MAP_DEPTH = 1.0;
 }
 
 //void light() {

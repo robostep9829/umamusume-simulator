@@ -1,21 +1,7 @@
 [gd_resource type="Resource" script_class="TrackSegment" format=3 uid="uid://bnis8bqvtbnvo"]
 
 [ext_resource type="Script" uid="uid://k4ptfmmb2irt" path="res://scripts/scrolling/track_segment.gd" id="1"]
-[ext_resource type="Shader" uid="uid://bt1d5adyshmc6" path="res://worlds/scrolling_track/floor_segments/biomes/rural/materials/ground_.tres" id="1_q1x4k"]
-[ext_resource type="Texture2D" uid="uid://dyfsm6e01tuat" path="res://worlds/uma_island/tex/layers/grass/forrest_ground_01_nor_gl_1k-recomp.exr" id="2_k21qt"]
-[ext_resource type="Texture2D" uid="uid://wt7lcdvdwbrb" path="res://worlds/scrolling_track/floor_segments/biomes/rural/tex/sand_02_nor_gl_1k_recomp.exr" id="3_0l3jc"]
-[ext_resource type="Texture2D" uid="uid://cuvlgiuuxsw0r" path="res://worlds/uma_island/tex/layers/grass/forrest_ground_01_diffpack_corr_1k.png" id="4_am57h"]
-[ext_resource type="Texture2D" uid="uid://bgmf13atu0jrd" path="res://worlds/scrolling_track/floor_segments/biomes/rural/tex/track-map.png" id="5_0l3jc"]
-[ext_resource type="Texture2D" uid="uid://dldrrp8ci0lmg" path="res://worlds/scrolling_track/floor_segments/biomes/rural/tex/sand_02_diff_rough_1k.png" id="5_3264g"]
-
-[sub_resource type="ShaderMaterial" id="ShaderMaterial_3eiyq"]
-render_priority = 0
-shader = ExtResource("1_q1x4k")
-shader_parameter/tex_grass = ExtResource("4_am57h")
-shader_parameter/tex_sand = ExtResource("5_3264g")
-shader_parameter/tex_layers = ExtResource("5_0l3jc")
-shader_parameter/nrm_grass = ExtResource("2_k21qt")
-shader_parameter/nrm_sand = ExtResource("3_0l3jc")
+[ext_resource type="Material" uid="uid://c8xsq2iw3ca2h" path="res://worlds/scrolling_track/floor_segments/biomes/rural/materials/ground.tres" id="1_q1x4k"]
 
 [sub_resource type="ArrayMesh" id="ArrayMesh_k5c7e"]
 _surfaces = [{
@@ -24,7 +10,7 @@ _surfaces = [{
 "format": 34896613399,
 "index_count": 6,
 "index_data": PackedByteArray(0, 0, 1, 0, 2, 0, 2, 0, 1, 0, 3, 0),
-"material": SubResource("ShaderMaterial_3eiyq"),
+"material": ExtResource("1_q1x4k"),
 "name": "Plane.001",
 "primitive": 3,
 "uv_scale": Vector4(0, 0, 0, 0),
