@@ -24,9 +24,11 @@ enum Mode {
 	ALONG_TRACK,
 	## Spread evenly on a ring around the horizon anchor, facing the middle of
 	## the ring. Horizon content (far hills, a town silhouette, a ring of haze
-	## cards) must not show the seams of the segment pool, so it is not tied to
-	## a segment at all: it is rebuilt only when the player has moved far enough
-	## away from the anchor (see [member BiomeDirector.ring_anchor_snap_distance]).
+	## cards) must not show the seams of the segment pool, so it is not tied to a
+	## segment at all: the anchor rides with the runner, and the ring is laid out
+	## again only every `host_every` elements. The ring surrounds the runner, so
+	## keep `distance_min` far enough to read as scenery rather than as something
+	## the runner could drive through.
 	RING,
 }
 

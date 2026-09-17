@@ -159,20 +159,27 @@ Two properties fall out of that:
 
 ### 2.2 Horizon: layer 3 without a seam
 
-A `RING` layer is not tied to a segment. It lives on a `HorizonAnchor` that stays
-put in world space, so the horizon does not show the seams of the segment pool.
-While the runner is farther from the anchor than `ring_anchor_snap_distance` the
-anchor is left exactly where it is; as soon as the runner has come that close, the
-anchor is pushed back out to a lead of `snap / RING_SNAP_FRACTION` (so the runner
-closes only 40 % of the lead before the next rebuild) and the ring is rebuilt
-around it. The horizon therefore lags behind very slowly, which is exactly the
-"camera-locked or very slow parallax" `LAYERS.md` asks of layer 3, and it costs
-nothing in between.
+A `RING` layer is not tied to a segment. It lives on a `HorizonAnchor` that rides
+with the runner - position only, never rotation - so:
 
-The snap distance is never smaller than the biome's widest ring plus
-`BiomeDirector.HORIZON_CLEARANCE` (200 m), so the whole ring always stays ahead of
-the runner: no card can be reached, passed, or end up beside the camera. A biome
-without a `RING` layer leaves the anchor untouched.
+* the horizon **surrounds** them in every direction instead of piling up in a cone
+  ahead of them. A ring whose cards all end up in front is the classic way to make
+  distant scenery read as floating cards;
+* it cannot be outrun: every card stays exactly `distance_min..distance_max` away,
+  whatever the runner does, so a `RING` layer belongs to the far band and wants a
+  `distance_min` of a kilometre or more;
+* it does not show the seams of the segment pool.
+
+The ring is laid out again only when the runner moves into another region of
+`host_every` elements, or when the biome changes. Between rebuilds the cards are
+perfectly still, which is the "camera-locked or very slow parallax" `LAYERS.md`
+asks of layer 3, and it costs nothing per frame. A biome without a `RING` layer
+leaves the anchor untouched.
+
+Because `_build_ring()` spreads the cards one slot apart with a slot jitter of at
+most 15 %, a ring whose cards are about as wide as a slot is continuous: the ridge
+of `layers/rural_far.tres` (14 cards of 1200 x 110 m on a 1.2-1.6 km ring) overlaps
+itself even in the worst case instead of leaving holes of empty sky.
 
 ### 2.3 Atmosphere: the one thing that must not change at a chunk boundary
 
@@ -194,6 +201,12 @@ centreline, and the endless track indexes slots by the straight segment's length
 while a 5-degree turn is 104.7 m long. The biome under the player can therefore
 be off by about half a segment near a boundary, which a multi-second fade hides
 completely.
+
+The demos show why a biome should carry its own `atmosphere` even when it is a
+day-lit one: `rural.tres` uses `rural_env.tres`, the project's base environment
+plus `fog_enabled` and a haze colour, and that fog is what turns a 1.5 km card into
+distant scenery instead of a crisp rectangle. Without it, everything past the
+playfield is as sharp as the road.
 
 ---
 
@@ -237,7 +250,22 @@ art), so it runs in about a second and exits non-zero on failure. It checks:
 * the track/director contract: every pooled body gets the road skin, a layer is
   built once per hosted element, re-placing unchanged segments keeps the *same*
   decoration nodes, and switching biome rebuilds them in place;
-* horizon rings keep their distance band and are only rebuilt after a drift.
+* horizon rings keep their distance band, ride with the runner, and are only laid
+  out again when the runner leaves a region.
+
+Godot does not have to be the only judge. Three small offline checkers live next
+to this project (they need the Godot class reference dump, not the editor):
+
+```bash
+python3 tools/check_res.py $(find worlds/scrolling_track -name "*.tres" -o -name "*.tscn")
+python3 tools/verify_placement.py     # placement/orientation invariants
+python3 tools/verify_horizon.py       # the far layer's numbers: continuity, haze, cost
+```
+
+`check_res.py` validates the text resources - paths, types, `script_class`,
+property names, typed arrays, shader parameters, node parents - against the same
+class information Godot itself uses, so a typo in a hand-authored `.tres` is caught
+before the editor is opened.
 
 ---
 
@@ -251,7 +279,8 @@ wherever it matters:
 | `layers/rural_near.tres` | the island's tree, wrapped as `props/rural_tree.tscn` and placed as a scene variant: real art, one per side per segment. Its leaf `MultiMesh` is 4700 instances rebuilt per instance, so the layer hosts it on every second element only, keeps `visible_range` short and casts no shadows; a real biome should bake a lighter tree |
 | `props/leaf_mesh.tres` | the leaf quad baked out of `uma_island.tscn`, so the demo does not depend on `props/rural/leaf.obj` being present in the checkout |
 | `layers/rural_mid.tres` | one `QuadMesh` card per segment with a flat unshaded material - a treeline, not a treeline asset |
-| `layers/rural_far.tres` | nine billboard cards on a ring - a horizon, not a panorama |
+| `layers/rural_far.tres` | fourteen Y-billboard cards on a 1.2-1.6 km ring - a horizon, not a panorama. They are still flat rectangles: replacing the card mesh with a hill silhouette is what this layer wants next |
+| `rural_env.tres` | the base environment plus fog, so the far band hazes out; a real biome would light its own sky, not reuse the island's |
 | `rural_dusk.tres` | a second biome so that transitions are visible at all; it is rural again with the dirt road texture and a dusk `Environment`, and should be replaced by the first real biome (city or suburbs) |
 | `materials/*.tres` | flat colours with `TODO`-less names, because they will be replaced wholesale |
 

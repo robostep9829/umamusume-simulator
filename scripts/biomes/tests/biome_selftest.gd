@@ -401,8 +401,9 @@ func _test_track_integration() -> void:
 	track.free()
 
 
-## Horizon content lives on the anchor and is rebuilt when the player comes close
-## to it, rather than per segment.
+## Horizon content lives on an anchor that rides with the runner, so the ring
+## surrounds them instead of piling up in front, and is laid out per region rather
+## than per segment.
 func _test_horizon() -> void:
 	var ring := BiomeLayer.new()
 	ring.mode = BiomeLayer.Mode.RING
@@ -446,40 +447,39 @@ func _test_horizon() -> void:
 			"horizon instances face the middle of the ring"
 		)
 
-		# The lead has to clear the widest ring, not just the closest cards, and
-		# the snap distance must never let the runner reach one.
-		var snap := director._effective_snap_distance()
-		var lead := director._horizon_lead()
+		# The anchor rides with the runner, so the ring surrounds them: it cannot be
+		# outrun, and nothing has to be re-snapped in front of them mid-run.
+		director._refresh_anchor(Vector3(120.0, 0.0, 40.0))
 		_check(
-			lead >= ring.distance_max + BiomeDirector.HORIZON_CLEARANCE,
-			"the horizon is led beyond the whole ring, not just its closest cards"
+			anchor.global_position.is_equal_approx(Vector3(120.0, 0.0, 40.0)),
+			"the anchor rides with the runner (got %s)" % anchor.global_position
 		)
-		_check(
-			snap >= ring.distance_max + BiomeDirector.HORIZON_CLEARANCE,
-			"the snap distance never lets the runner reach a card"
-		)
-		# A runner still farther away than the snap distance leaves the horizon
-		# alone, however far away the two are...
-		var anchor_position := anchor.global_position
-		director._refresh_anchor(anchor_position + Vector3(0.0, 0.0, snap * 2.0))
-		_check(host.get_child(0) == first_child, "a runner far from the anchor leaves the horizon alone")
-		# ...coming within it must push the anchor back out and rebuild it...
-		var close := anchor_position + Vector3(0.0, 0.0, snap * 0.5)
-		director._refresh_anchor(close)
+		# ...which leaves the very same cards alone while the runner is inside one
+		# region...
+		director._refresh_anchor(Vector3(240.0, 0.0, 40.0))
+		_check(host.get_child(0) == first_child, "one region keeps the horizon it laid out")
+		# ...and lays them out again once the runner has moved on to another one,
+		# because a horizon that re-randomised every frame would crawl.
+		director._refresh_anchor(Vector3(2400.0, 0.0, 40.0))
 		_check(host.get_child_count() == 4, "the rebuilt horizon keeps its instance count")
-		_check(
-			not is_equal_approx(anchor.global_position.z, anchor_position.z),
-			"the anchor was pushed back out (still at %s)" % anchor.global_position
-		)
-		# ...and no card of the rebuilt ring may sit inside the clearance.
-		var closest := INF
+		_check(host.get_child(0) != first_child, "a new region lays the horizon out again")
+		# Every card of the rebuilt ring is inside the band, measured from the runner
+		# the anchor now sits on: the ring is scenery all around them.
+		var near := INF
+		var far := 0.0
 		for child in host.get_children():
 			var card := child as Node3D
-			if card != null:
-				closest = minf(closest, card.global_position.distance_to(close))
+			if card == null:
+				continue
+			var distance := Vector2(
+				card.global_position.x - anchor.global_position.x,
+				card.global_position.z - anchor.global_position.z
+			).length()
+			near = minf(near, distance)
+			far = maxf(far, distance)
 		_check(
-			closest >= BiomeDirector.HORIZON_CLEARANCE,
-			"no horizon card comes closer than the clearance (closest %s)" % closest
+			near >= ring.distance_min - 0.01 and far <= ring.distance_max + 0.01,
+			"the horizon ring surrounds the runner inside its band (got %s..%s)" % [near, far]
 		)
 
 	root.remove_child(director)

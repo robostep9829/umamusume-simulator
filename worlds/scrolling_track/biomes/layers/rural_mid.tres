@@ -4,21 +4,21 @@
 [ext_resource type="Material" path="res://worlds/scrolling_track/biomes/materials/treeline.tres" id="2_treeline"]
 
 [sub_resource type="QuadMesh" id="QuadMesh_treeline"]
-size = Vector2(150, 26)
-center_offset = Vector3(0, 13, 0)
+size = Vector2(150, 22)
+center_offset = Vector3(0, 11, 0)
 
 [resource]
 script = ExtResource("1_layer")
 meshes = Array[Mesh]([SubResource("QuadMesh_treeline")])
 mesh_material = ExtResource("2_treeline")
 count = 1
-distance_min = 70.0
-distance_max = 120.0
+distance_min = 90.0
+distance_max = 150.0
 edge_margin = 0.2
 along_scatter = 0.8
 lateral_scatter = 12.0
 lift_scatter = 1.5
 scale_min = 0.85
 scale_max = 1.3
-visible_range = 500.0
+visible_range = 600.0
 cast_shadow = false

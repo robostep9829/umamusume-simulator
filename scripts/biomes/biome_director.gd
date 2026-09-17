@@ -59,17 +59,6 @@ const DECORATION_LAYERS: Array[int] = [
 	BiomeProvider.Layer.FAR,
 ]
 
-## How much of the horizon's own distance the runner may close before the anchor
-## is pushed back out; the rest is the drift window that makes distant scenery lag
-## behind instead of following the camera rigidly.
-const RING_SNAP_FRACTION := 0.6
-
-## Distance a horizon card must always keep from the runner, in metres. Ring
-## content is far scenery (see LAYERS.md): a card reached by the runner would be a
-## huge billboard sliding through the camera, so the anchor is pushed back out
-## before the nearest card can come this close.
-const HORIZON_CLEARANCE := 200.0
-
 ## Track to dress. When left empty, a [TrackManager] among the director's
 ## siblings (or its parent) is used, which is the usual scene layout.
 @export var track: TrackManager
@@ -81,11 +70,6 @@ const HORIZON_CLEARANCE := 200.0
 ## Seed of every decoration layout of the level. 0 means "only the track's own
 ## seed matters".
 @export var decor_seed: int = 0
-## Distance the runner may approach the horizon anchor before it is pushed back out
-## and its content rebuilt, in metres. Never less than the biome's widest ring plus
-## [constant HORIZON_CLEARANCE], so no card is ever reached; a larger value keeps
-## the horizon farther away and rebuilds it less often.
-@export var ring_anchor_snap_distance: float = 1200.0
 ## Seconds an atmosphere change takes when the player enters another biome.
 @export var environment_transition_time: float = 2.5
 ## Turn the whole biome system off without removing the node.
@@ -95,7 +79,7 @@ const HORIZON_CLEARANCE := 200.0
 var _records: Dictionary = {}
 var _active_provider: BiomeProvider
 var _anchor: Node3D
-var _anchor_ready: bool = false
+var _horizon_regions: Dictionary = {}
 var _base_environment: Environment
 var _blend_fields: Array[StringName] = []
 var _blend_tween: Tween
@@ -152,7 +136,7 @@ func active_provider() -> BiomeProvider:
 ## the editor the track is not running, so biomes are a play-time feature.
 func refresh() -> void:
 	_records.clear()
-	_anchor_ready = false
+	_horizon_regions.clear()
 	if _active_provider != null:
 		_rebuild_horizon()
 	if track != null:
@@ -224,62 +208,45 @@ func _rebuild_decoration(
 
 # --- Horizon side ------------------------------------------------------------
 
-## Keeps the horizon anchor ahead of the player: while the runner is still far
-## from it the anchor stays exactly where it is, and it is only moved - with its
-## content rebuilt - once the runner has come within the snap distance of it, so
-## distant scenery lags behind very slowly instead of following rigidly.
+## Keeps the horizon anchor under the player. A ring layer is far scenery - its
+## cards sit in a circle around the anchor - so riding along with the runner means
+## the horizon surrounds them in every direction instead of piling up in front of
+## them, and no card can ever be outrun. Only the direction the runner faces
+## changes which part of it they see, which is what a real horizon does.
 func _refresh_anchor(position: Vector3) -> void:
+	if _active_provider == null or track == null:
+		return
 	if _widest_ring_radius() <= 0.0:
-		# Nothing to keep ahead of the runner: a biome without a horizon must not
+		# Nothing to keep around the runner: a biome without a horizon must not
 		# rebuild an empty anchor every frame.
 		return
-	if _anchor_ready:
-		var anchor_position := _anchor.global_position
-		var approach := Vector2(position.x - anchor_position.x, position.z - anchor_position.z)
-		if approach.length() > _effective_snap_distance():
-			return
-	_anchor_ready = true
-	# The anchor stays on the ground, and it is placed ahead of the player so the
-	# ring's content stays out of reach: it is rebuilt again before the runner
-	# could get there.
-	_anchor.global_position = _anchor_position_for(position)
-	_rebuild_horizon()
+	_anchor.global_position = Vector3(position.x, 0.0, position.z)
+	if _ring_regions_changed():
+		_rebuild_horizon()
 
 
-## Where the horizon anchor belongs for a player at `position`: `lead` metres
-## further along the track, so horizon content is always ahead of the runner.
-func _anchor_position_for(position: Vector3) -> Vector3:
-	var forward := Vector3.FORWARD
-	if track != null:
-		forward = track.track_forward_at(position)
-	forward.y = 0.0
-	if forward.length_squared() < 0.0001:
-		forward = Vector3.FORWARD
-	return Vector3(position.x, 0.0, position.z) + forward.normalized() * _horizon_lead()
+## True once any ring layer has moved on to another region, which is the only time
+## the horizon's layout changes: a card kilometres away that re-randomised every
+## frame would make the distance crawl, and one that never did would show the same
+## hills for the whole level. A ring stays put for `host_every` elements, exactly
+## like the along-track layers.
+func _ring_regions_changed() -> bool:
+	var element_index := track.element_index_at(_anchor.global_position)
+	var changed := false
+	for layer in DECORATION_LAYERS:
+		var descriptor := _active_provider.decoration(layer)
+		if descriptor == null or not descriptor.is_usable() or not descriptor.is_ring():
+			changed = _horizon_regions.erase(layer) or changed
+			continue
+		var region := element_index / maxi(descriptor.host_every, 1)
+		if not _horizon_regions.has(layer) or int(_horizon_regions[layer]) != region:
+			_horizon_regions[layer] = region
+			changed = true
+	return changed
 
 
-## How far ahead of the player the horizon sits: far enough that the runner closes
-## only [constant RING_SNAP_FRACTION] of the lead before the horizon is pushed back
-## out, so the whole ring stays ahead of the runner. 0 when the biome has no
-## horizon content.
-func _horizon_lead() -> float:
-	if _widest_ring_radius() <= 0.0:
-		return 0.0
-	return _effective_snap_distance() / RING_SNAP_FRACTION
-
-
-## Distance the runner may approach the horizon anchor before it is pushed back
-## out: the configured distance, but never less than the biome's widest ring plus
-## [constant HORIZON_CLEARANCE], so no card is ever reached.
-func _effective_snap_distance() -> float:
-	var radius := _widest_ring_radius()
-	if radius <= 0.0:
-		return maxf(ring_anchor_snap_distance, 1.0)
-	return maxf(ring_anchor_snap_distance, radius + HORIZON_CLEARANCE)
-
-
-## Radius of the widest ring of the active biome, or 0 when it has none: the whole
-## ring has to stay ahead of the runner, not just its closest cards.
+## Radius of the widest ring of the active biome, or 0 when it has none: what the
+## anchor has to stay clear of.
 func _widest_ring_radius() -> float:
 	var radius := -1.0
 	if _active_provider != null:
@@ -365,7 +332,10 @@ func _build_ring(host: Node3D, descriptor: BiomeLayer, element_index: int, layer
 	for i in total:
 		var rng := BiomePlacement.instance_rng(decor_seed + descriptor.seed, layer, region, slot)
 		slot += 1
-		var angle := TAU * (float(i) + rng.randf()) / float(total)
+		# The slot jitter is kept small on purpose: a ring that clumps its cards
+		# leaves holes of empty sky between them, and a few rectangles with gaps in
+		# between read as floating cards rather than as a horizon.
+		var angle := TAU * (float(i) + rng.randf_range(-0.15, 0.15)) / float(total)
 		var distance := rng.randf_range(descriptor.distance_min, descriptor.distance_max)
 		var lift := descriptor.lift + rng.randf_range(-1.0, 1.0) * descriptor.lift_scatter
 		var position := Vector3(cos(angle), 0.0, sin(angle)) * distance + Vector3(0.0, lift, 0.0)
@@ -464,10 +434,9 @@ func _configure_instance(node: Node, descriptor: BiomeLayer) -> void:
 
 func _set_active_provider(provider: BiomeProvider) -> void:
 	_active_provider = provider
-	# The horizon belongs to the biome: rebuild it around the anchor it already
-	# has. The anchor itself is re-placed on the next frame, since a new biome may
-	# need a different lead distance.
-	_anchor_ready = false
+	# The horizon belongs to the biome: drop the cached layouts and rebuild it
+	# around the anchor it already has.
+	_horizon_regions.clear()
 	_rebuild_horizon()
 	_blend_environment(_target_environment(provider))
 	biome_changed.emit(provider)
