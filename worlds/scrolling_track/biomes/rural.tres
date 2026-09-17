@@ -1,0 +1,19 @@
+[gd_resource type="Resource" script_class="RuralBiome" load_steps=7 format=3]
+
+[ext_resource type="Script" path="res://scripts/biomes/providers/rural_biome.gd" id="1_rural"]
+[ext_resource type="Material" path="res://worlds/scrolling_track/floor_segments/biomes/rural/materials/ground.tres" id="2_grass"]
+[ext_resource type="Material" path="res://worlds/scrolling_track/biomes/materials/rural_dirt_road.tres" id="3_dirt"]
+[ext_resource type="Resource" path="res://worlds/scrolling_track/biomes/layers/rural_near.tres" id="4_near"]
+[ext_resource type="Resource" path="res://worlds/scrolling_track/biomes/layers/rural_mid.tres" id="5_mid"]
+[ext_resource type="Resource" path="res://worlds/scrolling_track/biomes/layers/rural_far.tres" id="6_far"]
+
+[resource]
+script = ExtResource("1_rural")
+biome_id = &"rural"
+display_name = "Rural (open field)"
+road_material_override = ExtResource("2_grass")
+road_surfaces = Array[Material]([ExtResource("2_grass"), ExtResource("3_dirt")])
+road_surface_every = 6
+near_layer = ExtResource("4_near")
+mid_layer = ExtResource("5_mid")
+far_layer = ExtResource("6_far")

@@ -1,0 +1,10 @@
+[gd_resource type="Resource" script_class="BiomePlaylist" load_steps=4 format=3]
+
+[ext_resource type="Script" path="res://scripts/biomes/biome_playlist.gd" id="1_playlist"]
+[ext_resource type="Script" path="res://scripts/biomes/biome_provider.gd" id="2_provider"]
+[ext_resource type="Resource" path="res://worlds/scrolling_track/biomes/rural.tres" id="3_rural"]
+
+[resource]
+script = ExtResource("1_playlist")
+biomes = Array[ExtResource("2_provider")]([ExtResource("3_rural")])
+segments_per_biome = 0

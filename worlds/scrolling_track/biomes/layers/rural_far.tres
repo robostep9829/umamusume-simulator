@@ -1,0 +1,23 @@
+[gd_resource type="Resource" script_class="BiomeLayer" load_steps=4 format=3]
+
+[ext_resource type="Script" path="res://scripts/biomes/biome_layer.gd" id="1_layer"]
+[ext_resource type="Material" path="res://worlds/scrolling_track/biomes/materials/far_hills.tres" id="2_far_hills"]
+
+[sub_resource type="QuadMesh" id="QuadMesh_hills"]
+size = Vector2(620, 110)
+center_offset = Vector3(0, 55, 0)
+orientation = 2
+
+[resource]
+script = ExtResource("1_layer")
+meshes = Array[Mesh]([SubResource("QuadMesh_hills")])
+mesh_material = ExtResource("2_far_hills")
+mode = 1
+count = 9
+host_every = 6
+distance_min = 650.0
+distance_max = 820.0
+scale_min = 0.9
+scale_max = 1.4
+visible_range = 2500.0
+cast_shadow = false

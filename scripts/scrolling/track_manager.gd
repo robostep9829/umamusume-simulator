@@ -1,3 +1,4 @@
+class_name TrackManager
 extends Node3D
 
 ## Track composer that chains consecutive floor elements to build a track.
@@ -9,8 +10,20 @@ extends Node3D
 ##     the player via a precomputed spine (coordinates stay bounded).
 ##   - Infinite: a procedural `InfiniteTrackLevel` with varying curvature; a
 ##     moving scroll origin and player snap keep coordinates from growing.
+##
+## The track itself knows nothing about scenery: it announces every floor body it
+## places through `segment_placed`, and systems such as [BiomeDirector] hang off
+## that signal.
 
 enum Kind { STRAIGHT, TURN }
+
+## Emitted for every floor body that was (re)placed, after its transform, mesh and
+## collider are set. `element_index` identifies the piece of track the body now
+## shows - endless tracks count elements from the start of the level, a closed
+## loop counts them inside the lap - so the same piece always reports the same
+## index, whichever pooled body happens to host it. That is what lets listeners
+## rebuild only what actually changed.
+signal segment_placed(element_index: int, body: StaticBody3D, segment: TrackSegment)
 
 ## Player the track is centred on and recycled around.
 @export var player: Node3D
@@ -137,8 +150,10 @@ func _replenish(s_p: float) -> void:
 		var slot := first_slot + (k - half)
 		var L := posmod(slot, _slot_count)
 		var node := _pool[k]
+		var segment := _segment_for(_spine_kind[L])
 		node.global_transform = _spine_transform[L]
-		_apply_segment(node, _segment_for(_spine_kind[L]))
+		_apply_segment(node, segment)
+		segment_placed.emit(L, node, segment)
 
 
 ## --- Infinite ----------------------------------------------------------------
@@ -192,8 +207,10 @@ func _build_window() -> void:
 
 	for k in pool_size:
 		var node := _pool[k]
+		var segment := _segment_for(_window_kind[k])
 		node.transform = _window_tf[k]
-		_apply_segment(node, _segment_for(_window_kind[k]))
+		_apply_segment(node, segment)
+		segment_placed.emit(_slot_first + k, node, segment)
 
 
 ## Moves the window's base slot so the player stays near the middle, keeping
@@ -212,7 +229,12 @@ func _recenter(new_first: int) -> void:
 
 ## Returns the player's arc-length measured in the scroll-local frame.
 func _player_local_s() -> float:
-	var p_local := _scroll.global_transform.affine_inverse() * player.global_position
+	return _local_s_for(player.global_position)
+
+
+## Returns the arc-length of `pos` measured in the scroll-local frame.
+func _local_s_for(pos: Vector3) -> float:
+	var p_local := _scroll.global_transform.affine_inverse() * pos
 	var p := Vector2(p_local.x, p_local.z)
 	var best := 0.0
 	var best_d2 := INF
@@ -251,6 +273,35 @@ func track_forward_at(pos: Vector3) -> Vector3:
 			best_s = float(i) * _seg_length + t * _seg_length
 	var i := int(clampf(floor(best_s / _seg_length), 0, pool_size - 1))
 	return _scroll.global_transform.basis * (-_window_tf[i].basis.z)
+
+
+## Returns the index of the track element whose centreline is closest to `pos`,
+## expressed the same way as the `element_index` of `segment_placed` - so a
+## listener can ask "which biome is the player in?" without knowing how the track
+## is pooled.
+func element_index_at(pos: Vector3) -> int:
+	if infinite:
+		if _scroll == null:
+			return 0
+		return _slot_first + int(floor(_local_s_for(pos) / _seg_length))
+	if _slot_count <= 0:
+		return 0
+	return posmod(int(floor(_closest_s(pos) / _seg_length)), _slot_count)
+
+
+## Re-places every pooled segment, which re-emits `segment_placed` for the whole
+## pool. Lets listeners update decisions they already made (see
+## [method BiomeDirector.refresh]); harmless to call while the track runs, because
+## re-placing a segment never moves the track.
+func refresh_pool() -> void:
+	if infinite:
+		if _scroll != null:
+			_build_window()
+		return
+	if _pool.is_empty():
+		return
+	var s := _closest_s(player.global_position) if player != null else 0.0
+	_replenish(s)
 
 
 ## Resets the scroll origin (and the player, which rides along) back toward the

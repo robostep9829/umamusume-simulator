@@ -1,0 +1,14 @@
+[gd_resource type="ShaderMaterial" format=3]
+
+[ext_resource type="Shader" path="res://worlds/scrolling_track/floor_segments/biomes/rural/materials/ground_.tres" id="1_shader"]
+[ext_resource type="Texture2D" path="res://worlds/uma_island/tex/layers/dirt/terrain_red_01_diffpack_1k.png" id="2_dirt"]
+[ext_resource type="Texture2D" path="res://worlds/uma_island/tex/layers/dirt/terrain_red_01_nor_gl_recomp_1k.exr" id="3_dirt_normal"]
+[ext_resource type="Texture2D" path="res://worlds/scrolling_track/floor_segments/biomes/rural/tex/track-map.png" id="4_track_map"]
+
+[resource]
+shader = ExtResource("1_shader")
+shader_parameter/tex_grass = ExtResource("2_dirt")
+shader_parameter/tex_sand = ExtResource("2_dirt")
+shader_parameter/tex_layers = ExtResource("4_track_map")
+shader_parameter/nrm_grass = ExtResource("3_dirt_normal")
+shader_parameter/nrm_sand = ExtResource("3_dirt_normal")
