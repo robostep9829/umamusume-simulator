@@ -1,6 +1,6 @@
 [gd_resource type="ArrayMesh" format=4 uid="uid://cobx4l3bbhs5a"]
 
-[ext_resource type="Shader" uid="uid://djkpcrm6rddos" path="res://worlds/scrolling_track/props/rural/materials/tree/wind_area_effect_simple.gdshader" id="1_nn28q"]
+[ext_resource type="Shader" uid="uid://djkpcrm6rddos" path="res://worlds/scrolling_track/biomes/rural/materials/shaders/wind_area_effect_simple.gdshader" id="1_nn28q"]
 
 [sub_resource type="FastNoiseLite" id="FastNoiseLite_6isqc"]
 

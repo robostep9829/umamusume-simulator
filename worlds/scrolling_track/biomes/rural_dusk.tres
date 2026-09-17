@@ -1,20 +1,38 @@
 [gd_resource type="Resource" script_class="RuralBiome" format=3 uid="uid://ceg58cw6l0m7u"]
 
+[ext_resource type="CompressedTexture3D" uid="uid://e573kqiepk0a" path="res://environment/tonemap/pbrNeutral.exr" id="1_mq0mn"]
 [ext_resource type="Script" uid="uid://cqxnxc6weq8hv" path="res://scripts/biomes/providers/rural_biome.gd" id="1_rural"]
-[ext_resource type="Material" uid="uid://b4n7hfri20ovo" path="res://worlds/scrolling_track/biomes/materials/rural_dirt_road.tres" id="2_dirt"]
-[ext_resource type="Environment" uid="uid://bx70kmc1q61p6" path="res://worlds/scrolling_track/biomes/rural_dusk_env.tres" id="3_environment"]
-[ext_resource type="Resource" path="res://worlds/scrolling_track/biomes/layers/rural_near.tres" id="4_near"]
-[ext_resource type="Resource" uid="uid://bmxxl1s70mdpp" path="res://worlds/scrolling_track/biomes/layers/rural_mid.tres" id="5_mid"]
-[ext_resource type="Resource" uid="uid://11dbwmj245x0" path="res://worlds/scrolling_track/biomes/layers/rural_far.tres" id="6_far"]
+[ext_resource type="Sky" uid="uid://coqbbfksjyjus" path="res://environment/sky_default.tres" id="2_6nkt7"]
+[ext_resource type="Resource" uid="uid://11dbwmj245x0" path="res://worlds/scrolling_track/biomes/rural/layers/rural_far.tres" id="3_iwufl"]
+[ext_resource type="Resource" uid="uid://bmxxl1s70mdpp" path="res://worlds/scrolling_track/biomes/rural/layers/rural_mid.tres" id="4_n1nvo"]
+[ext_resource type="Resource" uid="uid://dtek1tsbwhr3l" path="res://worlds/scrolling_track/biomes/rural/layers/rural_near.tres" id="5_57e3f"]
+[ext_resource type="Material" uid="uid://b4n7hfri20ovo" path="res://worlds/scrolling_track/biomes/rural/materials/rural_dirt_road.tres" id="6_wa067"]
+
+[sub_resource type="Environment" id="Environment_bibh1"]
+background_mode = 2
+background_color = Color(0.39, 0.39, 0.39, 1)
+sky = ExtResource("2_6nkt7")
+tonemap_exposure = 0.52
+fog_enabled = true
+fog_light_color = Color(0.85, 0.45, 0.32, 1)
+fog_light_energy = 1.2
+fog_sun_scatter = 0.15
+fog_density = 0.0042
+fog_aerial_perspective = 0.2
+fog_sky_affect = 0.85
+adjustment_enabled = true
+adjustment_contrast = 0.45
+adjustment_saturation = 0.8
+adjustment_color_correction = ExtResource("1_mq0mn")
 
 [resource]
 script = ExtResource("1_rural")
-road_surfaces = Array[Material]([ExtResource("2_dirt")])
+road_surfaces = Array[Material]([ExtResource("6_wa067")])
 road_surface_every = 1
 biome_id = &"rural_dusk"
 display_name = "Rural (dusk)"
-road_material_override = ExtResource("2_dirt")
-near_layer = ExtResource("4_near")
-mid_layer = ExtResource("5_mid")
-far_layer = ExtResource("6_far")
-atmosphere = ExtResource("3_environment")
+road_material_override = ExtResource("6_wa067")
+near_layer = ExtResource("5_57e3f")
+mid_layer = ExtResource("4_n1nvo")
+far_layer = ExtResource("3_iwufl")
+atmosphere = SubResource("Environment_bibh1")

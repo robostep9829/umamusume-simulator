@@ -1,7 +1,7 @@
 [gd_resource type="Resource" script_class="BiomeLayer" format=3 uid="uid://11dbwmj245x0"]
 
 [ext_resource type="Script" uid="uid://dl0u5uw0i1tal" path="res://scripts/biomes/biome_layer.gd" id="1_layer"]
-[ext_resource type="Material" path="res://worlds/scrolling_track/biomes/materials/far_hills.tres" id="2_far_hills"]
+[ext_resource type="Material" path="res://worlds/scrolling_track/biomes/rural/materials/far_hills.tres" id="2_far_hills"]
 
 [sub_resource type="QuadMesh" id="QuadMesh_hills"]
 size = Vector2(1200, 110)

@@ -1,7 +1,7 @@
 [gd_resource type="Resource" script_class="TrackSegment" format=3 uid="uid://bnis8bqvtbnvo"]
 
 [ext_resource type="Script" uid="uid://k4ptfmmb2irt" path="res://scripts/scrolling/track_segment.gd" id="1"]
-[ext_resource type="Material" uid="uid://c8xsq2iw3ca2h" path="res://worlds/scrolling_track/floor_segments/biomes/rural/materials/ground.tres" id="1_q1x4k"]
+[ext_resource type="Material" uid="uid://c8xsq2iw3ca2h" path="res://worlds/scrolling_track/biomes/rural/materials/ground.tres" id="1_q1x4k"]
 
 [sub_resource type="ArrayMesh" id="ArrayMesh_k5c7e"]
 _surfaces = [{

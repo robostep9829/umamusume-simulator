@@ -1,0 +1,19 @@
+[gd_resource type="Resource" script_class="BiomeLayer" format=3 uid="uid://dtek1tsbwhr3l"]
+
+[ext_resource type="Script" uid="uid://dl0u5uw0i1tal" path="res://scripts/biomes/biome_layer.gd" id="1_layer"]
+[ext_resource type="PackedScene" uid="uid://bprc7a7jmwtu5" path="res://worlds/scrolling_track/biomes/rural/props/rural_tree.tscn" id="2_tree"]
+
+[resource]
+script = ExtResource("1_layer")
+variants = Array[PackedScene]([ExtResource("2_tree")])
+count = 1
+host_every = 2
+distance_min = 13.0
+distance_max = 14.5
+edge_margin = 0.12
+along_scatter = 0.6
+scale_min = 0.85
+scale_max = 1.4
+yaw_scatter = 180.0
+visible_range = 320.0
+cast_shadow = false
