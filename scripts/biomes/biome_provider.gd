@@ -18,7 +18,11 @@ extends Resource
 ## Layers follow `worlds/scrolling_track/doc/LAYERS.md`:
 ## [codeblock]
 ## ROAD - layer 0, the playfield itself. Skinned through road_material() and
-##        road_mesh(), never decorated. The only layer that affects gameplay.
+##        road_mesh(), never decorated: `decoration(ROAD)` is not asked and
+##        `decorate_layer()` is not called with it. Props can still be *placed*
+##        inside the playfield by a NEAR/MID layer whose distance band is small
+##        enough - they are visual then, like any other decoration. The only layer
+##        that affects gameplay.
 ## NEAR - layer 1, full 3D dressing right beside the track.
 ## MID  - layer 2, low-poly silhouettes or flat cards, roughly 60-200 m out.
 ## FAR  - layer 3, the horizon: camera-locked content that only changes when the

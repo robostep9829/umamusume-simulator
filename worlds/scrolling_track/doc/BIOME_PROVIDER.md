@@ -329,6 +329,33 @@ A whole new near prop, end to end:
    the debug overlay's `layers` line should show the new instance count
 ```
 
+**Props inside the playfield (layer 0).** There is no decoration slot for layer 0:
+`decoration(ROAD)` is never asked (the default returns `null` for it) and
+`decorate_layer()` is never called with `ROAD`. What layer 0 takes is the road
+itself - `road_mesh_override` for geometry, `road_skins` / `road_variant()` /
+`road_surfaces` for the surface, all applied by `_skin_road()` on every placement.
+
+Nothing validates the bands, though: `distance_min` and `distance_max` are just
+metres from the centreline, so a `near_layer` is free to stand inside the playfield.
+The demo already does it - the road is 30 m wide and `rural_near.tres` places trees at
+13-14.5 m, in the decorative margin `LAYERS.md` describes ("outer 3-6 m on each side").
+Three things come with it:
+
+* Keep the running corridor clear. A 30 m playfield with an 18-24 m corridor leaves
+  about 3-6 m of margin per side; anything closer than that is in the runner's path.
+* Props there are visual. `BiomeLayer` instances are geometry with no collision, so
+  the runner passes through them - unless the prop scene carries its own
+  `StaticBody3D`, in which case it stops the runner but still has no gameplay meaning
+  (no scoring, no despawn, no spawning rules). Real obstacles are the `obstacle_skins`
+  hook of 1.2, which is declared and not consumed yet.
+* They pop in at the pool edge. Scenery at 90-150 m hides the pool window; a prop two
+  metres from the runner appears in front of them, so keep those low and small, and do
+  not expect `visible_range` to help.
+
+If a biome needs playfield-level props as a first-class thing rather than scenery
+placed close, that is a fourth slot (`road_layer`) plus a branch in `decoration()` and
+`ROAD` added to the director's loop - worth doing when obstacles land, not before.
+
 One slot per band is a deliberate limit, not an oversight: three bands with a list
 each covers "what is near, what is middle, what is horizon" without a scene graph
 to maintain. When a band needs two *independent* layers - trees at 13 m and bushes
