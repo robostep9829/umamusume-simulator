@@ -7,24 +7,67 @@ What matters about them is whether the ridge stays continuous (no holes of sky
 between the cards), whether it sits in the far band of `doc/LAYERS.md`, how much
 haze covers it, and how often it is laid out again.
 
-The numbers below mirror `worlds/scrolling_track/biomes/layers/rural_far.tres`,
-`BiomeDirector._build_ring()` and `biomes/rural_env.tres`; update them together.
+The ring and its fog are read from the files that author them, so a change there
+cannot leave this checker judging the old numbers; `BiomeDirector._build_ring()`
+is the only place a constant is mirrored, because it is code.
 
     python3 tools/verify_horizon.py      # exit 0 = the authored numbers hold
 """
 import math
+import re
 import sys
+from pathlib import Path
 
-# layers/rural_far.tres
-COUNT = 14
-DIST_MIN, DIST_MAX = 1200.0, 1600.0
-WIDTH, HEIGHT = 1200.0, 110.0
-SCALE_MIN, SCALE_MAX = 0.9, 1.4
-HOST_EVERY = 40
+ROOT = Path(__file__).resolve().parent.parent
+LAYER = ROOT / "worlds/scrolling_track/biomes/layers/rural_far.tres"
+ENVIRONMENT = ROOT / "worlds/scrolling_track/biomes/rural_env.tres"
+
+
+def read_resource(path):
+    """Properties of a text resource's `[resource]` block and its sub_resources."""
+    values = {}
+    sub_resources = {}
+    current = None
+    for raw in path.read_text().splitlines():
+        line = raw.strip()
+        if line.startswith("[sub_resource"):
+            current = re.search(r'\bid="([^"]+)"', line).group(1)
+            sub_resources[current] = {}
+            continue
+        if line.startswith("["):
+            current = "resource" if line == "[resource]" else None
+            continue
+        if current is not None and "=" in line:
+            key, value = line.split("=", 1)
+            sub_resources.setdefault(current, {})[key.strip()] = value.strip()
+    values.update(sub_resources.pop("resource", {}))
+    values["_sub_resources"] = sub_resources
+    return values
+
+
+def number(values, key, fallback):
+    return float(values[key]) if key in values else fallback
+
+
+def vector2(value):
+    """`Vector2(1200, 110)` as a pair of floats - the constructor name is not a number."""
+    inside = re.search(r"\(([^)]*)\)", value)
+    parts = inside.group(1).split(",") if inside else value.split(",")
+    return tuple(float(part) for part in parts[:2])
+
+
+layer = read_resource(LAYER)
+environment = read_resource(ENVIRONMENT)
+mesh = layer["_sub_resources"][re.search(r'SubResource\("([^"]+)"\)', layer["meshes"]).group(1)]
+
+COUNT = int(number(layer, "count", 0))
+DIST_MIN, DIST_MAX = number(layer, "distance_min", 0.0), number(layer, "distance_max", 0.0)
+WIDTH, HEIGHT = vector2(mesh["size"])
+SCALE_MIN, SCALE_MAX = number(layer, "scale_min", 1.0), number(layer, "scale_max", 1.0)
+HOST_EVERY = int(number(layer, "host_every", 1))
+FOG_DENSITY = number(environment, "fog_density", 0.0)
 # BiomeDirector._build_ring()
 SLOT_JITTER = 0.15
-# biomes/rural_env.tres
-FOG_DENSITY = 0.0008
 # the track and the runner
 ELEMENT_LENGTH = 100.0
 SPEED = 25.0

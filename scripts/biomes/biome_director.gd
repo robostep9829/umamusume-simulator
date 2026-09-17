@@ -48,6 +48,7 @@ const BLENDED_ENVIRONMENT_FIELDS: Array[StringName] = [
 	&"fog_sky_affect",
 	&"fog_height",
 	&"fog_height_density",
+	&"fog_sun_scatter",
 	&"tonemap_exposure",
 	&"tonemap_white",
 ]
@@ -575,14 +576,27 @@ func _configure_instance(node: Node, descriptor: BiomeLayer) -> void:
 
 
 # --- Biomes and atmosphere ---------------------------------------------------
+#
+# A biome's `atmosphere` is a whole [Environment], not a patch on the level's:
+# while a biome with one is active, the [WorldEnvironment] renders *that* file, so
+# a fog or sky setting left in the level's environment only survives until the
+# first biome is applied. Author the fog where the biome reads it, and give a
+# provider no `atmosphere` to keep the level's own. The switch is cross-faded, but
+# only for the numeric fields below - `sky`, `fog_enabled` and the rest are swapped
+# together with the resource, because a sky cannot be interpolated.
 
 func _set_active_provider(provider: BiomeProvider) -> void:
+	# The first biome of a run is applied as it is, without a fade: fading in from
+	# the level's own environment would show *that* look - possibly a different time
+	# of day, or much denser fog - for the length of the fade at the start of every
+	# run, which is not a biome transition.
+	var first := _active_provider == null
 	_active_provider = provider
 	# The horizon belongs to the biome: drop the cached layouts and rebuild it
 	# around the anchor it already has.
 	_horizon_regions.clear()
 	_rebuild_horizon()
-	_blend_environment(_target_environment(provider))
+	_blend_environment(_target_environment(provider), first)
 	biome_changed.emit(provider)
 
 
@@ -594,10 +608,30 @@ func _target_environment(provider: BiomeProvider) -> Environment:
 	return _base_environment
 
 
+## The [Environment] the world is rendering right now, or `null` when the level
+## has no [WorldEnvironment]. While a transition runs this is the half-faded
+## duplicate, which is what makes it useful to a debug readout: it shows what the
+## scene looks like, not what the biome asked for.
+func live_environment() -> Environment:
+	return world_environment.environment if world_environment != null else null
+
+
+## How far the running atmosphere transition has come: 0 when it starts, 1 when it
+## is done, and 1 whenever nothing is fading. Read by debug views; the fade itself
+## is a [Tween].
+func blend_progress() -> float:
+	if _blend_tween == null or not _blend_tween.is_valid() or not _blend_tween.is_running():
+		return 1.0
+	var duration := _blend_tween.get_total_duration()
+	if duration <= 0.0:
+		return 1.0
+	return clampf(_blend_tween.get_total_elapsed_time() / duration, 0.0, 1.0)
+
+
 ## Cross-fades the world environment to `target`. The resource is duplicated
 ## first: the authored `.tres` is never written to, and the fade always starts
 ## from whatever the world currently looks like.
-func _blend_environment(target: Environment) -> void:
+func _blend_environment(target: Environment, instant: bool = false) -> void:
 	if world_environment == null or target == null:
 		return
 	var current := world_environment.environment
@@ -615,7 +649,7 @@ func _blend_environment(target: Environment) -> void:
 		from[field] = current.get(field) if current != null else null
 	world_environment.environment = blended
 
-	var duration := environment_transition_time
+	var duration := 0.0 if instant else environment_transition_time
 	if duration <= 0.0:
 		return
 	_blend_tween = create_tween().set_parallel()

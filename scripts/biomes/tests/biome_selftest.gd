@@ -43,6 +43,7 @@ func _initialize() -> void:
 	_test_track_integration()
 	_test_horizon()
 	_test_debug_stats()
+	_test_atmosphere()
 
 	print("")
 	if _failures.is_empty():
@@ -607,6 +608,125 @@ func _test_debug_stats() -> void:
 
 ## Centreline tangent at `t`, measured from the placement itself so the check does
 ## not simply restate the formula it is testing.
+## The part of a biome change the player sees first. Written the way the debug
+## overlay reads it - through the *live* [Environment] - because "the fog did not
+## change with the biome" is exactly the kind of failure a test that only looks at
+## the biome's own `.tres` file cannot see.
+func _test_atmosphere() -> void:
+	var level := _environment(Color(0.2, 0.2, 0.25), 0.01)
+	var world := WorldEnvironment.new()
+	world.environment = level
+	root.add_child(world)
+
+	var day := _provider(&"day")
+	day.atmosphere = _environment(Color(0.62, 0.71, 0.8), 0.0018)
+	var dusk := _provider(&"dusk")
+	dusk.atmosphere = _environment(Color(0.85, 0.45, 0.32), 0.0042)
+	var bare := _provider(&"bare")
+
+	var playlist := BiomePlaylist.new()
+	playlist.biomes = [day, dusk, bare]
+	playlist.segments_per_biome = 4
+	var track := TrackManager.new()
+	track.infinite = true
+	track.straight_segment = _segment_resource(false)
+	track.turn_segment = _segment_resource(true)
+	var runner := Node3D.new()
+	track.player = runner
+
+	var director := BiomeDirector.new()
+	director.track = track
+	director.playlist = playlist
+	director.world_environment = world
+	director.environment_transition_time = 2.0
+	root.add_child(track)
+	root.add_child(runner)
+	root.add_child(director)
+
+	# The first biome of a run is taken as it is, however long a transition is set
+	# to: fading in from the level's environment would show that look - possibly a
+	# different time of day, or much denser fog - at the start of every run.
+	director._set_active_provider(day)
+	_check(director._blend_tween == null, "the first biome is applied without a fade")
+	_check_environment(director, day.atmosphere, "the world renders the biome's fog")
+
+	# Instant from here, so the switches below need no frames to read.
+	director.environment_transition_time = 0.0
+	director._set_active_provider(dusk)
+	_check_environment(director, dusk.atmosphere, "the next biome's fog replaces it")
+	_check(
+		not director.live_environment().fog_light_color.is_equal_approx(
+			day.atmosphere.fog_light_color
+		),
+		"the two biomes do not share a fog colour"
+	)
+	# A biome without an atmosphere keeps the level's own environment, and so the
+	# level's fog - the rule the docs promise.
+	director._set_active_provider(bare)
+	_check_environment(director, level, "a biome without an atmosphere keeps the level's fog")
+
+	# Now the same switch with a fade: the fog has to travel from the environment the
+	# player is looking at to the new biome's, which is the whole point of the
+	# cross-fade. The tween is stepped by hand - a self-test has no frames to spend.
+	director.environment_transition_time = 2.0
+	director._set_active_provider(dusk)
+	var fade := director._blend_tween
+	if fade == null or not fade.is_valid():
+		_check(false, "entering a biome starts an atmosphere fade")
+		return
+	_check(director.blend_progress() < 0.5, "a fade starts at its beginning")
+	# What the fade carries, as opposed to what is swapped with the resource: a fog
+	# colour that is not in this list would jump instead of travelling.
+	for field in [&"fog_light_color", &"fog_density", &"fog_light_energy", &"fog_sky_affect"]:
+		_check(director._blend_fields.has(field), "the fade carries `%s`" % field)
+	fade.custom_step(1.0)
+	var halfway: Color = director.live_environment().fog_light_color
+	_check(
+		halfway.is_equal_approx(level.fog_light_color.lerp(dusk.atmosphere.fog_light_color, 0.5)),
+		"halfway through a fade the fog is between the two biomes (got %s)" % halfway
+	)
+	_check(
+		is_equal_approx(
+			director.live_environment().fog_density,
+			lerpf(level.fog_density, dusk.atmosphere.fog_density, 0.5)
+		),
+		"the fog density fades too"
+	)
+	_check(
+		director.blend_progress() > 0.4 and director.blend_progress() < 0.6,
+		"a fade halfway through reports about halfway (got %s)" % director.blend_progress()
+	)
+	fade.custom_step(1.0)
+	_check_environment(director, dusk.atmosphere, "a finished fade leaves the biome's own fog")
+	_check(is_equal_approx(director.blend_progress(), 1.0), "a finished fade reports itself done")
+
+
+## Checks the fog the world is rendering against the one a biome asked for. Every
+## field is compared, because the ones that cannot be faded - `fog_enabled` among
+## them - are the ones a "the fog did not change" report tends to be about.
+func _check_environment(director: BiomeDirector, expected: Environment, what: String) -> void:
+	var live := director.live_environment()
+	if live == null:
+		_check(false, "%s (no live environment)" % what)
+		return
+	_check(live.fog_enabled == expected.fog_enabled, "%s: fog_enabled" % what)
+	_check(live.fog_light_color.is_equal_approx(expected.fog_light_color), "%s: fog colour" % what)
+	_check(is_equal_approx(live.fog_density, expected.fog_density), "%s: fog density" % what)
+	_check(
+		is_equal_approx(live.fog_sky_affect, expected.fog_sky_affect),
+		"%s: fog sky affect" % what
+	)
+
+
+## An environment whose fog is the only thing that matters to this test.
+func _environment(colour: Color, density: float) -> Environment:
+	var environment := Environment.new()
+	environment.fog_enabled = true
+	environment.fog_light_color = colour
+	environment.fog_density = density
+	return environment
+
+
 func _tangent(segment: TrackSegment, t: float) -> Vector3:
 	var step := 0.001
 	var before := BiomePlacement.local_position(segment, maxf(t - step, 0.0))

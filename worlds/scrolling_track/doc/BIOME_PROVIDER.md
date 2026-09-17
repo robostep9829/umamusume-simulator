@@ -194,7 +194,23 @@ the biome under the player each physics frame and, when it changes:
 The fade works on a *duplicate* of the biome's `Environment` (the authored
 `.tres` is never written to) and blends the numeric fields both environments
 have - background, ambient light, fog and tonemap. A resource's `sky` cannot be
-interpolated, so it is swapped with the rest of the biome's environment.
+interpolated, so it is swapped with the rest of the biome's environment, and so is
+`fog_enabled`: a biome that turns fog *on* does it as its environment is assigned,
+while its colour, density and energy travel over the fade.
+
+The first biome of a run is applied without a fade: cross-fading out of the level's
+own environment would show *that* look - possibly a different time of day, or much
+denser fog - at the start of every run, which is not a transition the player made.
+Every later switch, and only those, takes `environment_transition_time`.
+
+[b]A biome's `atmosphere` is a whole environment, not a patch on the level's.[/b]
+While a biome that has one is active, the `WorldEnvironment` renders that file, so
+a fog setting left in the level's own environment (`environment/new_environment.tres`)
+only survives until the first biome is applied. Turning fog on there and waiting for
+the biome to change its colour will therefore show nothing at all - author the fog in
+the biome's environment, or give the provider no `atmosphere` to keep the level's own.
+The debug overlay's `fog` line reads the environment that is actually rendering, so
+this is visible rather than guessed at.
 
 One approximation to know about: element boundaries are measured along the
 centreline, and the endless track indexes slots by the straight segment's length,
@@ -207,6 +223,21 @@ day-lit one: `rural.tres` uses `rural_env.tres`, the project's base environment
 plus `fog_enabled` and a haze colour, and that fog is what turns a 1.5 km card into
 distant scenery instead of a crisp rectangle. Without it, everything past the
 playfield is as sharp as the road.
+
+Two biomes have to differ *where the player is looking*, or the transition is
+invisible even though the data changed. The numbers that matter for fog are:
+
+| Field | Why it decides whether a change is seen |
+|---|---|
+| `fog_density` | metres of air per unit of haze: the demo's day biome reaches 88 % at its own 1.2 km horizon, dusk 99 % |
+| `fog_light_color` | the colour the distance takes; the clearest signal a biome has |
+| `fog_sky_affect` | how much of that colour the *sky* takes - and the sky is most of the picture |
+| `fog_aerial_perspective` | gives the fog colour back to the sky, so a high value hides the biome's own tint |
+| `fog_light_energy` | makes a dusk haze glow rather than just grey the view |
+
+`tools/verify_atmosphere.py` checks exactly this over the demo playlist - fog on in
+every biome, colours far enough apart to notice, haze that actually reaches the
+horizon - so the transition cannot silently become a no-op.
 
 ---
 
@@ -264,6 +295,7 @@ python3 tools/check_res.py $(find . -path ./.git -prune -o \( -name "*.tres" -o 
 python3 tools/verify_placement.py     # placement/orientation invariants
 python3 tools/verify_horizon.py       # the far layer's numbers: continuity, haze, cost
 python3 tools/verify_debug_stats.py   # what the debug overlay reads
+python3 tools/verify_atmosphere.py    # that a biome change is visible in the fog
 ```
 
 `check_res.py` validates the text resources - paths, types, `script_class`,
@@ -335,7 +367,13 @@ is a `CanvasLayer` that builds its own panel, finds the level's `TrackManager`,
 | `track` | endless or closed loop, pool size, seed / lap length |
 | `layers` | instances built per decoration layer, as they really are in the pool |
 | `horizon` | cards in the ring and how far the anchor currently is |
-| `skin` / `atmo` / `playlist` / `coming` | road variant, atmosphere file, playlist mode, the next few runs |
+| `fog` | the environment that is *rendering*: fog colour (with a swatch), density, energy, sky affect, aerial perspective, sun scatter |
+| `skin` / `atmo` / `playlist` / `coming` | road variant, atmosphere file (and how far a transition has come), playlist mode, the next few runs |
+
+The `fog` line is read from the live environment rather than from the biome's
+`.tres`, so during a transition it shows the colour the player is looking at right
+now, together with `atmo ... fading 43%`. That is what makes "the fog does not
+change with the biome" answerable from the screen instead of from the data.
 
 **F3** shows and hides it, **F4** cycles `compact` / `normal` / `full`. On a
 touchscreen a small button in the top-right corner opens it instead. The panel

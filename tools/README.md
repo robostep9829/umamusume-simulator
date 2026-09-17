@@ -12,6 +12,7 @@ quietly renders the wrong thing.
 | `verify_placement.py` | `BiomePlacement`'s geometry: end points, frames, handedness, arcs, lateral offsets, ring and lateral orientation |
 | `verify_horizon.py` | the numbers `biomes/layers/rural_far.tres` is authored with: ridge continuity, band, haze, rebuild interval |
 | `verify_debug_stats.py` | the debug overlay's readout: biome runs, distance to the next biome, run progress |
+| `verify_atmosphere.py` | that a biome change is *visible*: fog on in every biome, colours far enough apart, haze that reaches the horizon |
 | `build_godot_index.py` | rebuilds `godot_class_index.json`, the class knowledge `check_res.py` runs on |
 
 ```bash
@@ -19,10 +20,15 @@ python3 tools/check_res.py $(find . -path ./.git -prune -o \( -name "*.tres" -o 
 python3 tools/verify_placement.py
 python3 tools/verify_horizon.py
 python3 tools/verify_debug_stats.py
+python3 tools/verify_atmosphere.py
 ```
 
 All of them exit non-zero and print what is wrong, so they can be wired into a
 commit hook or CI as-is.
+
+`verify_horizon.py` and `verify_atmosphere.py` read the biomes' own `.tres` files
+rather than mirroring their numbers, so tuning the demo content cannot leave them
+judging an older version of it.
 
 `godot_class_index.json` is generated from the engine's own `doc/classes` XML, so
 it knows exactly what a resource may contain. It is committed to keep

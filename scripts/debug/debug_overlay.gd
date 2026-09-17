@@ -127,6 +127,7 @@ func refresh() -> void:
 		_add_track_lines(lines)
 	_add_player_lines(lines)
 	_add_biome_lines(lines)
+	_add_fog_lines(lines)
 	if detail >= Detail.FULL:
 		_add_extra_lines(lines)
 	lines.append(_hint_line())
@@ -363,6 +364,31 @@ func _add_biome_lines(lines: Array[String]) -> void:
 	_bar.value = float(_stats.get("run_progress", 0.0)) * 100.0
 
 
+## The fog the world is rendering *right now*. Read from the live environment
+## rather than from the biome's file, because during a transition those differ -
+## and the fog is where a biome change is easiest to see, so it is worth a line of
+## its own at every detail level.
+func _add_fog_lines(lines: Array[String]) -> void:
+	var environment := director.live_environment() if director != null else null
+	if environment == null:
+		lines.append(_field("fog", "no WorldEnvironment in this level", WARN_COLOR))
+		return
+	if not environment.fog_enabled:
+		lines.append(_field("fog", "off - the level's environment has it off", WARN_COLOR))
+		return
+	var colour := environment.fog_light_color
+	lines.append(_field("fog", "%s %s   density %s   energy %s" % [
+		_swatch(colour), colour.to_html(false),
+		String.num(environment.fog_density, 4),
+		String.num(environment.fog_light_energy, 2),
+	]))
+	lines.append(_field("", "sky %s   aerial %s   sun %s" % [
+		String.num(environment.fog_sky_affect, 2),
+		String.num(environment.fog_aerial_perspective, 2),
+		String.num(environment.fog_sun_scatter, 2),
+	]))
+
+
 func _add_extra_lines(lines: Array[String]) -> void:
 	if director == null:
 		return
@@ -377,7 +403,9 @@ func _add_extra_lines(lines: Array[String]) -> void:
 		int(_stats.get("variant", 0)) + 1, int(_stats.get("variants", 1))
 	]))
 	var atmosphere := String(_stats.get("atmosphere", ""))
-	lines.append(_field("atmo", atmosphere if not atmosphere.is_empty() else "level default"))
+	lines.append(_field("atmo", "%s%s" % [
+		atmosphere if not atmosphere.is_empty() else "level default", _fade_text()
+	]))
 	lines.append(_field("playlist", String(_stats.get("playlist", ""))))
 	var upcoming := _stats.get("upcoming", []) as Array
 	if not upcoming.is_empty():
@@ -412,6 +440,23 @@ func _thousands(value: float) -> String:
 	grouped = whole + grouped
 	var text := grouped if parts.size() < 2 else "%s.%s" % [grouped, parts[1]]
 	return ("-" if value < 0.0 else "") + text
+
+
+## A colour as a block the eye can compare between readouts.
+func _swatch(colour: Color) -> String:
+	return "[bgcolor=#%s]    [/bgcolor]" % colour.to_html(false)
+
+
+## How far the atmosphere transition has come, or an empty string when none is
+## running - so the readout tells "the fog is this colour" from "the fog is on its
+## way to this colour".
+func _fade_text() -> String:
+	if director == null:
+		return ""
+	var progress := director.blend_progress()
+	if progress >= 1.0:
+		return ""
+	return " \u00b7 fading %d%%" % int(round(progress * 100.0))
 
 
 func _metres(value: float) -> String:
