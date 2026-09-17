@@ -64,7 +64,7 @@ enum Side {
 @export var count: int = 2
 ## Which side of the track gets instances. Ignored in RING mode, which always
 ## closes the circle.
-@export var side: Side = Side.BOTH
+@export var side: BiomeLayer.Side = Side.BOTH
 ## ALONG_TRACK: host the layer on every N-th element only. The objects themselves
 ## have to cover the skipped span (a tree line built for `host_every = 4` must be
 ## as long as four segments), otherwise the layer will look like it has holes.

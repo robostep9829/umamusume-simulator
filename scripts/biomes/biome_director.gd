@@ -180,7 +180,7 @@ func _on_segment_placed(element_index: int, body: StaticBody3D, segment: TrackSe
 
 	var key := body.get_instance_id()
 	var record: Dictionary = _records.get(key, {})
-	var unchanged := record.get("index", -1) == element_index
+	var unchanged: bool = record.get("index", -1) == element_index
 	unchanged = unchanged and record.get("provider") == provider
 	unchanged = unchanged and record.get("segment") == segment
 	if unchanged:

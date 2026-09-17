@@ -7,7 +7,7 @@
 [ext_resource type="ArrayMesh" uid="uid://dxbpehg82cytg" path="res://worlds/scrolling_track/floor_segments/floor_straight.obj" id="5_7g5pp"]
 [ext_resource type="Material" uid="uid://c8xsq2iw3ca2h" path="res://worlds/scrolling_track/floor_segments/biomes/rural/materials/ground.tres" id="6_7g5pp"]
 [ext_resource type="ArrayMesh" uid="uid://cmmwpaw4ojxm1" path="res://worlds/scrolling_track/floor_segments/floor_turn_left_5deg.obj" id="7_i1jpn"]
-[ext_resource type="Script" path="res://scripts/biomes/biome_director.gd" id="8_biome"]
+[ext_resource type="Script" uid="uid://vk65f2vfnwtm" path="res://scripts/biomes/biome_director.gd" id="8_biome"]
 [ext_resource type="Resource" path="res://worlds/scrolling_track/biomes/playlist_demo.tres" id="9_playlist"]
 
 [sub_resource type="CylinderMesh" id="CylinderMesh_waqk3"]
@@ -47,12 +47,14 @@ mesh = SubResource("CylinderMesh_waqk3")
 
 [node name="FloorStraight" type="MeshInstance3D" parent="." unique_id=1591104222]
 process_mode = 4
+visible = false
 mesh = ExtResource("5_7g5pp")
 surface_material_override/0 = ExtResource("6_7g5pp")
 
 [node name="FloorTurnLeft5Deg" type="MeshInstance3D" parent="." unique_id=1006989938]
 process_mode = 4
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -100)
+visible = false
 material_override = ExtResource("6_7g5pp")
 mesh = ExtResource("7_i1jpn")
 surface_material_override/0 = ExtResource("6_7g5pp")
