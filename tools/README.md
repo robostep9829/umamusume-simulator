@@ -13,7 +13,7 @@ quietly renders the wrong thing.
 | `verify_horizon.py` | the numbers `biomes/layers/rural_far.tres` is authored with: ridge continuity, band, haze, rebuild interval |
 | `verify_debug_stats.py` | the debug overlay's readout: biome runs, distance to the next biome, run progress |
 | `check_engine_api.py` | every engine call in the project's GDScript, against the engine's own method list |
-| `check_gdscript_scope.py` | the *scope* of the project's GDScript: a name used outside the block that declares it, a `:=` value with no inferable type, a line indented past every open block, an integer literal too large for 64 bits |
+| `check_gdscript_scope.py` | the *scope* of the project's GDScript: a name used outside the block that declares it, a `:=` value with no inferable type, a line indented past every open block, an integer literal too large for 64 bits, a scene-tree script that adds nodes without a frame entry point |
 | `verify_atmosphere.py` | that a biome change is *visible*: colours far enough apart and haze that reaches the horizon, for the fogs an environment switches on |
 | `build_godot_index.py` | rebuilds `godot_class_index.json`, the class knowledge `check_res.py` runs on |
 | `resfile.py` | shared helper, not a checker: parses a `.tres`/`.tscn` and finds an asset by name, so the checkers survive a restructure |
@@ -50,7 +50,10 @@ resolves every other name against `godot_class_index.json` plus the project's ow
 silent about what it cannot decide from one file (lambda bindings, `match` patterns,
 statements split across brackets) rather than guessing. Like `check_engine_api.py`,
 it was validated against the revision it exists to catch, not only against a clean
-tree.
+tree. It also knows one engine lifecycle rule worth knowing: a script extending
+`SceneTree`/`MainLoop` that adds nodes but has no `_process`/`_physics_process` entry
+point is adding them before the root is inside the tree, so their `_ready()` never
+runs - which is what the biome self-test's first run was about.
 
 `verify_horizon.py` and `verify_atmosphere.py` read the biomes' own `.tres` files
 rather than mirroring their numbers, so tuning the demo content cannot leave them

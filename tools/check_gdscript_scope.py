@@ -20,7 +20,10 @@ only running the engine does it. This does that analysis by reading the file:
 * a line indented deeper than any open block, and a statement at file scope - the two
   shapes a lost or added tab leaves behind;
 * an integer literal too large for a signed 64-bit integer, which the engine prints as
-  "Cannot represent 0x…" and then substitutes INT64_MAX for.
+  "Cannot represent 0x…" and then substitutes INT64_MAX for;
+* a scene-tree script that adds nodes without a `_process`/`_physics_process` entry
+  point: the root is not inside the tree while `_initialize()` runs, so the nodes it
+  adds never get their `_ready()` (see the self-test's own note).
 
 It is not a compiler: blocks come from indentation, scopes from `var`/`const`/`for`/
 parameter declarations, and members from the engine index (`godot_class_index.json`).
@@ -172,8 +175,34 @@ def statements(lines: list) -> list:
     return [(number, indent, " ".join(text.split())) for number, indent, text in folded]
 
 
+def lifecycle_findings(path: Path) -> list:
+    """A main loop that adds nodes needs a frame entry point to survive.
+
+    `SceneTree::initialize()` calls the script's `_initialize()` and only then puts
+    `root` inside the tree, so a node added from there never enters the tree and its
+    `_ready()` never runs - and a Tween bound to it silently does nothing when
+    stepped. This is what the biome self-test's very first run was about.
+    """
+    text = path.read_text(errors="ignore")
+    if extends_of(path) not in ("SceneTree", "MainLoop"):
+        return []
+    found = []
+    for number, line in enumerate(text.splitlines(), start=1):
+        code = strip_code(line)
+        if re.search(r"\badd_child\(", code):
+            found.append(number)
+    if not found:
+        return []
+    if re.search(r"^func (_process|_physics_process)\s*\(", text, re.M):
+        return []
+    return [(found[0], "extends %s and adds nodes, but has no `_process` or "
+                       "`_physics_process` entry point: while `_initialize()` runs the root "
+                       "is not inside the tree yet, so the nodes added here never get their "
+                       "`_ready()` - run the work a frame later" % extends_of(path))]
+
+
 def check_file(path: Path, index: dict, classes: dict, known: set) -> list:
-    findings = []
+    findings = list(lifecycle_findings(path))
 
     def report(number: int, message: str) -> None:
         findings.append((number, message))

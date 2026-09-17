@@ -172,8 +172,13 @@ func validate() -> PackedStringArray:
 				"`multimesh` draws `meshes[0]` only, so %d of the %d meshes are never used"
 				% [meshes.size() - 1, meshes.size()]
 			)
-	if mesh_material != null and meshes.is_empty():
-		problems.append("`mesh_material` applies to `meshes` only, so it is never used")
+	if mesh_material != null:
+		if meshes.is_empty():
+			problems.append("`mesh_material` applies to `meshes` only, so it is never used")
+		elif not variants.is_empty():
+			problems.append(
+				"`mesh_material` applies to `meshes`, but the scenes win, so it is never applied"
+			)
 
 	if is_ring():
 		if fit_to_segment:

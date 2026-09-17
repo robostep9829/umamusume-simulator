@@ -394,6 +394,17 @@ art), so it runs in about a second and exits non-zero on failure. It checks:
   count to the next change (counting turns as the arcs they are), the run's
   progress, and the single-biome case, where there is no change to wait for.
 
+The run makes its checks from the first `_process` frame rather than from
+`_initialize()`, because the root is not in the tree yet while `_initialize()` runs:
+`SceneTree::initialize()` calls the main loop's `_initialize()` and only then does
+`root->_set_tree(this)`. A node added a line earlier never enters the tree, so its
+`_ready()` never runs - the track pools no bodies, the horizon has no anchor - and a
+[Tween] bound to it is stepped and silently does nothing (`Tween::step()` returns
+early while its bound node is outside the tree), which is how an atmosphere fade can
+be created, stepped and never move. The first check the run makes is that the tree is
+up, so a harness that drifts back into `_initialize()` says so in one line instead of
+failing a dozen checks about an empty track.
+
 Godot does not have to be the only judge. `tools/` holds offline checkers, all of
 which exit non-zero and say what is wrong:
 
@@ -423,7 +434,10 @@ and naming a line rather than the lost tab. The checker does that analysis from 
 file alone: indentation is read as blocks, `var`/`const`/`for`/parameters as
 declarations, names that are neither are looked up in the engine index, and a `:=`
 built by arithmetic over the loop variable of an untyped `for … in […]` is reported as
-the Variant type it is. Anything it cannot decide from one file it leaves alone.
+the Variant type it is. It also flags a `SceneTree`/`MainLoop` script that adds nodes
+without a `_process`/`_physics_process` entry point, since that is the harness mistake
+above caught offline rather than by running the engine. Anything it cannot decide from
+one file it leaves alone.
 
 `check_res.py` validates the text resources - paths, types, `script_class`,
 property names, typed arrays, shader parameters, node parents - against the same

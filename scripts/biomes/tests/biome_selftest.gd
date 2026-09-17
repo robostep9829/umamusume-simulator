@@ -27,24 +27,65 @@ const FRAME_EPSILON := 0.0001
 
 var _checks: int = 0
 var _failures: PackedStringArray = PackedStringArray()
+# Set by the first frame; see _process.
+var _ran: bool = false
+var _finished: bool = false
 
 
-func _initialize() -> void:
-	_test_placement_end_points()
-	_test_placement_frames()
-	_test_placement_mirrors()
-	_test_placement_lateral()
-	_test_placement_determinism()
-	_test_seed_spread()
-	_test_playlist_auto()
-	_test_playlist_single()
-	_test_playlist_sections()
-	_test_road_surfaces()
-	_test_validation()
-	_test_track_integration()
-	_test_horizon()
-	_test_debug_stats()
-	_test_atmosphere()
+## The tests run from the first `_process`, not from `_initialize`, because of *when*
+## the root enters the tree: `SceneTree::initialize()` runs the main loop's
+## `_initialize()` and only then does `root->_set_tree(this)`, so a node added during
+## `_initialize()` never enters the tree and never gets its `_ready()`. Half of these
+## tests build a track or a director and then read what its `_ready()` made - the
+## pool, the horizon anchor, the level environment - and a director that is not in
+## the tree also cannot fade anything: a [Tween] bound to an out-of-tree node is
+## stepped and silently does nothing (`Tween::step()` returns early while its bound
+## node is not inside the tree). One frame later the tree is up and everything behaves
+## the way the game does.
+func _process(_delta: float) -> bool:
+	if _ran:
+		# Never hang: if a script error stopped the run before it reported, the second
+		# frame ends it - and the missing "self-test:" line is the tell.
+		return true
+	_ran = true
+	_run_tests()
+	if not _finished:
+		printerr("biome self-test: the run stopped before it finished; see the errors above")
+		quit(1)
+	return true
+
+
+func _run_tests() -> void:
+	# The precondition for the tests that build nodes, checked before them so that a
+	# harness moved back into `_initialize()` reports one clear line - and skips what
+	# cannot work - instead of failing seventeen checks about an empty track.
+	var tree_ready := root.is_inside_tree()
+	_check(tree_ready, "the tree is running, so added nodes get their `_ready()`")
+
+	# Listed rather than called one by one, so the log says which test is running when
+	# an engine error lands between two checks.
+	var tests: Array[Callable] = [
+		_test_placement_end_points,
+		_test_placement_frames,
+		_test_placement_mirrors,
+		_test_placement_lateral,
+		_test_placement_determinism,
+		_test_seed_spread,
+		_test_playlist_auto,
+		_test_playlist_single,
+		_test_playlist_sections,
+		_test_road_surfaces,
+		_test_validation,
+	]
+	if tree_ready:
+		tests.append_array([
+			_test_track_integration, _test_horizon, _test_debug_stats, _test_atmosphere
+		])
+	else:
+		print("  · (the track, horizon, stats and atmosphere tests need a running tree)")
+	for test in tests:
+		print("  · %s" % test.get_method())
+		test.call()
 
 	print("")
 	if _failures.is_empty():
@@ -53,6 +94,7 @@ func _initialize() -> void:
 		print("biome self-test: %d checks, %d FAILED" % [_checks, _failures.size()])
 		for failure in _failures:
 			print("  - %s" % failure)
+	_finished = true
 	quit(0 if _failures.is_empty() else 1)
 
 
@@ -361,10 +403,13 @@ func _test_validation() -> void:
 	# And the reporting itself: the same problem is printed once, however many times
 	# the failing code path runs (a pooled body is re-dressed every element).
 	var reporter := BiomeDirector.new()
-	reporter._report_once(&"same", "one")
-	reporter._report_once(&"same", "two")
-	reporter._report_once(&"other", "three")
+	# The console shows the first and third of these as errors - they are this test
+	# printing on purpose, and the second call must not print at all.
+	reporter._report_once(&"same", "self-test: the first report of \"same\" (expected)")
+	reporter._report_once(&"same", "self-test: the second report of \"same\" is swallowed")
+	reporter._report_once(&"other", "self-test: the first report of \"other\" (expected)")
 	_check(reporter.reported_problems().size() == 2, "a repeated problem is reported once")
+	reporter.free()
 
 
 ## The problems `resource` reports, joined, for substring checks. Taken as a
@@ -420,9 +465,11 @@ func _test_track_integration() -> void:
 	playlist.biomes = [first]
 	playlist.segments_per_biome = 4
 
+	var world := _level_world()
 	var director := BiomeDirector.new()
 	director.track = track
 	director.playlist = playlist
+	director.world_environment = world
 
 	root.add_child(track)
 	root.add_child(director)
@@ -484,10 +531,7 @@ func _test_track_integration() -> void:
 	var index := track.element_index_at(Vector3.ZERO)
 	_check(index >= 0 and index < lap, "element_index_at() reports an element of the lap")
 
-	root.remove_child(director)
-	root.remove_child(track)
-	director.free()
-	track.free()
+	_teardown([director, track, world])
 
 
 ## Horizon content lives on an anchor that rides with the runner, so the ring
@@ -500,6 +544,9 @@ func _test_horizon() -> void:
 	ring.count = 4
 	ring.distance_min = 500.0
 	ring.distance_max = 700.0
+	# Past the band, or the farthest cards of the ring would be culled - which is
+	# exactly what the layer's own validation reports.
+	ring.visible_range = 800.0
 	ring.host_every = 4
 
 	var provider := _provider(&"ringed")
@@ -511,9 +558,11 @@ func _test_horizon() -> void:
 	var track := TrackManager.new()
 	track.straight_segment = _segment_resource(false)
 	track.turn_segment = _segment_resource(true)
+	var world := _level_world()
 	var director := BiomeDirector.new()
 	director.track = track
 	director.playlist = playlist
+	director.world_environment = world
 	root.add_child(track)
 	root.add_child(director)
 
@@ -537,19 +586,21 @@ func _test_horizon() -> void:
 		)
 
 		# The anchor rides with the runner, so the ring surrounds them: it cannot be
-		# outrun, and nothing has to be re-snapped in front of them mid-run.
-		director._refresh_anchor(Vector3(120.0, 0.0, 40.0))
+		# outrun, and nothing has to be re-snapped in front of them mid-run. The
+		# positions are on the level's first straights, so which element they fall on
+		# (12 / 100 = element 1, then 2) does not depend on how a curve resolves.
+		director._refresh_anchor(Vector3(0.0, 0.0, -120.0))
 		_check(
-			anchor.global_position.is_equal_approx(Vector3(120.0, 0.0, 40.0)),
+			anchor.global_position.is_equal_approx(Vector3(0.0, 0.0, -120.0)),
 			"the anchor rides with the runner (got %s)" % anchor.global_position
 		)
 		# ...which leaves the very same cards alone while the runner is inside one
-		# region...
-		director._refresh_anchor(Vector3(240.0, 0.0, 40.0))
+		# region (elements 0-3 are one, `host_every` = 4)...
+		director._refresh_anchor(Vector3(0.0, 0.0, -240.0))
 		_check(host.get_child(0) == first_child, "one region keeps the horizon it laid out")
-		# ...and lays them out again once the runner has moved on to another one,
-		# because a horizon that re-randomised every frame would crawl.
-		director._refresh_anchor(Vector3(2400.0, 0.0, 40.0))
+		# ...and lays them out again once the runner has moved on to another one
+		# (element 12), because a horizon that re-randomised every frame would crawl.
+		director._refresh_anchor(Vector3(0.0, 0.0, -1200.0))
 		_check(host.get_child_count() == 4, "the rebuilt horizon keeps its instance count")
 		_check(host.get_child(0) != first_child, "a new region lays the horizon out again")
 		# Every card of the rebuilt ring is inside the band, measured from the runner
@@ -571,10 +622,7 @@ func _test_horizon() -> void:
 			"the horizon ring surrounds the runner inside its band (got %s..%s)" % [near, far]
 		)
 
-	root.remove_child(director)
-	root.remove_child(track)
-	director.free()
-	track.free()
+	_teardown([director, track, world])
 
 
 ## The debug overlay reads the biome system through these: the run a biome covers,
@@ -616,9 +664,11 @@ func _test_debug_stats() -> void:
 	track.turn_segment = _segment_resource(true)
 	var runner := Node3D.new()
 	track.player = runner
+	var world := _level_world()
 	var director := BiomeDirector.new()
 	director.track = track
 	director.playlist = playlist
+	director.world_environment = world
 	root.add_child(track)
 	root.add_child(runner)
 	root.add_child(director)
@@ -683,12 +733,7 @@ func _test_debug_stats() -> void:
 	_check(director.distance_to_biome_change() < 0.0, "distance_to_biome_change() says never")
 	_check((flat["upcoming"] as Array).is_empty(), "a single-biome track has nothing coming")
 
-	root.remove_child(director)
-	root.remove_child(track)
-	root.remove_child(runner)
-	director.free()
-	track.free()
-	runner.free()
+	_teardown([director, track, runner, world])
 
 
 ## --- helpers -----------------------------------------------------------------
@@ -700,10 +745,8 @@ func _test_debug_stats() -> void:
 ## change with the biome" is exactly the kind of failure a test that only looks at
 ## the biome's own `.tres` file cannot see.
 func _test_atmosphere() -> void:
-	var level := _environment(Color(0.2, 0.2, 0.25), 0.01)
-	var world := WorldEnvironment.new()
-	world.environment = level
-	root.add_child(world)
+	var world := _level_world()
+	var level := world.environment
 
 	var day := _provider(&"day")
 	day.atmosphere = _environment(Color(0.62, 0.71, 0.8), 0.0018)
@@ -796,6 +839,8 @@ func _test_atmosphere() -> void:
 	director._set_active_provider(clear)
 	_check_environment(director, clear.atmosphere, "a biome that leaves fog off renders fog off")
 
+	_teardown([director, track, runner, world])
+
 
 ## Checks the fog the world is rendering against the one a biome asked for. Every
 ## field is compared, because the ones that cannot be faded - `fog_enabled` among
@@ -886,6 +931,26 @@ func _segment_resource(is_turn: bool) -> TrackSegment:
 	segment.width = 30.0
 	segment.height = 0.4
 	return segment
+
+
+## A level [WorldEnvironment] with a plain environment, added to the tree. Every test
+## that hands its director a playlist gets one: a biome with no atmosphere falls back
+## to it, and with no environment anywhere the director reports an error by design
+## (see [method BiomeDirector._blend_environment]) - true, but noise in a test run.
+func _level_world() -> WorldEnvironment:
+	var world := WorldEnvironment.new()
+	world.environment = _environment(Color(0.2, 0.2, 0.25), 0.01)
+	root.add_child(world)
+	return world
+
+
+## Frees what a test built. `free()` takes a node's children with it, and anything left
+## alive is what the engine reports as leaked instances when the run exits.
+func _teardown(nodes: Array) -> void:
+	for node in nodes:
+		if node.get_parent() != null:
+			node.get_parent().remove_child(node)
+		node.free()
 
 
 func _segment_name(segment: TrackSegment) -> String:
