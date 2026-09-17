@@ -401,7 +401,16 @@ python3 tools/verify_placement.py     # placement/orientation invariants
 python3 tools/verify_horizon.py       # the far layer's numbers: continuity, haze, cost
 python3 tools/verify_debug_stats.py   # what the debug overlay reads
 python3 tools/verify_atmosphere.py    # that a biome change is visible in the fog
+python3 tools/check_engine_api.py     # that every engine call the scripts make exists
 ```
+
+`check_engine_api.py` reads every `name(` in the project's GDScript and asks the
+engine whether it has a method by that name, in any of its 810 classes or as a global
+function. It exists because this project is developed without a way to run Godot: a
+call that does not exist fails only when the line is reached, which for a debug view
+or an error path can be long after the code looked fine. `tween.get_total_duration()`
+was in this system's own fade for a day, and the only reason it was found is that a
+human ran the game.
 
 `check_res.py` validates the text resources - paths, types, `script_class`,
 property names, typed arrays, shader parameters, node parents - against the same

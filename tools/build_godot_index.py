@@ -1,5 +1,11 @@
 #!/usr/bin/env python3
-"""Builds `godot_class_index.json`, the class knowledge `check_res.py` runs on.
+"""Builds `godot_class_index.json`, the engine knowledge the checkers run on.
+
+It carries three things: every class's members (what a `.tres` may contain, for
+`check_res.py`), every class's methods and constants, and the global functions - the
+last two for `check_engine_api.py`, which reads every method call in the project and
+asks whether the engine has anything by that name. A method that exists nowhere is a
+typo that only shows up at runtime, once the line is reached.
 
 Godot's own class reference is the only trustworthy description of what a `.tres`
 may contain, and it ships with the engine sources rather than the editor. Point
@@ -56,26 +62,61 @@ def download(tag: str, target: pathlib.Path) -> pathlib.Path:
 
 def build(source: pathlib.Path) -> dict:
     classes = {}
+    methods = set()
+    constants = set()
     for xml in sorted((source / "doc/classes").glob("*.xml")):
         try:
             node = ET.parse(xml).getroot()
         except ET.ParseError:
             continue
+        own_methods = {m.get("name") for m in node.findall(".//method")}
+        own_constants = {c.get("name") for c in node.findall(".//constant")}
         classes[node.get("name")] = {
             "inherits": node.get("inherits") or "",
             "members": sorted({m.get("name") for m in node.findall(".//member")}),
         }
+        methods |= own_methods
+        constants |= own_constants
+
+    # Global functions: the engine's (`@GlobalScope`, which is what `str()`, `print()`
+    # and the `*f()`/`*i()` math helpers are) plus GDScript's own utility functions
+    # (`is_instance_of()`, `type_exists()`...), which are registered in the language
+    # module and documented nowhere.
+    globals_ = {m.get("name") for m in ET.parse(
+        source / "doc/classes/@GlobalScope.xml").getroot().findall(".//method")}
+    utility = source / "modules/gdscript/gdscript_utility_functions.cpp"
+    if utility.is_file():
+        globals_ |= set(re.findall(r"REGISTER_FUNC\(\s*(\w+)", utility.read_text(errors="ignore")))
 
     # Property names the engine registers in C++ without a class-reference entry
-    # (serialised internals such as `surface_material_override/0`, `data`...).
+    # (serialised internals such as `surface_material_override/0`, `data`...), and
+    # the methods it binds there. The second list matters for calls the documentation
+    # leaves out: `set_owner()` is a real, callable method of `Node` - bound in C++
+    # as the setter of `owner`, documented nowhere - so a checker that only trusts
+    # the documentation would call the user's working code a mistake.
     cpp = set()
+    cpp_methods = set()
     for folder in ("scene", "core"):
         for path in (source / folder).rglob("*.cpp"):
             text = path.read_text(errors="ignore")
             cpp |= set(re.findall(r'ADD_PROPERTYI?\(PropertyInfo\([^,]+,\s*"([^"]+)"', text))
+            cpp_methods |= set(re.findall(r'bind_method\(D_METHOD\("([a-zA-Z_0-9]+)"', text))
     cpp |= {"script", "metadata", "unique_id", "node_paths", "instance", "index",
             "connection", "name", "type", "id", "groups", "owner", "process_mode"}
-    return {"classes": classes, "cpp_properties": sorted(cpp)}
+    if len(cpp) < 500:
+        # A tree with only `doc/classes` extracted still builds, but `check_res.py`
+        # would then reject perfectly good internals - better to say so than to hand
+        # back a half-blind index.
+        print(f"warning: only {len(cpp)} C++ property names were found; extract the "
+              f"`scene` and `core` sources as well, or check_res.py will be strict about "
+              f"properties it cannot see", file=sys.stderr)
+    return {
+        "classes": classes,
+        "cpp_properties": sorted(cpp),
+        "methods": sorted(methods | cpp_methods),
+        "constants": sorted(constants),
+        "globals": sorted(globals_),
+    }
 
 
 def main() -> int:
@@ -97,7 +138,8 @@ def main() -> int:
 
     pathlib.Path(arguments.out).write_text(json.dumps(index))
     size = pathlib.Path(arguments.out).stat().st_size // 1024
-    print(f"{len(index['classes'])} classes, {len(index['cpp_properties'])} C++ property names"
+    print(f"{len(index['classes'])} classes, {len(index['cpp_properties'])} C++ property names, "
+          f"{len(index['methods'])} methods, {len(index['globals'])} global functions"
           f" -> {arguments.out} ({size} KiB)")
     return 0
 

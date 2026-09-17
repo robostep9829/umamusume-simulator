@@ -84,6 +84,8 @@ var _horizon_regions: Dictionary = {}
 var _base_environment: Environment
 var _blend_fields: Array[StringName] = []
 var _blend_tween: Tween
+# Set by the fade itself, see blend_progress().
+var _blend_progress := 1.0
 # What `playlist.validate()` found at startup, and which runtime problems were
 # already printed, so a report never repeats itself (see _report_once).
 var _problems: PackedStringArray = PackedStringArray()
@@ -696,15 +698,17 @@ func live_environment() -> Environment:
 
 
 ## How far the running atmosphere transition has come: 0 when it starts, 1 when it
-## is done, and 1 whenever nothing is fading. Read by debug views; the fade itself
-## is a [Tween].
+## is done, and 1 whenever nothing is fading. Read by debug views.
+##
+## The number is written by the fade itself - a method tweener runs beside the field
+## tweeners and stores the fraction - instead of being read back out of the [Tween].
+## A [Tween] has no "how far along am I" call: `get_total_elapsed_time()` counts the
+## time since it started but nothing remembers the duration it was started with, and
+## a fade stepped by hand (`custom_step()`, which the self-test uses) would have to be
+## reflected here separately. Letting the tween write it keeps the two in step by
+## construction.
 func blend_progress() -> float:
-	if _blend_tween == null or not _blend_tween.is_valid() or not _blend_tween.is_running():
-		return 1.0
-	var duration :float = _blend_tween.get_total_duration()
-	if duration <= 0.0:
-		return 1.0
-	return clampf(_blend_tween.get_total_elapsed_time() / duration, 0.0, 1.0)
+	return _blend_progress
 
 
 ## Cross-fades the world environment to `target`. The resource is duplicated
@@ -737,6 +741,7 @@ func _blend_environment(target: Environment, instant: bool = false) -> void:
 
 	if _blend_tween != null and _blend_tween.is_valid():
 		_blend_tween.kill()
+	_blend_tween = null
 
 	var from := {}
 	for field in _blend_fields:
@@ -744,9 +749,11 @@ func _blend_environment(target: Environment, instant: bool = false) -> void:
 	world_environment.environment = blended
 
 	var duration := 0.0 if instant else environment_transition_time
+	_blend_progress = 1.0 if duration <= 0.0 else 0.0
 	if duration <= 0.0:
 		return
 	_blend_tween = create_tween().set_parallel()
+	_blend_tween.tween_method(_set_blend_progress, 0.0, 1.0, duration)
 	for field in _blend_fields:
 		var to_value: Variant = blended.get(field)
 		var from_value: Variant = from.get(field)
@@ -769,6 +776,11 @@ func _available_blend_fields(environment: Environment) -> Array[StringName]:
 		if existing.has(field):
 			fields.append(field)
 	return fields
+
+
+## Stores how far the fade is, for [method blend_progress]. Called by the tween.
+func _set_blend_progress(value: float) -> void:
+	_blend_progress = value
 
 
 func _set_environment_color(value: Color, environment: Environment, field: StringName) -> void:
