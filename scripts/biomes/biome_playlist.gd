@@ -70,6 +70,36 @@ func provider_at(element_index: int) -> BiomeProvider:
 	return biomes[index]
 
 
+## True when the whole track is served by one provider: no transition will ever
+## happen, however far the runner goes. Lets a debug overlay (and anything else)
+## tell "one biome for now" from "the next change is still far away".
+func is_single_biome() -> bool:
+	if uses_sections():
+		for provider in _section_providers:
+			if provider != _section_providers[0]:
+				return false
+		return true
+	return biomes.size() <= 1 or segments_per_biome <= 0
+
+
+## The stretch of elements served by one provider that covers `element_index`, as
+## `(first element, length in elements)`. A run is maximal: when the order happens
+## to place the same biome in two neighbouring rounds - which shuffling can do - the
+## run covers both, so it is measured instead of derived from `segments_per_biome`.
+func run_range_at(element_index: int) -> Vector2i:
+	var provider := provider_at(element_index)
+	var bound := _run_scan_bound()
+	if provider == null or bound <= 0:
+		return Vector2i(element_index, 1)
+	var first := element_index
+	while element_index - first < bound and provider_at(first - 1) == provider:
+		first -= 1
+	var last := element_index
+	while last - element_index < bound and provider_at(last + 1) == provider:
+		last += 1
+	return Vector2i(first, last - first + 1)
+
+
 ## Index of the [BiomeSection] that covers `element_index`, or -1 when the playlist
 ## runs in auto order. Handy for debug overlays and lap-split logic.
 func section_index_at(element_index: int) -> int:
@@ -139,6 +169,16 @@ func validate() -> PackedStringArray:
 
 
 # --- Sections ----------------------------------------------------------------
+
+## Longest a run of one provider can be: a whole pass through the sections, or
+## every round of the biome list. Seeds both walks of [method run_range_at].
+func _run_scan_bound() -> int:
+	if uses_sections():
+		return _section_total
+	if biomes.is_empty() or segments_per_biome <= 0:
+		return 0
+	return segments_per_biome * maxi(biomes.size(), 1)
+
 
 func _rebuild_section_layout() -> void:
 	_section_starts = PackedInt32Array()

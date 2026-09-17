@@ -42,6 +42,7 @@ func _initialize() -> void:
 	_test_validation()
 	_test_track_integration()
 	_test_horizon()
+	_test_debug_stats()
 
 	print("")
 	if _failures.is_empty():
@@ -486,6 +487,120 @@ func _test_horizon() -> void:
 	root.remove_child(track)
 	director.free()
 	track.free()
+
+
+## The debug overlay reads the biome system through these: the run a biome covers,
+## how far the next change is, and the state dictionary itself.
+func _test_debug_stats() -> void:
+	var first := _provider(&"first")
+	var second := _provider(&"second")
+	var playlist := BiomePlaylist.new()
+	playlist.biomes = [first, second]
+	playlist.segments_per_biome = 4
+
+	_check(playlist.run_range_at(0) == Vector2i(0, 4), "a run starts where its round does")
+	_check(playlist.run_range_at(3) == Vector2i(0, 4), "the last element of a round is in it")
+	_check(playlist.run_range_at(4) == Vector2i(4, 4), "the next round is a run of its own")
+	_check(not playlist.is_single_biome(), "a two-biome playlist does change biome")
+
+	var single := BiomePlaylist.new()
+	single.biomes = [first]
+	_check(single.is_single_biome(), "a one-biome playlist never changes biome")
+	single.biomes = [first, second]
+	single.segments_per_biome = 0
+	_check(single.is_single_biome(), "segments_per_biome = 0 pins the first biome")
+	var same_everywhere := BiomePlaylist.new()
+	var only := BiomeSection.new()
+	only.provider = first
+	only.segments = 25
+	same_everywhere.sections = [only]
+	_check(same_everywhere.is_single_biome(), "sections that all name one biome never change")
+
+	var track := TrackManager.new()
+	track.infinite = true
+	# Fixed section lengths, so the end of the first straight run is known without
+	# knowing the generator's RNG: elements 0-9 are straights, 10-15 are turns.
+	track.straight_min = 10
+	track.straight_max = 10
+	track.turn_min = 6
+	track.turn_max = 6
+	track.straight_segment = _segment_resource(false)
+	track.turn_segment = _segment_resource(true)
+	var runner := Node3D.new()
+	track.player = runner
+	var director := BiomeDirector.new()
+	director.track = track
+	director.playlist = playlist
+	root.add_child(track)
+	root.add_child(runner)
+	root.add_child(director)
+
+	director._set_active_provider(first)
+	# An endless track spent entirely on straights at the start, so element 0 is
+	# 100 m long and the four elements of the run are exactly 400 m.
+	_check(track.is_endless(), "the test track is an endless one")
+	_check(is_equal_approx(track.element_length_at(0), 100.0), "a straight is 100 m long")
+	_check(track.element_direction_at(0) == 0, "a straight has no direction")
+	_check(
+		is_equal_approx(track.element_length_at(10), deg_to_rad(5.0) * 1200.0),
+		"a 5 degree turn of 1200 m radius is 104.72 m of arc"
+	)
+	_check(absi(track.element_direction_at(11)) == 1, "a turn bends to one side or the other")
+
+	var stats := director.debug_stats()
+	_check(stats["biome"] == &"first", "the stats name the active biome")
+	_check(stats["elements"] == 0, "the runner at the origin is on element 0")
+	_check(is_zero_approx(stats["progress"]), "the runner at the origin is at the element's entry")
+	_check(stats["change_elements"] == 4, "the change is four elements away")
+	_check(
+		is_equal_approx(stats["change_distance"], 400.0),
+		"four 100 m elements are 400 m (got %s)" % stats["change_distance"]
+	)
+	_check(stats["next_biome"] == &"second", "the next biome is the other one")
+	_check(stats["run_elements"] == 4, "the run is one round long")
+	_check(is_zero_approx(stats["run_progress"]), "the run has just started")
+	_check(director.elements_to_biome_change() == 4, "elements_to_biome_change() agrees")
+	_check(
+		is_equal_approx(director.distance_to_biome_change(), 400.0),
+		"distance_to_biome_change() agrees"
+	)
+	var upcoming: Array[Dictionary] = stats["upcoming"]
+	_check(upcoming.size() == 3, "the stats look three runs ahead")
+	if upcoming.size() == 3:
+		_check(
+			upcoming[0]["id"] == &"second" and upcoming[1]["id"] == &"first",
+			"the upcoming runs start after the current one and alternate"
+		)
+		_check(upcoming[0]["elements"] == 4, "an upcoming run reports its length in elements")
+
+	# Halfway through an element, half of it is left to run.
+	runner.global_position = Vector3(0.0, 0.0, -50.0)
+	_check(director.elements_to_biome_change() == 4, "halfway through element 0 is still element 0")
+	_check(
+		is_equal_approx(director.distance_to_biome_change(), 350.0),
+		"distance_to_biome_change() counts the rest of the current element (got %s)"
+		% director.distance_to_biome_change()
+	)
+	_check(
+		is_equal_approx(director.debug_stats()["run_progress"], 0.125),
+		"the run's progress bar is an eighth of the way along"
+	)
+
+	# One biome for the whole track: no change to wait for.
+	director.playlist = single
+	var flat := director.debug_stats()
+	_check(flat["change_elements"] == -1, "a single-biome track reports no change")
+	_check(flat["change_distance"] < 0.0, "a single-biome track reports no distance")
+	_check(director.elements_to_biome_change() == -1, "elements_to_biome_change() says never")
+	_check(director.distance_to_biome_change() < 0.0, "distance_to_biome_change() says never")
+	_check((flat["upcoming"] as Array).is_empty(), "a single-biome track has nothing coming")
+
+	root.remove_child(director)
+	root.remove_child(track)
+	root.remove_child(runner)
+	director.free()
+	track.free()
+	runner.free()
 
 
 ## --- helpers -----------------------------------------------------------------

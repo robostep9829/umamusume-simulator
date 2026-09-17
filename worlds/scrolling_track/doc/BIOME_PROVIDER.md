@@ -251,21 +251,29 @@ art), so it runs in about a second and exits non-zero on failure. It checks:
   built once per hosted element, re-placing unchanged segments keeps the *same*
   decoration nodes, and switching biome rebuilds them in place;
 * horizon rings keep their distance band, ride with the runner, and are only laid
-  out again when the runner leaves a region.
+  out again when the runner leaves a region;
+* the debug readout's numbers: the run a biome covers, the distance and element
+  count to the next change (counting turns as the arcs they are), the run's
+  progress, and the single-biome case, where there is no change to wait for.
 
-Godot does not have to be the only judge. Three small offline checkers live next
-to this project (they need the Godot class reference dump, not the editor):
+Godot does not have to be the only judge. `tools/` holds four offline checkers,
+all of which exit non-zero and say what is wrong:
 
 ```bash
-python3 tools/check_res.py $(find worlds/scrolling_track -name "*.tres" -o -name "*.tscn")
+python3 tools/check_res.py $(find . -path ./.git -prune -o \( -name "*.tres" -o -name "*.tscn" \) -print)
 python3 tools/verify_placement.py     # placement/orientation invariants
 python3 tools/verify_horizon.py       # the far layer's numbers: continuity, haze, cost
+python3 tools/verify_debug_stats.py   # what the debug overlay reads
 ```
 
 `check_res.py` validates the text resources - paths, types, `script_class`,
 property names, typed arrays, shader parameters, node parents - against the same
-class information Godot itself uses, so a typo in a hand-authored `.tres` is caught
-before the editor is opened.
+class information Godot itself uses (a class index generated from the engine's
+`doc/classes`, see `tools/build_godot_index.py`), so a typo in a hand-authored
+`.tres` is caught before the editor is opened. The three oracles exist because the
+biome system's failures are geometric and numeric - a mirrored instance, a ring
+that drifts out of reach, a distance that reads wrong - and those are exactly the
+things a headless self-test in a text-only checkout cannot see either.
 
 ---
 
@@ -305,3 +313,53 @@ Two more things worth knowing while iterating:
 * Everything that scales with the pool is O(pooled segments): decoration is
   parented per segment, so the cost of a biome is its layer descriptors, not the
   length of the track, and an idle frame only compares 40 small dictionaries.
+
+---
+
+## 6. Debug overlay
+
+`scripts/debug/debug_overlay.gd` is the window into all of the above at runtime. It
+is a `CanvasLayer` that builds its own panel, finds the level's `TrackManager`,
+`BiomeDirector` and player by itself (or takes them from the inspector), and shows:
+
+| Line | What it is |
+|---|---|
+| `fps / frame / physics` | frame rate and the two process times, in ms |
+| `s` | metres along the centreline to the runner, counted from the start of the endless level or from the closed loop's origin, plus the lap and the distance left in it |
+| `speed` | the player's velocity, in m/s |
+| `element` | the element index under the runner, whether it is a straight or which way it turns, and how far into it they are |
+| `pos` | the player's world position |
+| `biome` | the active provider's `biome_id` and `display_name` |
+| `next` | the biome that follows, in metres, seconds and elements - or "this biome runs the whole track" when the playlist pins one |
+| the bar | how far through the current biome run the runner is |
+| `track` | endless or closed loop, pool size, seed / lap length |
+| `layers` | instances built per decoration layer, as they really are in the pool |
+| `horizon` | cards in the ring and how far the anchor currently is |
+| `skin` / `atmo` / `playlist` / `coming` | road variant, atmosphere file, playlist mode, the next few runs |
+
+**F3** shows and hides it, **F4** cycles `compact` / `normal` / `full`. On a
+touchscreen a small button in the top-right corner opens it instead. The panel
+never takes input, so it cannot swallow the game's controls, and its width is fixed
+so the readout does not twitch as numbers change. Nothing in it is needed at
+runtime: delete the node and the game is exactly as before.
+
+The overlay does not reach into the biome system's internals. It reads one
+dictionary - `BiomeDirector.debug_stats()` - plus the track's inspection helpers
+(`is_endless()`, `lap_length()`, `track_distance_at()`, `element_index_at()`,
+`element_length_at()`, `element_direction_at()`, `element_progress_at()`) and the
+playlist's (`is_single_biome()`, `run_range_at()`, `describe()`). Those are
+read-only and public on purpose: any other HUD, tool or test that wants "which
+biome is the runner in, and how long until it changes?" can use them, and
+`tools/verify_debug_stats.py` checks the arithmetic behind them.
+
+`run_range_at()` deserves a note: a biome *run* is a maximal stretch of elements
+served by one provider, measured rather than derived from `segments_per_biome`.
+That matters with shuffling, where a round can open with the biome that is already
+running, making the run twice as long as a round.
+
+To add the overlay to another level, add a `CanvasLayer` with the script attached:
+
+```gdscript
+[node name="DebugOverlay" type="CanvasLayer" parent="."]
+script = ExtResource("debug_overlay")
+```

@@ -15,11 +15,10 @@ extends RefCounted
 ## towards the outside of a curve.
 
 
-## Arc length of `segment`'s centreline, in metres.
+## Arc length of `segment`'s centreline, in metres. Kept as a static helper so
+## placement code reads uniformly; the segment itself is the source of the value.
 static func length(segment: TrackSegment) -> float:
-	if segment.is_turn():
-		return deg_to_rad(segment.turn_degrees) * segment.radius
-	return segment.length
+	return segment.arc_length()
 
 
 ## Heading of the centreline at arc fraction `t` (0 = entry, 1 = exit), in

@@ -145,10 +145,154 @@ func refresh() -> void:
 		track.refresh_pool()
 
 
-## Short human-readable state, handy for a debug overlay.
+## Short human-readable state, handy for a log line.
 func debug_summary() -> String:
 	var current := _active_provider.biome_id if _active_provider != null else &"<none>"
 	return "biome: %s | %s" % [current, playlist.describe() if playlist != null else "no playlist"]
+
+
+## Elements until the biome under the player changes, or -1 when the level keeps
+## one biome for the whole run (see [method BiomePlaylist.is_single_biome]).
+func elements_to_biome_change() -> int:
+	if track == null or playlist == null or track.player == null:
+		return -1
+	if playlist.is_single_biome():
+		return -1
+	var element := track.element_index_at(track.player.global_position)
+	var run := playlist.run_range_at(element)
+	return maxi(run.x + run.y - element, 0)
+
+
+## Metres until the biome under the player changes, or -1.0 when it never does:
+## what is left of the current element plus the full length of the ones between.
+## Measured along the elements' own arc lengths, so a stretch of turns counts as
+## the 104.7 m each of them really is rather than as the index grid's 100 m.
+func distance_to_biome_change() -> float:
+	var elements := elements_to_biome_change()
+	if elements < 0 or track == null or track.player == null:
+		return -1.0
+	var position := track.player.global_position
+	var element := track.element_index_at(position)
+	var distance := track.element_length_at(element) * (1.0 - track.element_progress_at(position))
+	for step in elements - 1:
+		distance += track.element_length_at(element + step + 1)
+	return distance
+
+
+## Everything the debug overlay shows about the biome system, in one dictionary, so
+## a UI does not have to know how biomes, layers and the horizon are stored. Safe
+## to call before the first physics frame - the biome fields then say "nothing
+## yet" - and safe to call without a player, which is what the self-test does.
+func debug_stats() -> Dictionary:
+	var stats := {
+		"biome": &"<none>",
+		"biome_name": "",
+		"playlist": playlist.describe() if playlist != null else "no playlist",
+		"elements": 0,
+		"progress": 0.0,
+		"run_first": 0,
+		"run_elements": 0,
+		"run_progress": 0.0,
+		"change_elements": -1,
+		"change_distance": -1.0,
+		"next_biome": &"",
+		"upcoming": [] as Array[Dictionary],
+		"variant": 0,
+		"variants": 1,
+		"atmosphere": "",
+		"layers": {},
+		"horizon_cards": 0,
+		"horizon_distance": 0.0,
+	}
+	if _active_provider != null:
+		stats["biome"] = _active_provider.biome_id
+		stats["biome_name"] = _active_provider.display_name
+		stats["variants"] = _active_provider.road_variant_count()
+		if _active_provider.atmosphere != null:
+			stats["atmosphere"] = _active_provider.atmosphere.resource_path.get_file()
+	if track != null and track.player != null and playlist != null:
+		var position := track.player.global_position
+		var element := track.element_index_at(position)
+		stats["elements"] = element
+		stats["progress"] = track.element_progress_at(position)
+		if _active_provider != null:
+			stats["variant"] = _active_provider.road_variant(element)
+		if not playlist.is_single_biome():
+			_fill_change_stats(stats, element)
+	stats["layers"] = _layer_instance_counts()
+	stats["horizon_cards"] = _horizon_instance_count()
+	stats["horizon_distance"] = _horizon_distance()
+	return stats
+
+
+func _fill_change_stats(stats: Dictionary, element: int) -> void:
+	var run := playlist.run_range_at(element)
+	stats["run_first"] = run.x
+	stats["run_elements"] = run.y
+	var walked := float(element - run.x) + stats["progress"]
+	stats["run_progress"] = clampf(walked / maxf(float(run.y), 1.0), 0.0, 1.0)
+	stats["change_elements"] = maxi(run.x + run.y - element, 0)
+	stats["change_distance"] = distance_to_biome_change()
+	var next_provider := playlist.provider_at(run.x + run.y)
+	stats["next_biome"] = next_provider.biome_id if next_provider != null else &"<none>"
+	stats["upcoming"] = _upcoming_runs(element)
+
+
+## The runs that follow the one under `element_index`, for the overlay's "what is
+## coming" line. Empty when the playlist never changes biome.
+func _upcoming_runs(element_index: int, count: int = 3) -> Array[Dictionary]:
+	var runs: Array[Dictionary] = []
+	if playlist == null or playlist.is_single_biome():
+		return runs
+	var cursor := playlist.run_range_at(element_index)
+	var next_element := cursor.x + cursor.y
+	for _step in count:
+		var provider := playlist.provider_at(next_element)
+		if provider == null:
+			break
+		var run := playlist.run_range_at(next_element)
+		runs.append({"id": provider.biome_id, "elements": run.y})
+		next_element = run.x + run.y
+	return runs
+
+
+## Instances currently built per decoration layer, walking the pool rather than
+## trusting a counter: it reports what is really there.
+func _layer_instance_counts() -> Dictionary:
+	var counts := {}
+	for layer in DECORATION_LAYERS:
+		var name := String(BiomeProvider.Layer.keys()[layer]).to_lower()
+		counts[name] = _count_instances(track, "BiomeLayer%s" % BiomeProvider.Layer.keys()[layer])
+	return counts
+
+
+func _count_instances(root: Node, container_name: String) -> int:
+	if root == null:
+		return 0
+	var total := 0
+	for child in root.get_children():
+		if child.name == container_name:
+			total += child.get_child_count()
+		else:
+			total += _count_instances(child, container_name)
+	return total
+
+
+func _horizon_instance_count() -> int:
+	if _anchor == null:
+		return 0
+	var total := 0
+	for container in _anchor.get_children():
+		total += container.get_child_count()
+	return total
+
+
+## How far the horizon anchor currently sits from the runner: it rides along, so
+## this is the ring's lead, and a ring that drifts away means the anchor is stuck.
+func _horizon_distance() -> float:
+	if _anchor == null or track == null or track.player == null:
+		return 0.0
+	return _anchor.global_position.distance_to(track.player.global_position)
 
 
 # --- Segment side ------------------------------------------------------------

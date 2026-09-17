@@ -45,5 +45,13 @@ func turn() -> float:
 	return direction * deg_to_rad(turn_degrees) if is_turn() else 0.0
 
 
+## Length of the centreline in metres. For a turn this is the arc it sweeps, which
+## is slightly longer than the chord [method end] returns.
+func arc_length() -> float:
+	if is_turn():
+		return deg_to_rad(turn_degrees) * radius
+	return length
+
+
 func _forward(heading: float) -> Vector3:
 	return Vector3(sin(heading), 0.0, -cos(heading))

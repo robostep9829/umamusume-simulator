@@ -68,6 +68,7 @@ var _turn_shape: BoxShape3D
 
 # Closed-loop state
 var _slot_count: int = 0
+var _lap_length: float = 0.0
 var _spine_kind: Array[int] = []
 var _spine_transform: Array[Transform3D] = []
 var _spine_pt: PackedVector3Array = []
@@ -125,6 +126,7 @@ func _physics_process(_delta: float) -> void:
 ## transform of every slot's entry point, starting from the loop origin.
 func _build_spine() -> void:
 	_slot_count = track_level.count()
+	_lap_length = 0.0
 	_spine_kind.resize(_slot_count)
 	_spine_transform.resize(_slot_count)
 	_spine_pt.resize(_slot_count)
@@ -140,6 +142,7 @@ func _build_spine() -> void:
 		_spine_pt[i] = origin
 		origin += _basis_from_heading(heading) * seg.end()
 		heading += seg.turn()
+		_lap_length += seg.arc_length()
 
 
 ## Maps each pooled slot to a level slot centred on the player's arc-length.
@@ -289,6 +292,65 @@ func element_index_at(pos: Vector3) -> int:
 	return posmod(int(floor(_closest_s(pos) / _seg_length)), _slot_count)
 
 
+## --- Inspection --------------------------------------------------------------
+##
+## Read-only helpers for debug overlays, tests and tools. None of them affects
+## placement; they answer "where is the runner, and what is under them?" in the
+## same terms `segment_placed` reports.
+
+## True when the track is endless (procedural, re-centred around the player)
+## rather than a closed loop.
+func is_endless() -> bool:
+	return infinite
+
+
+## Length of the closed loop in metres, or 0 on an endless track.
+func lap_length() -> float:
+	return _lap_length
+
+
+## Arc length of the element at `element_index`, in metres. A turn is measured
+## along the arc it sweeps, so elements are not all the same length even though the
+## index grid counts every slot as `straight_segment.length`.
+func element_length_at(element_index: int) -> float:
+	if _straight_segment == null:
+		return 0.0
+	return _segment_for(_element_kind_at(element_index)).arc_length()
+
+
+## Which way the element at `element_index` bends: -1 left, +1 right, 0 straight.
+func element_direction_at(element_index: int) -> int:
+	var kind := _element_kind_at(element_index)
+	if kind == TrackLevel.Kind.STRAIGHT:
+		return 0
+	if infinite:
+		return -1 if kind == InfiniteTrackLevel.Kind.TURN_LEFT else 1
+	return signi(track_level.turn_direction)
+
+
+## Distance travelled along the centreline to the point of it closest to `pos`, in
+## metres. An endless track counts from the start of the level, so this grows
+## without bound; a closed loop counts from the loop origin, so it wraps each lap.
+func track_distance_at(pos: Vector3) -> float:
+	if infinite:
+		if _scroll == null:
+			return 0.0
+		return float(_slot_first) * _seg_length + _local_s_for(pos)
+	if _slot_count <= 0:
+		return 0.0
+	return _closest_s(pos)
+
+
+## How far into the element under `pos` the runner is, as a fraction of that
+## element: 0 at its entry, approaching 1 at the seam to the next one. The endless
+## track indexes elements by `straight_segment.length`, so this is progress through
+## the index grid the biomes are chosen on, not an arc-length ratio on a turn.
+func element_progress_at(pos: Vector3) -> float:
+	if _seg_length <= 0.0:
+		return 0.0
+	return clampf(fmod(track_distance_at(pos), _seg_length) / _seg_length, 0.0, 1.0)
+
+
 ## Re-places every pooled segment, which re-emits `segment_placed` for the whole
 ## pool. Lets listeners update decisions they already made (see
 ## [method BiomeDirector.refresh]); harmless to call while the track runs, because
@@ -341,6 +403,18 @@ func _create_pool(parent: Node) -> void:
 func _collider_size(seg: TrackSegment, margin_x: float, margin_z: float) -> Vector3:
 	var aabb := seg.mesh.get_aabb().size
 	return Vector3(aabb.x + margin_x, seg.height, aabb.z + margin_z)
+
+
+## Element kind at `element_index`, in the level's own enum. Both level kinds
+## start with STRAIGHT, so the comparison above is shared.
+func _element_kind_at(element_index: int) -> int:
+	if infinite:
+		if _infinite_level == null:
+			return TrackLevel.Kind.STRAIGHT
+		return _infinite_level.element_at(element_index)
+	if track_level == null:
+		return TrackLevel.Kind.STRAIGHT
+	return track_level.element_at(element_index)
 
 
 ## Returns the TrackSegment an element kind resolves to. In closed-loop mode
