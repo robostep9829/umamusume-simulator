@@ -8,7 +8,6 @@ background_mode = 2
 background_color = Color(0.39, 0.39, 0.39, 1)
 sky = ExtResource("2_k4ra3")
 tonemap_exposure = 0.57
-fog_enabled = true
 fog_density = 0.02
 fog_sky_affect = 0.54
 adjustment_enabled = true

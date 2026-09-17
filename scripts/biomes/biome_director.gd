@@ -622,7 +622,7 @@ func live_environment() -> Environment:
 func blend_progress() -> float:
 	if _blend_tween == null or not _blend_tween.is_valid() or not _blend_tween.is_running():
 		return 1.0
-	var duration := _blend_tween.get_total_duration()
+	var duration :float = _blend_tween.get_total_duration()
 	if duration <= 0.0:
 		return 1.0
 	return clampf(_blend_tween.get_total_elapsed_time() / duration, 0.0, 1.0)

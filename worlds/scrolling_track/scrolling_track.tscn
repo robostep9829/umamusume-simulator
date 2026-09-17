@@ -46,11 +46,14 @@ material_override = ExtResource("6_7g5pp")
 mesh = ExtResource("7_i1jpn")
 surface_material_override/0 = ExtResource("6_7g5pp")
 
-[node name="BiomeDirector" type="Node3D" parent="." unique_id=1715226903]
+[node name="BiomeDirector" type="Node3D" parent="." unique_id=1715226903 node_paths=PackedStringArray("track", "world_environment")]
 script = ExtResource("8_biome")
 track = NodePath("../TrackManager")
 playlist = ExtResource("9_playlist")
 world_environment = NodePath("../WorldEnvironment")
 
-[node name="DebugOverlay" type="CanvasLayer" parent="." unique_id=1314205677]
+[node name="DebugOverlay" type="CanvasLayer" parent="." unique_id=1314205677 node_paths=PackedStringArray("track", "director", "player")]
 script = ExtResource("10_debug")
+track = NodePath("../TrackManager")
+director = NodePath("../BiomeDirector")
+player = NodePath("../Player")
