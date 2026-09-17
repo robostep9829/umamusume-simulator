@@ -405,9 +405,11 @@ func _create_pool(parent: Node) -> void:
 	for _i in pool_size:
 		var node := StaticBody3D.new()
 		var mi := MeshInstance3D.new()
+		mi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 		mi.name = "Mesh"
 		mi.visibility_range_end = 250.0
 		var m_floor := MeshInstance3D.new()
+		m_floor.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 		m_floor.name = "Floor"
 		m_floor.visibility_range_end = 250.0    # parity with the road's own cull distance
 		var cs := CollisionShape3D.new()
