@@ -247,8 +247,9 @@ horizon - so the transition cannot silently become a no-op.
    one). Either reference it directly or put several into `road_skins` so the
    surface varies along the biome.
 2. **Layers.** Duplicate `layers/rural_near.tres` (beside the road, 15-60 m),
-   `rural_mid.tres` (60-200 m) and `rural_far.tres` (the ring), or write new ones.
-   Keep the bands of `LAYERS.md`; the director does not enforce them.
+   `rural_mid.tres` (60-200 m) and `rural_far.tres` (the ring), or write new ones,
+   and assign the artwork as described in 3.1. Keep the bands of `LAYERS.md`; the
+   director does not enforce them.
 3. **Atmosphere.** Optional: an `Environment` in `atmosphere` for a different
    time of day or weather; the transition is automatic.
 4. **Biome.** Duplicate `rural.tres`, set `biome_id`, `display_name` and the
@@ -260,6 +261,73 @@ horizon - so the transition cannot silently become a no-op.
 
 For the three biomes of `BIOMES.md`, step 2 is the work: the obstacle and
 feature tables there are data for the hooks of section 1.2 once obstacles exist.
+
+### 3.1 Assigning assets to a layer
+
+A biome has one decoration slot per band - `near_layer`, `mid_layer`, `far_layer` -
+and each slot is one [BiomeLayer] resource. Inside that resource the artwork goes
+into one of two lists, and the director picks one entry per instance:
+
+| List | Takes | Use it for |
+|---|---|---|
+| `variants` | `PackedScene`s (root must be a `Node3D`) | props made of several nodes, or props with their own materials - a tree with a trunk and leaves, a house, a lamp. Materials travel inside the scene, and `mesh_material` is not applied |
+| `meshes` | `Mesh`es | one-piece geometry where the layer's single `mesh_material` is enough - cards, silhouettes, hedge segments. This is the only form `multimesh` and `fit_to_segment` can use |
+
+`variants` win: when both lists are filled the scenes are used, so a biome can swap
+placeholder meshes for real props without touching anything else.
+
+Which band takes what:
+
+| Layer | Content of `LAYERS.md` | Assign it as | Cost knobs that matter |
+|---|---|---|---|
+| 1 - near, 15-60 m | trees, bushes, fences, lamps, mailboxes, benches - things the player can recognise as objects | `variants`, one scene per prop, `count` 1-2 per side | `host_every` for density (2-4 is often enough), `visible_range` around 300 m, `cast_shadow` off for anything small |
+| 2 - mid, 60-200 m | tree lines, rooftops, hedges, poles, walls: silhouettes, not objects | `meshes`, one card or block per kind, `multimesh = true` | `fit_to_segment` for strips that must tile without gaps, `visible_range` ~600 m, `cast_shadow` off, `host_every` if one copy spans several elements |
+| 3 - far, 1 km+ | far hills, a town edge, atmospheric haze | `mode = RING`, one card in `meshes`, an unshaded or billboard material in `mesh_material` | `count` = cards around the circle (12-16 usually closes it), `host_every` = elements the silhouette may last for, `visible_range` past the ring, `cast_shadow` off |
+
+Layer 0 is not a `BiomeLayer`: the road is assigned on the provider itself, through
+`road_material_override` (or `road_skins`, which cycles per element, or
+`road_surfaces` of [RuralBiome] for a surface that changes every few elements) and
+`road_mesh_override`.
+
+Four things that decide whether a layer looks right:
+
+* **`host_every` is a promise about size.** A layer hosted on every N-th element
+  dresses only those elements, so the artwork has to cover the span it skipped: a
+  treeline card built for `host_every = 4` must be four segments long, or the layer
+  will look like it has holes in it.
+* **Distance bands come from `LAYERS.md`, not from the code**, and they are about
+  the *player's* perception: near dressing should not be so far away that it reads
+  as mid scenery, and a ring card closer than ~1 km reads as something the runner
+  could reach. The playfield of the demo is a 30 m road strip, which is why
+  `rural_near.tres` sits at 13-14.5 m - widen it once there is ground to stand on.
+* **`mesh_material` is a `material_override`.** One material for every mesh of the
+  layer, and it wins over the mesh's own material. When two props need different
+  looks, they are two scenes in `variants`, or two layers in different bands.
+* **Placement is seeded, not random.** Every instance's position comes from
+  `decor_seed + layer.seed`, the band, the element index and the slot, so a prop is
+  in exactly the same place every time the endless track recycles that element.
+  Give each layer its own `seed` only if you want the same band to look different
+  between two providers or two layers of one biome.
+
+A whole new near prop, end to end:
+
+```text
+1. worlds/scrolling_track/biomes/props/roadside_bush.tscn
+   - root Node3D, mesh children, their own materials
+2. worlds/scrolling_track/biomes/layers/rural_near.tres
+   - add the scene to `variants`, keep the band and cost fields
+3. rural.tres already points at that layer, so nothing else changes
+4. BiomeDirector.refresh() (or a biome change) rebuilds every placed segment;
+   the debug overlay's `layers` line should show the new instance count
+```
+
+One slot per band is a deliberate limit, not an oversight: three bands with a list
+each covers "what is near, what is middle, what is horizon" without a scene graph
+to maintain. When a band needs two *independent* layers - trees at 13 m and bushes
+at 22 m, placed with different counts and seeds - either mix both assets in that
+band's lists (the director spreads them over the same band), or add the second one
+by hand in `decorate_layer()`. Turning the slots into arrays is a small change to
+`BiomeProvider.decoration()` and `BiomeDirector` if a biome ever needs it.
 
 ---
 
