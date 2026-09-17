@@ -15,6 +15,17 @@ extends RefCounted
 ## towards the outside of a curve.
 
 
+## Mix constants of [method _mix], written as signed 64-bit decimals on purpose: both
+## are above 2^63 - 1, and the engine refuses a hex literal that large - "Cannot
+## represent 0xbf58476d1ce4e5b9 as a 64-bit signed integer" - then substitutes
+## INT64_MAX for it. The murmur3 finaliser quietly becomes two multiplications by the
+## same constant, which still yields distinct seeds, so nothing looks wrong: they just
+## crowd into the top of the range (see [method _test_seed_spread] in the self-test).
+## The same bit patterns, spelled the way the engine accepts them.
+const MIX_A := -4658895280553007687  # 0xbf58476d1ce4e5b9
+const MIX_B := -7723592293110705685  # 0x94d049bb133111eb
+
+
 ## Arc length of `segment`'s centreline, in metres. Kept as a static helper so
 ## placement code reads uniformly; the segment itself is the source of the value.
 static func length(segment: TrackSegment) -> float:
@@ -110,6 +121,8 @@ static func instance_rng(
 	seed_value: int, layer: int, element_index: int, slot: int
 ) -> RandomNumberGenerator:
 	var mixed := _mix(seed_value)
+	# Odd constants (the golden ratio, and the murmur3 finaliser's mix values) spread
+	# neighbouring elements and slots across the whole range.
 	mixed ^= _mix(layer + 0x9e3779b9)
 	mixed ^= _mix(element_index + 0x85ebca6b)
 	mixed ^= _mix(slot + 0xc2b2ae35)
@@ -122,6 +135,6 @@ static func instance_rng(
 ## ints wrap around, so this is stable on every platform.
 static func _mix(value: int) -> int:
 	var x := value
-	x = (x ^ (x >> 30)) * 0xbf58476d1ce4e5b9
-	x = (x ^ (x >> 27)) * 0x94d049bb133111eb
+	x = (x ^ (x >> 30)) * MIX_A
+	x = (x ^ (x >> 27)) * MIX_B
 	return x ^ (x >> 31)

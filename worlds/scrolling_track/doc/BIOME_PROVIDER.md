@@ -381,7 +381,9 @@ art), so it runs in about a second and exits non-zero on failure. It checks:
   right turns, mirror symmetry between the two turn directions, and that lateral
   offsets stay perpendicular to the track;
 * decoration placement is reproducible (same seed + element + slot = same
-  values), which is the property the recycling rules rely on;
+  values), which is the property the recycling rules rely on - and those seeds
+  spread over the whole 64-bit range, which is what keeps the mix constants above
+  2^63 - 1 honest;
 * playlist selection in all four modes (auto, single biome, shuffle, sections);
 * the track/director contract: every pooled body gets the road skin, a layer is
   built once per hosted element, re-placing unchanged segments keeps the *same*
@@ -392,8 +394,8 @@ art), so it runs in about a second and exits non-zero on failure. It checks:
   count to the next change (counting turns as the arcs they are), the run's
   progress, and the single-biome case, where there is no change to wait for.
 
-Godot does not have to be the only judge. `tools/` holds four offline checkers,
-all of which exit non-zero and say what is wrong:
+Godot does not have to be the only judge. `tools/` holds offline checkers, all of
+which exit non-zero and say what is wrong:
 
 ```bash
 python3 tools/check_res.py $(find . -path ./.git -prune -o \( -name "*.tres" -o -name "*.tscn" \) -print)
@@ -402,6 +404,7 @@ python3 tools/verify_horizon.py       # the far layer's numbers: continuity, haz
 python3 tools/verify_debug_stats.py   # what the debug overlay reads
 python3 tools/verify_atmosphere.py    # that a biome change is visible in the fog
 python3 tools/check_engine_api.py     # that every engine call the scripts make exists
+python3 tools/check_gdscript_scope.py # that no name is used outside its block
 ```
 
 `check_engine_api.py` reads every `name(` in the project's GDScript and asks the
@@ -412,12 +415,22 @@ or an error path can be long after the code looked fine. `tween.get_total_durati
 was in this system's own fade for a day, and the only reason it was found is that a
 human ran the game.
 
+`check_gdscript_scope.py` covers what neither the engine nor the linters tell you
+early: whether a name is still in scope. GDScript's parse and style checks both pass a
+file whose indentation moved a block out of the loop that declared its variables - the
+engine is the only thing that notices, and it notices by refusing to load the script
+and naming a line rather than the lost tab. The checker does that analysis from the
+file alone: indentation is read as blocks, `var`/`const`/`for`/parameters as
+declarations, names that are neither are looked up in the engine index, and a `:=`
+built by arithmetic over the loop variable of an untyped `for … in […]` is reported as
+the Variant type it is. Anything it cannot decide from one file it leaves alone.
+
 `check_res.py` validates the text resources - paths, types, `script_class`,
 property names, typed arrays, shader parameters, node parents - against the same
 class information Godot itself uses (a class index generated from the engine's
 `doc/classes`, see `tools/build_godot_index.py`), so a typo in a hand-authored
-`.tres` is caught before the editor is opened. The three oracles exist because the
-biome system's failures are geometric and numeric - a mirrored instance, a ring
+`.tres` is caught before the editor is opened. The checkers that mirror the biome
+system's own numbers exist because its failures are geometric - a mirrored instance, a ring
 that drifts out of reach, a distance that reads wrong - and those are exactly the
 things a headless self-test in a text-only checkout cannot see either.
 

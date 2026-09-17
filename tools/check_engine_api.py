@@ -73,7 +73,7 @@ VARIABLE = re.compile(r"^\s*var\s+([A-Za-z_]\w*)")
 LAMBDA_PARAM = re.compile(r"\bfunc\s*\(([^)]*)\)")
 
 
-def strip_line(line: str) -> str:
+def strip_code(line: str) -> str:
     """The line without its comment and without anything inside a string literal.
 
     Both matter for a name check: a doc comment or a message is not code, and
@@ -107,7 +107,7 @@ def call_sites(text: str):
     """Every `name(` in the file, with the line it is on. The `.` before a call is not
     required - `super.foo()`, `foo()` and `x.foo()` are all calls."""
     for number, line in enumerate(text.splitlines(), start=1):
-        stripped = strip_line(line)
+        stripped = strip_code(line)
         if stripped.lstrip().startswith("@"):
             continue
         for match in CALL.finditer(stripped):

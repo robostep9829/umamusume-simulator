@@ -35,6 +35,7 @@ func _initialize() -> void:
 	_test_placement_mirrors()
 	_test_placement_lateral()
 	_test_placement_determinism()
+	_test_seed_spread()
 	_test_playlist_auto()
 	_test_playlist_single()
 	_test_playlist_sections()
@@ -102,17 +103,17 @@ func _test_placement_frames() -> void:
 				(frame * Vector3(1.0, 0.0, 0.0)).dot(tangent) < FRAME_EPSILON,
 				"the frame's right stays perpendicular to travel at t = %s of %s" % [t, name]
 			)
-	# A layer that faces the track: the yaw the director uses for `face_track`
-	# must turn the instance's -Z back towards the centreline on both sides.
-	for side in [-1.0, 1.0]:
-		var yaw := -side * PI * 0.5
-		for t in [0.0, 0.5, 1.0]:
-			var facing := BiomePlacement.basis_at(segment, t, yaw)
-			var towards_road := BiomePlacement.basis_at(segment, t).x * -side
-			_check(
-				(-facing.z).dot(towards_road) > 1.0 - FRAME_EPSILON,
-				"face_track looks back at the road on side %s of %s at t = %s" % [side, name, t]
-			)
+		# A layer that faces the track: the yaw the director uses for `face_track`
+		# must turn the instance's -Z back towards the centreline on both sides.
+		for side: float in [-1.0, 1.0]:
+			var yaw: float = -side * PI * 0.5
+			for t in [0.0, 0.5, 1.0]:
+				var facing := BiomePlacement.basis_at(segment, t, yaw)
+				var towards_road := BiomePlacement.basis_at(segment, t).x * -side
+				_check(
+					(-facing.z).dot(towards_road) > 1.0 - FRAME_EPSILON,
+					"face_track looks back at the road on side %s of %s at t = %s" % [side, name, t]
+				)
 
 
 ## A left-hand turn is the mirror image of a right-hand turn: a layer must not
@@ -162,6 +163,24 @@ func _test_placement_determinism() -> void:
 	_check(a == b, "the same placement request always yields the same random value")
 	_check(a != c, "a different element yields a different random value")
 	_check(a != d, "a different layer yields a different random value")
+
+
+## The mix has to use the whole 64-bit range. Both of its constants are above
+## 2^63 - 1, and the engine refuses a hex literal that large, substituting INT64_MAX
+## for it: the finaliser then multiplies by the same constant twice and every seed
+## lands in the top of the range. Distinct seeds are not enough to catch that - the
+## crowded ones are still distinct - so this counts the high bytes they cover.
+func _test_seed_spread() -> void:
+	var element_bytes := {}
+	var slot_bytes := {}
+	for element in 12:
+		element_bytes[BiomePlacement.instance_rng(1234, 0, element, 0).seed >> 56] = true
+	for slot in 8:
+		slot_bytes[BiomePlacement.instance_rng(1234, 0, 0, slot).seed >> 56] = true
+	_check(element_bytes.size() >= 8, "12 consecutive elements spread their seeds over the "
+		+ "int64 range (covered %d high bytes)" % element_bytes.size())
+	_check(slot_bytes.size() >= 5, "8 slots of one element spread their seeds over the "
+		+ "int64 range (covered %d high bytes)" % slot_bytes.size())
 
 
 ## --- playlists ---------------------------------------------------------------
