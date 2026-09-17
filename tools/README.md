@@ -14,6 +14,7 @@ quietly renders the wrong thing.
 | `verify_debug_stats.py` | the debug overlay's readout: biome runs, distance to the next biome, run progress |
 | `verify_atmosphere.py` | that a biome change is *visible*: colours far enough apart and haze that reaches the horizon, for the fogs an environment switches on |
 | `build_godot_index.py` | rebuilds `godot_class_index.json`, the class knowledge `check_res.py` runs on |
+| `resfile.py` | shared helper, not a checker: parses a `.tres`/`.tscn` and finds an asset by name, so the checkers survive a restructure |
 
 ```bash
 python3 tools/check_res.py $(find . -path ./.git -prune -o \( -name "*.tres" -o -name "*.tscn" \) -print)
@@ -30,7 +31,10 @@ commit hook or CI as-is.
 rather than mirroring their numbers, so tuning the demo content cannot leave them
 judging an older version of it - and they respect the switches those files set:
 `fog_enabled` is the environment asset's decision, so a fog left off is reported and
-left alone rather than failed.
+left alone rather than failed. Neither has an asset path written into it: they ask
+`resfile.py` for the file by name and follow its references from there (an
+`atmosphere` may be a file of its own or an inline sub-resource), which is why moving
+the biome folders around the project does not silently break them.
 
 `godot_class_index.json` is generated from the engine's own `doc/classes` XML, so
 it knows exactly what a resource may contain. It is committed to keep

@@ -15,18 +15,19 @@ a fog that is switched *on*, and the comparisons need at least two of those.
 
 Read from the demo content itself, so the numbers cannot drift apart from the
 files: the playlist picks the biomes, each biome names its environment and its far
-layer, and the far layer says how far away the haze is judged.
+layer, and the far layer says how far away the haze is judged. An atmosphere may be
+a file of its own or an inline `[sub_resource]` inside the biome, as the demo
+biomes now have it - `tools/resfile.py` follows either.
 
-    python3 tools/verify_atmosphere.py      # exit 0 = the atmosphere is worth looking at
+    python3 tools/verify_atmosphere.py [playlist.tres]
+                                         # exit 0 = the atmosphere is worth looking at
 """
 import math
-import re
 import sys
 from pathlib import Path
 
-ROOT = Path(__file__).resolve().parent.parent
-BIOMES = ROOT / "worlds/scrolling_track/biomes"
-PLAYLIST = BIOMES / "playlist_demo.tres"
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+import resfile
 
 # Thresholds of "a player would notice", applied only to a fog that is switched on.
 # The sky carries most of the screen, so it is the one that matters: the shift is
@@ -40,110 +41,51 @@ MIN_SKY_AFFECT = 0.30                    # below this the sky ignores the fog
 MAX_DENSITY = 0.05                       # beyond this the world is a grey wall
 
 
-def read_resource(path: Path) -> dict:
-    """Properties of a text resource's `[resource]` block, plus its ext_resources."""
-    values: dict = {}
-    ext: dict = {}
-    in_resource = False
-    for raw in path.read_text().splitlines():
-        line = raw.strip()
-        if line.startswith("[ext_resource"):
-            # `\b` matters: without it the `id="` inside a `uid="uid://..."` matches
-            # first and every reference resolves to a UID, which Godot adds on save.
-            found = re.search(r'\bid="([^"]+)"', line)
-            resource = re.search(r'\bpath="res://([^"]+)"', line)
-            if found and resource:
-                ext[found.group(1)] = ROOT / resource.group(1)
-            continue
-        if line.startswith("["):
-            in_resource = line == "[resource]"
-            continue
-        if in_resource and "=" in line:
-            key, value = line.split("=", 1)
-            values[key.strip()] = value.strip()
-    values["_ext"] = ext
-    values["_path"] = path
-    return values
-
-
-def reference(value: str, values: dict) -> Path:
-    """The file an `ExtResource("id")` property points at."""
-    found = re.search(r'ExtResource\("([^"]+)"\)', value)
-    if not found:
-        raise SystemExit(f"{values['_path'].name}: value is not a reference: {value}")
-    return values["_ext"][found.group(1)]
-
-
-def references(value: str, values: dict) -> list:
-    """The files an array property points at, ignoring the array's own type."""
-    body = value.split("](", 1)[1] if "](" in value else value
-    return [values["_ext"][name] for name in re.findall(r'ExtResource\("([^"]+)"\)', body)]
-
-
-def colour(value: str) -> tuple:
-    numbers = [float(part) for part in re.findall(r"-?\d+(?:\.\d+)?", value)]
-    return tuple(numbers[:3])
-
-
-def number(values: dict, key: str, fallback: float) -> float:
-    return float(values[key]) if key in values else fallback
-
-
-def boolean(values: dict, key: str, fallback: bool) -> bool:
-    return values[key] == "true" if key in values else fallback
-
-
 def haze(density: float, distance: float) -> float:
     """How much of a surface at `distance` is fog: Godot's exponential fog."""
     return 1.0 - math.exp(-density * distance)
 
 
-playlist = read_resource(PLAYLIST)
-providers = references(playlist["biomes"], playlist)
-if len(providers) < 2:
-    raise SystemExit(f"{PLAYLIST.name}: a transition needs at least two biomes")
+playlist_path = Path(sys.argv[1]).resolve() if len(sys.argv) > 1 else resfile.find_asset(
+    "playlist_demo.tres")
+playlist = resfile.read(playlist_path)
+biomes = playlist.references("biomes")
+if not biomes:
+    raise SystemExit(f"{playlist.origin}: names no biomes, so it applies nothing")
+if len(biomes) < 2:
+    raise SystemExit(f"{playlist.origin}: a transition needs at least two biomes")
 
-print(f"playlist: {len(providers)} biomes, "
+print(f"playlist {playlist.origin}: {len(biomes)} biomes, "
       f"{playlist.get('segments_per_biome', '?')} elements each")
 
 rows = []
-for provider_path in providers:
-    provider = read_resource(provider_path)
-    if "atmosphere" not in provider:
-        rows.append({"name": provider_path.stem, "environment": None, "layer": None})
-        continue
-    environment_path = reference(provider["atmosphere"], provider)
-    environment = read_resource(environment_path)
-    layer = reference(provider["far_layer"], provider) if "far_layer" in provider else None
-    rows.append({
-        "name": provider_path.stem,
-        "environment": environment,
-        "environment_path": environment_path,
-        "layer": read_resource(layer) if layer else None,
-    })
+for biome in biomes:
+    row = {"name": biome.text("biome_id", biome.name), "biome": biome}
+    row["environment"] = biome.reference("atmosphere")
+    row["layer"] = biome.reference("far_layer")
+    rows.append(row)
 
 failures = []
 for row in rows:
     environment = row["environment"]
+    name = row["biome"].origin if not environment else environment.origin
     if environment is None:
         # Not an error: `atmosphere` unset is the documented way to keep the level's
         # own environment, and this biome then has no fog of its own to check.
         print(f"  {row['name']:10} keeps the level's environment, no atmosphere of its own")
         continue
-    name = row["environment_path"].name
-    enabled = boolean(environment, "fog_enabled", False)
-    density = number(environment, "fog_density", 0.01)
-    aerial = number(environment, "fog_aerial_perspective", 0.0)
-    sky_affect = number(environment, "fog_sky_affect", 1.0)
-    energy = number(environment, "fog_light_energy", 1.0)
-    tint = colour(environment["fog_light_color"]) if "fog_light_color" in environment else (1, 1, 1)
-    row.update({"density": density, "aerial": aerial, "sky_affect": sky_affect,
-                "energy": energy, "tint": tint, "enabled": enabled, "file": name})
-    if not enabled:
+    if not environment.boolean("fog_enabled"):
         # The environment asset decides. Say so, and judge nothing about it.
-        print(f"  {row['name']:10} {name:20} fog off - the asset leaves it off")
+        print(f"  {row['name']:10} fog off - the asset leaves it off ({name})")
         continue
-    print(f"  {row['name']:10} {name:20} fog on  colour {tint} density {density:g}")
+    density = environment.number("fog_density", 0.01)
+    aerial = environment.number("fog_aerial_perspective", 0.0)
+    sky_affect = environment.number("fog_sky_affect", 1.0)
+    energy = environment.number("fog_light_energy", 1.0)
+    row.update({"density": density, "aerial": aerial, "sky_affect": sky_affect,
+                "energy": energy, "tint": environment.colour("fog_light_color"),
+                "enabled": True, "file": name})
+    print(f"  {row['name']:10} fog on  colour {row['tint']} density {density:g}  ({name})")
     print(f"             sky affect {sky_affect:g}, aerial perspective {aerial:g}, "
           f"energy {energy:g}")
     if not 0.0 < density <= MAX_DENSITY:
@@ -159,7 +101,7 @@ for row in rows:
 # wrong biome: the fog simply cuts rather than fades, because `fog_enabled` is
 # swapped with the rest of the environment instead of being interpolated.
 with_atmosphere = [row for row in rows if row["environment"] is not None]
-fogged = [row for row in with_atmosphere if row["enabled"]]
+fogged = [row for row in with_atmosphere if row.get("enabled")]
 if len(fogged) < len(with_atmosphere):
     print(f"fog is on in {len(fogged)} of {len(with_atmosphere)} biomes that carry an "
           f"environment: entering one from another switches it instantly, in or out")
@@ -172,11 +114,11 @@ else:
     # colour mixed in by `fog_sky_affect`, with `fog_aerial_perspective` of it replaced
     # by the sky itself (the same sky in every biome, so only the rest can differ).
     weights = [(1.0 - row["aerial"]) * row["sky_affect"] * row["energy"] for row in fogged]
-    shifts = []
-    for i in range(len(fogged) - 1):
-        weight = min(weights[i], weights[i + 1])
-        shifts.append(weight * max(
-            abs(a - b) for a, b in zip(fogged[i]["tint"], fogged[i + 1]["tint"])))
+    shifts = [
+        min(weights[i], weights[i + 1]) * max(
+            abs(a - b) for a, b in zip(fogged[i]["tint"], fogged[i + 1]["tint"]))
+        for i in range(len(fogged) - 1)
+    ]
     shift = max(shifts)
     print(f"strongest recolouring of the sky between two biomes with fog: {shift:.3f}")
     if shift < MIN_SKY_SHIFT:
@@ -186,12 +128,14 @@ else:
 
     # And on the horizon, where the fog has had a kilometre to build up.
     for row in fogged:
-        if row["layer"] is None:
+        layer = row["layer"]
+        if layer is None:
             failures.append(f"{row['name']}: no `far_layer`, so there is no horizon to judge")
             continue
-        distance = number(row["layer"], "distance_min", 0.0)
+        distance = layer.number("distance_min", 0.0)
         row["haze"] = haze(row["density"], distance)
-        print(f"  {row['name']:10} horizon at {distance:g} m is {row['haze']:.0%} fog")
+        print(f"  {row['name']:10} horizon at {distance:g} m ({layer.origin}) is "
+              f"{row['haze']:.0%} fog")
         if row["haze"] < MIN_HORIZON_HAZE:
             failures.append(
                 f"{row['name']}: at its own horizon distance only {row['haze']:.0%} of the "

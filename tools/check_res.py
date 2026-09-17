@@ -2,7 +2,8 @@
 """Validates this project's Godot text resources (.tres / .tscn) without Godot.
 
     python3 tools/check_res.py <file> [<file> ...]        # paths from the repo root
-    python3 tools/check_res.py $(find worlds ui prefabs environment -name "*.tres" -o -name "*.tscn")
+    python3 tools/check_res.py $(find worlds ui prefabs \
+        -name "*.tres" -o -name "*.tscn")
 
 Hand-authored resources are the easiest place to make a silent mistake: a typo in
 a property name, a path that moved, a `script_class` that no longer matches its
