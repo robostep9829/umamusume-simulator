@@ -1,7 +1,7 @@
-[gd_resource type="Environment" load_steps=3 format=3]
+[gd_resource type="Environment" format=3 uid="uid://cb0mw5kqdfbg4"]
 
-[ext_resource type="CompressedTexture3D" path="res://environment/tonemap/pbrNeutral.exr" id="1_tonemap"]
-[ext_resource type="Sky" path="res://environment/sky_default.tres" id="2_sky"]
+[ext_resource type="CompressedTexture3D" uid="uid://e573kqiepk0a" path="res://environment/tonemap/pbrNeutral.exr" id="1_tonemap"]
+[ext_resource type="Sky" uid="uid://coqbbfksjyjus" path="res://environment/sky_default.tres" id="2_sky"]
 
 [resource]
 background_mode = 2
@@ -10,7 +10,6 @@ sky = ExtResource("2_sky")
 tonemap_exposure = 0.57
 fog_enabled = true
 fog_light_color = Color(0.63, 0.69, 0.74, 1)
-fog_light_energy = 1.0
 fog_density = 0.0008
 fog_aerial_perspective = 0.45
 fog_sky_affect = 0.5

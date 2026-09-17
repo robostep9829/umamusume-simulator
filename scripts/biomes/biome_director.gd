@@ -229,7 +229,7 @@ func _fill_change_stats(stats: Dictionary, element: int) -> void:
 	var run := playlist.run_range_at(element)
 	stats["run_first"] = run.x
 	stats["run_elements"] = run.y
-	var walked := float(element - run.x) + stats["progress"]
+	var walked : float = float(element - run.x) + stats["progress"]
 	stats["run_progress"] = clampf(walked / maxf(float(run.y), 1.0), 0.0, 1.0)
 	stats["change_elements"] = maxi(run.x + run.y - element, 0)
 	stats["change_distance"] = distance_to_biome_change()

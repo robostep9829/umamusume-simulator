@@ -20,5 +20,4 @@ lateral_scatter = 12.0
 lift_scatter = 1.5
 scale_min = 0.85
 scale_max = 1.3
-visible_range = 600.0
 cast_shadow = false

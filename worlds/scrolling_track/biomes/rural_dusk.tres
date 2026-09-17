@@ -1,20 +1,20 @@
-[gd_resource type="Resource" script_class="RuralBiome" load_steps=8 format=3]
+[gd_resource type="Resource" script_class="RuralBiome" format=3 uid="uid://ceg58cw6l0m7u"]
 
-[ext_resource type="Script" path="res://scripts/biomes/providers/rural_biome.gd" id="1_rural"]
-[ext_resource type="Material" path="res://worlds/scrolling_track/biomes/materials/rural_dirt_road.tres" id="2_dirt"]
-[ext_resource type="Environment" path="res://worlds/scrolling_track/biomes/rural_dusk_env.tres" id="3_environment"]
+[ext_resource type="Script" uid="uid://cqxnxc6weq8hv" path="res://scripts/biomes/providers/rural_biome.gd" id="1_rural"]
+[ext_resource type="Material" uid="uid://b4n7hfri20ovo" path="res://worlds/scrolling_track/biomes/materials/rural_dirt_road.tres" id="2_dirt"]
+[ext_resource type="Environment" uid="uid://bx70kmc1q61p6" path="res://worlds/scrolling_track/biomes/rural_dusk_env.tres" id="3_environment"]
 [ext_resource type="Resource" path="res://worlds/scrolling_track/biomes/layers/rural_near.tres" id="4_near"]
-[ext_resource type="Resource" path="res://worlds/scrolling_track/biomes/layers/rural_mid.tres" id="5_mid"]
-[ext_resource type="Resource" path="res://worlds/scrolling_track/biomes/layers/rural_far.tres" id="6_far"]
+[ext_resource type="Resource" uid="uid://bmxxl1s70mdpp" path="res://worlds/scrolling_track/biomes/layers/rural_mid.tres" id="5_mid"]
+[ext_resource type="Resource" uid="uid://11dbwmj245x0" path="res://worlds/scrolling_track/biomes/layers/rural_far.tres" id="6_far"]
 
 [resource]
 script = ExtResource("1_rural")
+road_surfaces = Array[Material]([ExtResource("2_dirt")])
+road_surface_every = 1
 biome_id = &"rural_dusk"
 display_name = "Rural (dusk)"
 road_material_override = ExtResource("2_dirt")
-road_surfaces = Array[Material]([ExtResource("2_dirt")])
-road_surface_every = 1
-atmosphere = ExtResource("3_environment")
 near_layer = ExtResource("4_near")
 mid_layer = ExtResource("5_mid")
 far_layer = ExtResource("6_far")
+atmosphere = ExtResource("3_environment")

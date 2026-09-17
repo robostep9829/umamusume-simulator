@@ -1,11 +1,12 @@
-[gd_resource type="Resource" script_class="BiomePlaylist" load_steps=5 format=3]
+[gd_resource type="Resource" script_class="BiomePlaylist" format=3 uid="uid://bjdqfib13mfdm"]
 
-[ext_resource type="Script" path="res://scripts/biomes/biome_playlist.gd" id="1_playlist"]
-[ext_resource type="Script" path="res://scripts/biomes/biome_provider.gd" id="2_provider"]
+[ext_resource type="Script" uid="uid://5xf1pp20qw58" path="res://scripts/biomes/biome_playlist.gd" id="1_playlist"]
+[ext_resource type="Script" uid="uid://cu1v424fvlipl" path="res://scripts/biomes/biome_provider.gd" id="2_provider"]
 [ext_resource type="Resource" path="res://worlds/scrolling_track/biomes/rural.tres" id="3_rural"]
 [ext_resource type="Resource" path="res://worlds/scrolling_track/biomes/rural_dusk.tres" id="4_rural_dusk"]
+[ext_resource type="Script" uid="uid://c741ite6obmdp" path="res://scripts/biomes/biome_section.gd" id="5_5awug"]
 
 [resource]
 script = ExtResource("1_playlist")
 biomes = Array[ExtResource("2_provider")]([ExtResource("3_rural"), ExtResource("4_rural_dusk")])
-segments_per_biome = 12
+segments_per_biome = 3

@@ -8,10 +8,8 @@
 [ext_resource type="Material" uid="uid://c8xsq2iw3ca2h" path="res://worlds/scrolling_track/floor_segments/biomes/rural/materials/ground.tres" id="6_7g5pp"]
 [ext_resource type="ArrayMesh" uid="uid://cmmwpaw4ojxm1" path="res://worlds/scrolling_track/floor_segments/floor_turn_left_5deg.obj" id="7_i1jpn"]
 [ext_resource type="Script" uid="uid://vk65f2vfnwtm" path="res://scripts/biomes/biome_director.gd" id="8_biome"]
-[ext_resource type="Resource" path="res://worlds/scrolling_track/biomes/playlist_demo.tres" id="9_playlist"]
-[ext_resource type="Script" path="res://scripts/debug/debug_overlay.gd" id="10_debug"]
-
-[sub_resource type="CylinderMesh" id="CylinderMesh_waqk3"]
+[ext_resource type="Resource" uid="uid://bjdqfib13mfdm" path="res://worlds/scrolling_track/biomes/playlist_demo.tres" id="9_playlist"]
+[ext_resource type="Script" uid="uid://7uenwo5bciov" path="res://scripts/debug/debug_overlay.gd" id="10_debug"]
 
 [node name="ScrollingTrack" type="Node3D" unique_id=97728838]
 
@@ -35,24 +33,12 @@ directional_shadow_max_distance = 6.0
 [node name="WorldEnvironment" type="WorldEnvironment" parent="." unique_id=931496456]
 environment = ExtResource("4_la2pr")
 
-[node name="MeshInstance3D" type="MeshInstance3D" parent="." unique_id=1564056299]
+[node name="StraightPrevier" type="MeshInstance3D" parent="." unique_id=1591104222]
 process_mode = 4
-visible = false
-mesh = SubResource("CylinderMesh_waqk3")
-
-[node name="MeshInstance3D2" type="MeshInstance3D" parent="." unique_id=1805783648]
-process_mode = 4
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -60)
-visible = false
-mesh = SubResource("CylinderMesh_waqk3")
-
-[node name="FloorStraight" type="MeshInstance3D" parent="." unique_id=1591104222]
-process_mode = 4
-visible = false
 mesh = ExtResource("5_7g5pp")
 surface_material_override/0 = ExtResource("6_7g5pp")
 
-[node name="FloorTurnLeft5Deg" type="MeshInstance3D" parent="." unique_id=1006989938]
+[node name="TurnPreview" type="MeshInstance3D" parent="." unique_id=1006989938]
 process_mode = 4
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -100)
 visible = false
@@ -65,7 +51,6 @@ script = ExtResource("8_biome")
 track = NodePath("../TrackManager")
 playlist = ExtResource("9_playlist")
 world_environment = NodePath("../WorldEnvironment")
-
 
 [node name="DebugOverlay" type="CanvasLayer" parent="." unique_id=1314205677]
 script = ExtResource("10_debug")
