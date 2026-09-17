@@ -42,6 +42,11 @@ enum Side {
 	RIGHT,
 }
 
+## Closest a [constant Mode.RING] may sit, in metres. Closer than this the horizon
+## stops reading as distance and starts reading as scenery the runner could reach -
+## and could drive past, since a ring card is not anchored to anything.
+const RING_MIN_DISTANCE := 300.0
+
 ## Uncheck to keep an authored layer around but inactive.
 @export var enabled: bool = true
 
@@ -131,8 +136,15 @@ func is_ring() -> bool:
 	return mode == Mode.RING
 
 
-## Problems the [BiomeDirector] reports at startup, so an unfinished biome fails
-## loudly instead of rendering nothing.
+## Problems the [BiomeDirector] reports as errors at startup, so a layer that is
+## unfinished - or that is set up to do something other than what it looks like it
+## does - fails loudly instead of rendering nothing.
+##
+## The second half is the important half. A layer is data, so half of it can be
+## ignored without anything failing: `variants` win over `meshes`, a [MultiMesh] can
+## only draw one of them, `mesh_material` never touches a scene. Every one of those
+## is reported here, because a prop that never appears is otherwise found by eye, and
+## only after wondering whether the band was wrong.
 func validate() -> PackedStringArray:
 	var problems := PackedStringArray()
 	if not is_usable():
@@ -145,4 +157,37 @@ func validate() -> PackedStringArray:
 		problems.append("`distance_max` is smaller than `distance_min`")
 	if fit_to_segment and meshes.is_empty():
 		problems.append("`fit_to_segment` needs `meshes`, it is ignored for scenes")
+
+	if not variants.is_empty() and not meshes.is_empty():
+		problems.append(
+			"`variants` and `meshes` are both set: the scenes win, so the %d mesh(es) "
+			% meshes.size()
+			+ "are never used"
+		)
+	if multimesh and not meshes.is_empty():
+		if not variants.is_empty():
+			problems.append("`multimesh` is never built while `variants` is set")
+		elif meshes.size() > 1:
+			problems.append(
+				"`multimesh` draws `meshes[0]` only, so %d of the %d meshes are never used"
+				% [meshes.size() - 1, meshes.size()]
+			)
+	if mesh_material != null and meshes.is_empty():
+		problems.append("`mesh_material` applies to `meshes` only, so it is never used")
+
+	if is_ring():
+		if fit_to_segment:
+			problems.append("`fit_to_segment` is used along the track only, RING ignores it")
+		if distance_min < RING_MIN_DISTANCE:
+			problems.append(
+				"a ring card at `distance_min` = %s m could be driven past; the horizon "
+				% String.num(distance_min, 1)
+				+ "belongs beyond %s m" % String.num(RING_MIN_DISTANCE, 0)
+			)
+	if visible_range > 0.0 and visible_range < distance_max:
+		problems.append(
+			"`visible_range` (%s m) is closer than `distance_max` (%s m), so part of "
+			% [String.num(visible_range, 1), String.num(distance_max, 1)]
+			+ "this layer is never visible"
+		)
 	return problems

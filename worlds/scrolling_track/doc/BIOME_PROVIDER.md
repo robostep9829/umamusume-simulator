@@ -264,8 +264,10 @@ off, or with no `atmosphere` at all, is respected and reported rather than faile
    fields above. `BiomeProvider` can be used directly - no script needed.
 5. **Playlist.** Add it to `playlist_demo.tres` for the endless track, or to a
    `sections` list for an authored lap.
-6. **Check.** `playlist.validate()` runs on `_ready` and reports empty biomes,
-   empty layers and inconsistent numbers through `push_warning()`.
+6. **Check.** `playlist.validate()` runs on `BiomeDirector._ready()` and reports
+   empty biomes, empty layers, inconsistent numbers - and layers that are set up to do
+   something other than what they look like they do - through `push_error()`. See
+   section 7.
 
 For the three biomes of `BIOMES.md`, step 2 is the work: the obstacle and
 feature tables there are data for the hooks of section 1.2 once obstacles exist.
@@ -471,6 +473,7 @@ is a `CanvasLayer` that builds its own panel, finds the level's `TrackManager`,
 | `layers` | instances built per decoration layer, as they really are in the pool |
 | `horizon` | cards in the ring and how far the anchor currently is |
 | `fog` | the environment that is *rendering*: fog colour (with a swatch), density, energy, sky affect, aerial perspective, sun scatter |
+| `issues` | how many problems the console reported, shown at every detail level |
 | `skin` / `atmo` / `playlist` / `coming` | road variant, atmosphere file (and how far a transition has come), playlist mode, the next few runs |
 
 The `fog` line is read from the live environment rather than from the biome's
@@ -504,3 +507,54 @@ To add the overlay to another level, add a `CanvasLayer` with the script attache
 [node name="DebugOverlay" type="CanvasLayer" parent="."]
 script = ExtResource("debug_overlay")
 ```
+
+---
+
+## 7. Errors in the console
+
+The biome system is data, so most of what can go wrong with it goes wrong quietly: a
+layer keeps rendering, it just renders something else than what the file says. Two
+kinds of message are printed to catch that.
+
+**At startup**, `BiomeDirector._ready()` asks the playlist to validate itself and
+prints one `push_error` per problem, after a line naming the file they came from:
+
+```text
+BiomeDirector (BiomeDirector): res://worlds/scrolling_track/playlists/playlist_demo.tres
+has 3 problem(s), biomes still run:
+  - rural_dusk: MID layer `visible_range` (120.0 m) is closer than `distance_max` (200.0 m),
+    so part of this layer is never visible
+  - rural_dusk: FAR layer a ring card at `distance_min` = 60.0 m could be driven past;
+    the horizon belongs beyond 300 m
+  - both `biomes` and `sections` are set: the sections win, so the 2 biome(s) in `biomes`
+    are never used
+```
+
+Problems do not stop the run: the playlist is still applied. They mean the world will
+not look like the data says, and the alternative - a prop that never appears, a ring
+that is driven through, a list that is silently ignored - is found by eye hours later.
+
+**At runtime**, anything that fails while the world is being built is reported with
+`_report_once()`: the first occurrence prints, repeats do not. A pooled body without
+its `Mesh` child or a variant that is not a `Node3D` would otherwise print the same
+line once per segment, several hundred times per minute, and the second message is no
+more useful than the first. The keys are in `reported_problems()`, so a test can see
+what was said:
+
+| Reported once | When |
+|---|---|
+| no `TrackManager` / no `BiomePlaylist` | the director cannot run at all |
+| the track has no `player` | no biome can be chosen, so nothing is decorated |
+| a pooled body has no `Mesh` child | the road skin is not applied (check `TrackManager`'s pool) |
+| a biome carries an atmosphere but there is no `WorldEnvironment` | no sky, fog or light of a biome is ever shown |
+| neither the biome nor the level has an environment | the atmosphere stays whatever it was |
+| a `variants` entry is empty, or its root is not a `Node3D` | that prop is skipped |
+
+`BiomeDirector.validation_problems()` and `reported_problems()` expose both kinds for a
+test, and the debug overlay shows an `issues` line - `2 · see the Output panel` - at
+every detail level, because a phone screen has no Output panel to look at.
+
+The offline checkers in `tools/` judge the same content without Godot, and
+`tools/verify_atmosphere.py` is the one that overlaps most with startup validation: it
+looks at the atmosphere of a whole playlist, where the runtime reports one biome at a
+time.

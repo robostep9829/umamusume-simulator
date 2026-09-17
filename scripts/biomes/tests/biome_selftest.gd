@@ -298,6 +298,74 @@ func _test_validation() -> void:
 	broken_section.sections = [section]
 	_check(not broken_section.validate().is_empty(), "a section without length is a problem")
 
+	# The half of validation that catches a layer which looks right and does nothing:
+	# `variants` win over `meshes`, a MultiMesh can only draw one mesh, and
+	# `mesh_material` never touches a scene. Each has to be named in the report, or
+	# the author is left looking at a prop that never appears.
+	var shadowed := BiomeLayer.new()
+	shadowed.variants = [PackedScene.new()]
+	shadowed.meshes = [BoxMesh.new(), BoxMesh.new()]
+	shadowed.multimesh = true
+	shadowed.mesh_material = StandardMaterial3D.new()
+	_check_problem(shadowed, "the scenes win", "meshes that scenes shadow are reported")
+	_check_problem(shadowed, "never built", "a MultiMesh that is never built is reported")
+	_check_problem(shadowed, "mesh_material", "a material that is never applied is reported")
+
+	var unreachable := BiomeLayer.new()
+	unreachable.meshes = [BoxMesh.new()]
+	unreachable.distance_max = 200.0
+	unreachable.visible_range = 120.0
+	_check_problem(unreachable, "never visible", "a layer culled inside its own band is reported")
+
+	var low_ring := BiomeLayer.new()
+	low_ring.mode = BiomeLayer.Mode.RING
+	low_ring.meshes = [BoxMesh.new()]
+	low_ring.distance_min = 60.0
+	low_ring.distance_max = 120.0
+	low_ring.fit_to_segment = true
+	_check_problem(low_ring, "driven past", "a ring close enough to drive past is reported")
+	_check_problem(low_ring, "RING ignores", "fit_to_segment in RING mode is reported")
+
+	var half_filled := _provider(&"half")
+	half_filled.road_skins = [StandardMaterial3D.new(), null]
+	half_filled.obstacle_skins = [PackedScene.new(), null]
+	_check_problem(half_filled, "road_skins", "an empty road skin slot is reported")
+	_check_problem(half_filled, "obstacle_skins", "an empty obstacle skin slot is reported")
+
+	var two_sources := BiomePlaylist.new()
+	two_sources.biomes = [_provider(&"only")]
+	two_sources.sections = [section_of(_provider(&"only"), 5)]
+	two_sources.segments_per_biome = -1
+	_check_problem(two_sources, "sections win", "biomes shadowed by sections are reported")
+	_check_problem(two_sources, "negative", "a negative round length is reported")
+
+	# And the reporting itself: the same problem is printed once, however many times
+	# the failing code path runs (a pooled body is re-dressed every element).
+	var reporter := BiomeDirector.new()
+	reporter._report_once(&"same", "one")
+	reporter._report_once(&"same", "two")
+	reporter._report_once(&"other", "three")
+	_check(reporter.reported_problems().size() == 2, "a repeated problem is reported once")
+
+
+## The problems `resource` reports, joined, for substring checks. Taken as a
+## [Variant] so the same helper serves a playlist, a biome and a layer - `Resource`
+## has no `validate()` of its own, and a typed call would be refused by the analyzer.
+func _problems_of(resource: Variant) -> String:
+	return "\n".join(resource.validate())
+
+
+func _check_problem(resource: Variant, fragment: String, what: String) -> void:
+	_check(_problems_of(resource).contains(fragment), "%s (it did not mention \"%s\")"
+		% [what, fragment])
+
+
+func section_of(provider: BiomeProvider, segments: int) -> BiomeSection:
+	var section := BiomeSection.new()
+	section.provider = provider
+	section.segments = segments
+	return section
+
 
 ## --- track integration -------------------------------------------------------
 

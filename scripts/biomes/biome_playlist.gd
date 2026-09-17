@@ -144,6 +144,14 @@ func describe() -> String:
 ## fails loudly instead of leaving the track bare.
 func validate() -> PackedStringArray:
 	var problems := PackedStringArray()
+	if segments_per_biome < 0:
+		problems.append("`segments_per_biome` cannot be negative")
+	if not biomes.is_empty() and not sections.is_empty():
+		problems.append(
+			"both `biomes` and `sections` are set: the sections win, so the %d biome(s) "
+			% biomes.size()
+			+ "in `biomes` are never used"
+		)
 	if uses_sections():
 		if _section_total <= 0:
 			problems.append("`sections` cover 0 elements")

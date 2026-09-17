@@ -350,6 +350,13 @@ func _add_biome_lines(lines: Array[String]) -> void:
 	var title := biome if biome_name.is_empty() else "%s · %s" % [biome, biome_name]
 	lines.append(_field("biome", title, GOOD_COLOR))
 
+	# An authoring problem is reported in the console, which a phone or a released
+	# build does not show: the count here is what makes it visible in the game, and
+	# it is shown at every detail level for the same reason.
+	var problems := int(_stats.get("problems", 0))
+	if problems > 0:
+		lines.append(_field("issues", "%d · see the Output panel" % problems, WARN_COLOR))
+
 	var change := float(_stats.get("change_distance", -1.0))
 	if change < 0.0:
 		lines.append(_field("next", "this biome runs the whole track"))

@@ -84,6 +84,10 @@ var _horizon_regions: Dictionary = {}
 var _base_environment: Environment
 var _blend_fields: Array[StringName] = []
 var _blend_tween: Tween
+# What `playlist.validate()` found at startup, and which runtime problems were
+# already printed, so a report never repeats itself (see _report_once).
+var _problems: PackedStringArray = PackedStringArray()
+var _reported: Dictionary = {}
 
 
 func _ready() -> void:
@@ -101,17 +105,62 @@ func _ready() -> void:
 	if track == null:
 		track = _find_track()
 	if track == null:
-		push_warning("BiomeDirector (%s): no TrackManager assigned, biomes stay off." % name)
+		push_error(
+			"BiomeDirector (%s): no TrackManager assigned or found beside it, so no biome "
+			% name
+			+ "is applied. Point `track` at the level's TrackManager."
+		)
 		return
 	if playlist == null:
-		push_warning("BiomeDirector (%s): no BiomePlaylist assigned, biomes stay off." % name)
+		push_error(
+			"BiomeDirector (%s): no BiomePlaylist assigned, so no biome is applied. "
+			% name
+			+ "Point `playlist` at one."
+		)
 		return
 
-	var problems := playlist.validate()
-	if not problems.is_empty():
-		push_warning("BiomeDirector (%s): %s" % [name, "\n  - ".join(problems)])
-
+	_report_playlist_problems()
 	track.segment_placed.connect(_on_segment_placed)
+
+
+## Problems [method BiomePlaylist.validate] found at startup, empty when the playlist
+## is well formed. Kept so a test or a debug view can read what was reported.
+func validation_problems() -> PackedStringArray:
+	return _problems
+
+
+## What the director has already complained about: problem key -> true.
+func reported_problems() -> Dictionary:
+	return _reported
+
+
+## Reports the playlist's problems as errors, one message each, prefixed by the file
+## they came from. An authoring mistake here does not stop the game - it makes the
+## world render something other than what was authored, which is otherwise noticed
+## hours later and by eye.
+func _report_playlist_problems() -> void:
+	_problems = playlist.validate()
+	if _problems.is_empty():
+		return
+	var source := playlist.resource_path
+	if source.is_empty():
+		source = "<playlist built in code>"
+	push_error(
+		"BiomeDirector (%s): %s has %d problem(s), biomes still run:"
+		% [name, source, _problems.size()]
+	)
+	for problem in _problems:
+		push_error("  - %s" % problem)
+
+
+## Prints `message` once per `key`. Anything that fails per segment - a variant that
+## is not a Node3D, a pooled body without its mesh - would otherwise bury the rest of
+## the log under a few hundred identical lines, and is no more useful for it.
+func _report_once(key: StringName, message: String) -> void:
+	if _reported.has(key):
+		return
+	_reported[key] = true
+	push_error(message)
 
 
 func _physics_process(_delta: float) -> void:
@@ -119,6 +168,12 @@ func _physics_process(_delta: float) -> void:
 		return
 	var player := track.player
 	if player == null:
+		_report_once(
+			&"no_player",
+			"BiomeDirector (%s): the TrackManager has no `player`, so no biome can be "
+			% name
+			+ "chosen and decoration is not built."
+		)
 		return
 	var position := player.global_position
 	_refresh_anchor(position)
@@ -204,6 +259,7 @@ func debug_stats() -> Dictionary:
 		"layers": {},
 		"horizon_cards": 0,
 		"horizon_distance": 0.0,
+		"problems": _problems.size(),
 	}
 	if _active_provider != null:
 		stats["biome"] = _active_provider.biome_id
@@ -326,6 +382,14 @@ func _skin_road(
 ) -> void:
 	var mesh_instance := body.get_node_or_null("Mesh") as MeshInstance3D
 	if mesh_instance == null:
+		# TrackManager's pool names the road mesh "Mesh"; without it there is nothing
+		# to paint, and every one of the pool's bodies would fail the same way.
+		_report_once(
+			&"no_mesh_child",
+			"BiomeDirector (%s): a pooled body of the track has no `Mesh` child, so its "
+			% name
+			+ "road skin was not applied. Check TrackManager's pool."
+		)
 		return
 	if provider == null:
 		mesh_instance.material_override = null
@@ -498,9 +562,24 @@ func _spawn(
 ) -> Node3D:
 	if not descriptor.variants.is_empty():
 		var scene := descriptor.variants[rng.randi_range(0, descriptor.variants.size() - 1)]
+		if scene == null:
+			_report_once(
+				StringName("empty_variant:%s" % descriptor.resource_path),
+				"BiomeDirector: `%s` has an empty entry in `variants`, so that instance "
+				% _path_of(descriptor)
+				+ "was skipped."
+			)
+			return null
 		var scene_instance := scene.instantiate() as Node3D
 		if scene_instance == null:
-			push_warning("BiomeDirector: a variant of a BiomeLayer is not a Node3D, it was skipped.")
+			# Reported once per scene: a prop that cannot be posed would otherwise fail
+			# on every element it is drawn on.
+			_report_once(
+				StringName("variant_root:%s" % scene.resource_path),
+				"BiomeDirector: `%s` is not a Node3D, so it cannot be placed; it will be "
+				% _path_of(scene)
+				+ "skipped wherever a layer lists it."
+			)
 			return null
 		scene_instance.transform = placement
 		_configure_instance(scene_instance, descriptor)
@@ -632,7 +711,22 @@ func blend_progress() -> float:
 ## first: the authored `.tres` is never written to, and the fade always starts
 ## from whatever the world currently looks like.
 func _blend_environment(target: Environment, instant: bool = false) -> void:
-	if world_environment == null or target == null:
+	if world_environment == null:
+		# A biome is carrying an atmosphere and nothing in the level can render it.
+		_report_once(
+			&"no_world_environment",
+			"BiomeDirector (%s): a biome carries an atmosphere, but `world_environment` "
+			% name
+			+ "is not set, so no sky, fog or light of a biome is ever shown."
+		)
+		return
+	if target == null:
+		_report_once(
+			&"no_environment",
+			"BiomeDirector (%s): neither the biome nor the level's WorldEnvironment has "
+			% name
+			+ "an environment, so the atmosphere stays whatever it was."
+		)
 		return
 	var current := world_environment.environment
 	var blended := target.duplicate() as Environment
@@ -696,6 +790,14 @@ func _find_track() -> TrackManager:
 			if sibling is TrackManager:
 				return sibling
 	return null
+
+
+## Short name of a resource for a console message: its path, or its class when it was
+## built in code and has none.
+func _path_of(resource: Resource) -> String:
+	if resource == null:
+		return "<empty>"
+	return resource.resource_path if not resource.resource_path.is_empty() else "<inline resource>"
 
 
 func _layer_host(body: Node3D, layer: int) -> Node3D:

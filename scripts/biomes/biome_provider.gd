@@ -204,6 +204,12 @@ func validate() -> PackedStringArray:
 		problems.append("`biome_id` is empty; it identifies the biome in logs and save data")
 	if road_variant_count() <= 0:
 		problems.append("`road_variant_count()` must be at least 1")
+	for i in road_skins.size():
+		if road_skins[i] == null:
+			problems.append("`road_skins[%d]` is empty, so that element is unpainted" % i)
+	for i in obstacle_skins.size():
+		if obstacle_skins[i] == null:
+			problems.append("`obstacle_skins[%d]` is empty" % i)
 	for layer in [Layer.NEAR, Layer.MID, Layer.FAR]:
 		var descriptor := decoration(layer)
 		if descriptor == null:
