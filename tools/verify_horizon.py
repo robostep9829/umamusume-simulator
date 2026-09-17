@@ -65,7 +65,10 @@ DIST_MIN, DIST_MAX = number(layer, "distance_min", 0.0), number(layer, "distance
 WIDTH, HEIGHT = vector2(mesh["size"])
 SCALE_MIN, SCALE_MAX = number(layer, "scale_min", 1.0), number(layer, "scale_max", 1.0)
 HOST_EVERY = int(number(layer, "host_every", 1))
-FOG_DENSITY = number(environment, "fog_density", 0.0)
+# The biome's fog as its environment actually has it: switched off, there is no
+# haze to measure, and the ring is judged by size and distance alone.
+FOG_ENABLED = environment.get("fog_enabled") == "true"
+FOG_DENSITY = number(environment, "fog_density", 0.0) if FOG_ENABLED else 0.0
 # BiomeDirector._build_ring()
 SLOT_JITTER = 0.15
 # the track and the runner
@@ -88,6 +91,8 @@ for distance in (DIST_MIN, DIST_MAX):
     ridge = math.degrees(math.atan((HEIGHT * SCALE_MIN - EYE_HEIGHT) / distance))
     print(f"      at {distance:7.0f} m: {haze * 100:4.0f}% haze, ridge {ridge:4.1f} deg tall")
 print(f"laid out again every {HOST_EVERY * ELEMENT_LENGTH:.0f} m = {interval:.0f} s of running")
+if not FOG_ENABLED:
+    print("      the biome's environment has fog off: the ring is judged unfogged")
 
 failures = []
 if gap_worst > 0.0:

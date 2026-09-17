@@ -203,6 +203,13 @@ own environment would show *that* look - possibly a different time of day, or mu
 denser fog - at the start of every run, which is not a transition the player made.
 Every later switch, and only those, takes `environment_transition_time`.
 
+`fog_enabled` is the environment file's own switch. Nothing in the system writes to
+it: a biome whose environment leaves fog off is rendered with fog off, and the
+change is carried by whatever that environment *does* set (background, ambient light,
+tonemap). The one consequence worth knowing is that the switch is not interpolated -
+it is swapped with the rest of the resource - so going from a fogged biome to an
+unfogged one cuts the fog instead of fading it out.
+
 [b]A biome's `atmosphere` is a whole environment, not a patch on the level's.[/b]
 While a biome that has one is active, the `WorldEnvironment` renders that file, so
 a fog setting left in the level's own environment (`environment/new_environment.tres`)
@@ -235,9 +242,10 @@ invisible even though the data changed. The numbers that matter for fog are:
 | `fog_aerial_perspective` | gives the fog colour back to the sky, so a high value hides the biome's own tint |
 | `fog_light_energy` | makes a dusk haze glow rather than just grey the view |
 
-`tools/verify_atmosphere.py` checks exactly this over the demo playlist - fog on in
-every biome, colours far enough apart to notice, haze that actually reaches the
-horizon - so the transition cannot silently become a no-op.
+`tools/verify_atmosphere.py` checks exactly this over the demo playlist - colours far
+enough apart to notice, haze that actually reaches the horizon - so the transition
+cannot silently become a no-op. It checks only what is switched on: a biome with fog
+off, or with no `atmosphere` at all, is respected and reported rather than failed.
 
 ---
 

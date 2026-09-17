@@ -368,13 +368,17 @@ func _add_biome_lines(lines: Array[String]) -> void:
 ## rather than from the biome's file, because during a transition those differ -
 ## and the fog is where a biome change is easiest to see, so it is worth a line of
 ## its own at every detail level.
+##
+## `fog_enabled` is the environment asset's own switch and nothing here or in the
+## director writes to it, so a fog that is off is reported as the setting it is
+## rather than as a problem.
 func _add_fog_lines(lines: Array[String]) -> void:
 	var environment := director.live_environment() if director != null else null
 	if environment == null:
 		lines.append(_field("fog", "no WorldEnvironment in this level", WARN_COLOR))
 		return
 	if not environment.fog_enabled:
-		lines.append(_field("fog", "off - the level's environment has it off", WARN_COLOR))
+		lines.append(_field("fog", "off - this environment leaves it off"))
 		return
 	var colour := environment.fog_light_color
 	lines.append(_field("fog", "%s %s   density %s   energy %s" % [

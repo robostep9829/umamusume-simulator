@@ -12,7 +12,7 @@ quietly renders the wrong thing.
 | `verify_placement.py` | `BiomePlacement`'s geometry: end points, frames, handedness, arcs, lateral offsets, ring and lateral orientation |
 | `verify_horizon.py` | the numbers `biomes/layers/rural_far.tres` is authored with: ridge continuity, band, haze, rebuild interval |
 | `verify_debug_stats.py` | the debug overlay's readout: biome runs, distance to the next biome, run progress |
-| `verify_atmosphere.py` | that a biome change is *visible*: fog on in every biome, colours far enough apart, haze that reaches the horizon |
+| `verify_atmosphere.py` | that a biome change is *visible*: colours far enough apart and haze that reaches the horizon, for the fogs an environment switches on |
 | `build_godot_index.py` | rebuilds `godot_class_index.json`, the class knowledge `check_res.py` runs on |
 
 ```bash
@@ -28,7 +28,9 @@ commit hook or CI as-is.
 
 `verify_horizon.py` and `verify_atmosphere.py` read the biomes' own `.tres` files
 rather than mirroring their numbers, so tuning the demo content cannot leave them
-judging an older version of it.
+judging an older version of it - and they respect the switches those files set:
+`fog_enabled` is the environment asset's decision, so a fog left off is reported and
+left alone rather than failed.
 
 `godot_class_index.json` is generated from the engine's own `doc/classes` XML, so
 it knows exactly what a resource may contain. It is committed to keep

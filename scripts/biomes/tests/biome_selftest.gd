@@ -700,6 +700,15 @@ func _test_atmosphere() -> void:
 	_check_environment(director, dusk.atmosphere, "a finished fade leaves the biome's own fog")
 	_check(is_equal_approx(director.blend_progress(), 1.0), "a finished fade reports itself done")
 
+	# `fog_enabled` is the environment asset's switch and neither the director nor the
+	# overlay writes to it, so a biome that leaves fog off is rendered with fog off -
+	# it cuts rather than fades, which is the asset's decision to make.
+	var clear := _provider(&"clear")
+	clear.atmosphere = _environment(Color(0.9, 0.9, 0.95), 0.02, false)
+	director.environment_transition_time = 0.0
+	director._set_active_provider(clear)
+	_check_environment(director, clear.atmosphere, "a biome that leaves fog off renders fog off")
+
 
 ## Checks the fog the world is rendering against the one a biome asked for. Every
 ## field is compared, because the ones that cannot be faded - `fog_enabled` among
@@ -718,10 +727,12 @@ func _check_environment(director: BiomeDirector, expected: Environment, what: St
 	)
 
 
-## An environment whose fog is the only thing that matters to this test.
-func _environment(colour: Color, density: float) -> Environment:
+## An environment whose fog is the only thing that matters to this test. The switch
+## itself is a parameter, because "who decides whether there is fog" is one of the
+## things being tested.
+func _environment(colour: Color, density: float, fog: bool = true) -> Environment:
 	var environment := Environment.new()
-	environment.fog_enabled = true
+	environment.fog_enabled = fog
 	environment.fog_light_color = colour
 	environment.fog_density = density
 	return environment
