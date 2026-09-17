@@ -248,11 +248,17 @@ wherever it matters:
 
 | Asset | What it is |
 |---|---|
-| `layers/rural_near.tres` | the real `railing.obj`, stretched with `fit_to_segment`, plus a placeholder material |
+| `layers/rural_near.tres` | the island's tree, wrapped as `props/rural_tree.tscn` and placed as a scene variant: real art, one per side per segment. Its leaf `MultiMesh` is 4700 instances rebuilt per instance, so the layer hosts it on every second element only, keeps `visible_range` short and casts no shadows; a real biome should bake a lighter tree |
+| `props/leaf_mesh.tres` | the leaf quad baked out of `uma_island.tscn`, so the demo does not depend on `props/rural/leaf.obj` being present in the checkout |
 | `layers/rural_mid.tres` | one `QuadMesh` card per segment with a flat unshaded material - a treeline, not a treeline asset |
 | `layers/rural_far.tres` | nine billboard cards on a ring - a horizon, not a panorama |
 | `rural_dusk.tres` | a second biome so that transitions are visible at all; it is rural again with the dirt road texture and a dusk `Environment`, and should be replaced by the first real biome (city or suburbs) |
 | `materials/*.tres` | flat colours with `TODO`-less names, because they will be replaced wholesale |
+
+One thing to know about the demo level: `scrolling_track.tscn` is a bare 30 m road
+strip with no terrain beside it, so the near layer keeps its trees *on* the strip
+(13-14.5 m from the centreline, just inside the edge). In a level with ground,
+widen `distance_min`/`distance_max` to the 15-60 m band of `LAYERS.md`.
 
 One geometric detail about `fit_to_segment`: a stretched strip is aligned with
 the track's chord, not with the arc. On a 5-degree turn of 1200 m radius that is

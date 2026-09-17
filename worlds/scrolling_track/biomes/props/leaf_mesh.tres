@@ -1,0 +1,36 @@
+[gd_resource type="ArrayMesh" load_steps=2 format=3]
+
+# The island's leaf quad, baked from worlds/uma_island/uma_island.tscn instead of
+# importing leaf.obj, so the biome works from the same mesh the island renders.
+# Its surface carries no material: the node that instances it supplies one.
+[sub_resource type="ArrayMesh" id="ArrayMesh_jsywb"]
+_surfaces = [{
+"aabb": AABB(0, 0, -1, 1e-05, 2, 2),
+"format": 34896613377,
+"index_count": 12,
+"index_data": PackedByteArray("AAABAAIAAgABAAMAAAAEAAEABQAEAAAA"),
+"name": "Plane",
+"primitive": 3,
+"uv_scale": Vector4(0, 0, 0, 0),
+"vertex_count": 6,
+"vertex_data": PackedByteArray("AAAAAP9/AAAAAP///38AAAAAnz0AAAAAAABfwgAAAAAAAF/C//8AAAAAnz3//wAA")
+}]
+blend_shape_mode = 0
+
+
+[resource]
+_surfaces = [{
+"aabb": AABB(0, 0, -1, 1e-05, 2, 2),
+"attribute_data": PackedByteArray("////fwAA/3///wAAAAAAAAAA////////"),
+"format": 34896613399,
+"index_count": 12,
+"index_data": PackedByteArray("AAABAAIAAgABAAMAAAAEAAEABQAEAAAA"),
+"name": "Plane",
+"primitive": 3,
+"uv_scale": Vector4(0, 0, 0, 0),
+"vertex_count": 6,
+"vertex_data": PackedByteArray("AAAAAP9/VNUAAP///39U1QAAnz0AAFTVAABfwgAAVNUAAF/C//9U1QAAnz3//1TVqqpUVaqqVFWqqlRVqqpUVaqqVFWqqlRV")
+}]
+blend_shape_mode = 0
+shadow_mesh = SubResource("ArrayMesh_jsywb")
+

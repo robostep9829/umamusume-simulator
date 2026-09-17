@@ -2,7 +2,7 @@
 
 [ext_resource type="Script" path="res://scripts/animated_leaves/particle_tree.gd" id="1_leaves"]
 [ext_resource type="Shader" path="res://worlds/scrolling_track/props/rural/materials/tree/wind_area_effect_simple.gdshader" id="2_wind"]
-[ext_resource type="ArrayMesh" path="res://worlds/scrolling_track/props/rural/leaf.obj" id="3_leaf"]
+[ext_resource type="ArrayMesh" path="res://worlds/scrolling_track/biomes/props/leaf_mesh.tres" id="3_leaf"]
 [ext_resource type="ArrayMesh" path="res://worlds/scrolling_track/props/rural/trunk.obj" id="4_trunk"]
 [ext_resource type="Material" path="res://worlds/scrolling_track/biomes/materials/tree_trunk.tres" id="5_bark"]
 

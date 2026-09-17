@@ -7,11 +7,13 @@
 script = ExtResource("1_layer")
 variants = Array[PackedScene]([ExtResource("2_tree")])
 count = 1
-distance_min = 18.0
-distance_max = 26.0
+host_every = 2
+distance_min = 13.0
+distance_max = 14.5
 edge_margin = 0.12
 along_scatter = 0.6
 yaw_scatter = 180.0
 scale_min = 0.85
 scale_max = 1.4
 visible_range = 320.0
+cast_shadow = false
