@@ -10,7 +10,7 @@ quietly renders the wrong thing.
 |---|---|
 | `check_res.py` | every `.tres`/`.tscn` in the project: resource paths and types, `script_class`, property names against the engine's class reference, typed arrays, shader parameters, node parents and `unique_id`s |
 | `verify_placement.py` | `BiomePlacement`'s geometry: end points, frames, handedness, arcs, lateral offsets, ring and lateral orientation |
-| `verify_horizon.py` | the numbers `biomes/layers/rural_far.tres` is authored with: ridge continuity, band, haze, rebuild interval |
+| `verify_horizon.py` | the numbers `biomes/rural/layers/rural_far.tres` is authored with: ridge continuity, band, haze, rebuild interval |
 | `verify_debug_stats.py` | the debug overlay's readout: biome runs, distance to the next biome, run progress |
 | `check_engine_api.py` | every engine call in the project's GDScript, against the engine's own method list |
 | `check_gdscript_scope.py` | the *scope* of the project's GDScript: a name used outside the block that declares it, a `:=` value with no inferable type, a line indented past every open block, an integer literal too large for 64 bits, a scene-tree script that adds nodes without a frame entry point |

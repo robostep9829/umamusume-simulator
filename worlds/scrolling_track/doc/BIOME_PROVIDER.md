@@ -13,16 +13,22 @@ scripts/biomes/
     biome_section.gd      BiomeSection   - one leg of an authored lap
     biome_director.gd     BiomeDirector  - applies a playlist to a TrackManager
     biome_placement.gd    BiomePlacement - segment-local geometry + seeded RNG
+    providers/rural_biome.gd             - the rural biome as a subclass
     tests/biome_selftest.gd              - headless checks, no art needed
 
 worlds/scrolling_track/biomes/
-    rural.tres                           - a biome, as data
+    rural.tres                           - a biome, as data (a RuralBiome)
     rural_dusk.tres                      - a second one, to show transitions
-    playlist_demo.tres                   - rural / rural_dusk, 12 elements each
-    playlist_single.tres                 - one biome for the whole track
+
+worlds/scrolling_track/biomes/rural/     - everything the rural biome owns
     layers/rural_{near,mid,far}.tres     - the three decoration layers
     materials/*.tres                     - road skins and placeholder prop materials
-    rural_dusk_env.tres                  - the dusk atmosphere
+    props/rural_tree.tscn, leaf_mesh.tres
+    tex/*.png, *.exr                     - the textures those materials use
+
+worlds/scrolling_track/playlists/
+    playlist_demo.tres                   - rural / rural_dusk, 3 elements each
+    playlist_single.tres                 - one biome for the whole track
 ```
 
 The design rule is the one from `BIOMES.md`: **the track never changes shape.**
@@ -99,7 +105,8 @@ Two authoring styles, and the one that fits the level is used:
 ```text
 Endless track    biomes + segments_per_biome
                  elements 0..N-1 run in biomes[0], the next N in biomes[1], then
-                 it wraps. 12 elements x 100 m is a couple of minutes per biome.
+                 it wraps. 12 elements x 100 m is a couple of minutes per biome;
+                 the demo sets 3 so a transition is visible within seconds.
                  One biome in the list, or segments_per_biome = 0, pins the whole
                  track to that biome - the intended setup for a themed level.
                  order = SHUFFLE reshuffles the list on every pass.
@@ -178,8 +185,8 @@ leaves the anchor untouched.
 
 Because `_build_ring()` spreads the cards one slot apart with a slot jitter of at
 most 15 %, a ring whose cards are about as wide as a slot is continuous: the ridge
-of `layers/rural_far.tres` (14 cards of 1200 x 110 m on a 1.2-1.6 km ring) overlaps
-itself even in the worst case instead of leaving holes of empty sky.
+of `rural/layers/rural_far.tres` (14 cards of 1200 x 110 m on a 1.2-1.6 km ring)
+overlaps itself even in the worst case instead of leaving holes of empty sky.
 
 ### 2.3 Atmosphere: the one thing that must not change at a chunk boundary
 
@@ -226,10 +233,10 @@ be off by about half a segment near a boundary, which a multi-second fade hides
 completely.
 
 The demos show why a biome should carry its own `atmosphere` even when it is a
-day-lit one: `rural.tres` uses `rural_env.tres`, the project's base environment
-plus `fog_enabled` and a haze colour, and that fog is what turns a 1.5 km card into
-distant scenery instead of a crisp rectangle. Without it, everything past the
-playfield is as sharp as the road.
+day-lit one: `rural.tres` carries one as an inline `Environment` (the project's
+sky and tonemapping, plus fog and a haze colour), and that fog is what turns a
+1.5 km card into distant scenery instead of a crisp rectangle. Without it,
+everything past the playfield is as sharp as the road.
 
 Two biomes have to differ *where the player is looking*, or the transition is
 invisible even though the data changed. The numbers that matter for fog are:
@@ -254,8 +261,9 @@ off, or with no `atmosphere` at all, is respected and reported rather than faile
 1. **Road.** Make a material with the ground shader of the biome (or an existing
    one). Either reference it directly or put several into `road_skins` so the
    surface varies along the biome.
-2. **Layers.** Duplicate `layers/rural_near.tres` (beside the road, 15-60 m),
-   `rural_mid.tres` (60-200 m) and `rural_far.tres` (the ring), or write new ones,
+2. **Layers.** Duplicate `rural/layers/rural_near.tres` (beside the road,
+   15-60 m), `rural/layers/rural_mid.tres` (60-200 m) and
+   `rural/layers/rural_far.tres` (the ring), or write new ones,
    and assign the artwork as described in 3.1. Keep the bands of `LAYERS.md`; the
    director does not enforce them.
 3. **Atmosphere.** Optional: an `Environment` in `atmosphere` for a different
@@ -322,9 +330,9 @@ Four things that decide whether a layer looks right:
 A whole new near prop, end to end:
 
 ```text
-1. worlds/scrolling_track/biomes/props/roadside_bush.tscn
+1. worlds/scrolling_track/biomes/rural/props/roadside_bush.tscn
    - root Node3D, mesh children, their own materials
-2. worlds/scrolling_track/biomes/layers/rural_near.tres
+2. worlds/scrolling_track/biomes/rural/layers/rural_near.tres
    - add the scene to `variants`, keep the band and cost fields
 3. rural.tres already points at that layer, so nothing else changes
 4. BiomeDirector.refresh() (or a biome change) rebuilds every placed segment;
@@ -457,13 +465,13 @@ wherever it matters:
 
 | Asset | What it is |
 |---|---|
-| `layers/rural_near.tres` | the island's tree, wrapped as `props/rural_tree.tscn` and placed as a scene variant: real art, one per side per segment. Its leaf `MultiMesh` is 4700 instances rebuilt per instance, so the layer hosts it on every second element only, keeps `visible_range` short and casts no shadows; a real biome should bake a lighter tree |
-| `props/leaf_mesh.tres` | the leaf quad baked out of `uma_island.tscn`, so the demo does not depend on `props/rural/leaf.obj` being present in the checkout |
-| `layers/rural_mid.tres` | one `QuadMesh` card per segment with a flat unshaded material - a treeline, not a treeline asset |
-| `layers/rural_far.tres` | fourteen Y-billboard cards on a 1.2-1.6 km ring - a horizon, not a panorama. They are still flat rectangles: replacing the card mesh with a hill silhouette is what this layer wants next |
-| `rural_env.tres` | the base environment plus fog, so the far band hazes out; a real biome would light its own sky, not reuse the island's |
-| `rural_dusk.tres` | a second biome so that transitions are visible at all; it is rural again with the dirt road texture and a dusk `Environment`, and should be replaced by the first real biome (city or suburbs) |
-| `materials/*.tres` | flat colours with `TODO`-less names, because they will be replaced wholesale |
+| `rural/layers/rural_near.tres` | the island's tree, wrapped as `rural/props/rural_tree.tscn` and placed as a scene variant: real art, one per side per segment. Its leaf `MultiMesh` is 4700 instances rebuilt per instance, so the layer hosts it on every second element only, keeps `visible_range` short and casts no shadows; a real biome should bake a lighter tree |
+| `rural/props/leaf_mesh.tres` | the leaf quad baked out of `uma_island.tscn`, so the demo does not depend on `props/rural/leaf.obj` being present in the checkout |
+| `rural/layers/rural_mid.tres` | one `QuadMesh` card per segment with a flat unshaded material - a treeline, not a treeline asset |
+| `rural/layers/rural_far.tres` | fourteen Y-billboard cards on a 1.2-1.6 km ring - a horizon, not a panorama. They are still flat rectangles: replacing the card mesh with a hill silhouette is what this layer wants next |
+| the base `Environment` in `rural.tres` | an inline sub-resource: background, sky and the fog that hazes the far band out. A real biome would light its own sky, not reuse the island's |
+| `rural_dusk.tres` | a second biome so that transitions are visible at all; it is rural again with the dirt road texture and its own inline dusk `Environment`, and should be replaced by the first real biome (city or suburbs) |
+| `rural/materials/*.tres` | flat colours with `TODO`-less names, because they will be replaced wholesale |
 
 One thing to know about the demo level: `scrolling_track.tscn` is a bare 30 m road
 strip with no terrain beside it, so the near layer keeps its trees *on* the strip
