@@ -329,8 +329,10 @@ func _upcoming_runs(element_index: int, count: int = 3) -> Array[Dictionary]:
 func _layer_instance_counts() -> Dictionary:
 	var counts := {}
 	for layer in DECORATION_LAYERS:
-		var band := BiomeProvider.Layer.keys()[layer]
-		var name := String(band).to_lower()
+		# `Layer.keys()` is an untyped `Array`, so the element is a `Variant` and a
+		# `:=` here would be refused by the analyzer; the cast names the type.
+		var band := String(BiomeProvider.Layer.keys()[layer])
+		var name := band.to_lower()
 		# A band's instances live in one of two places: an along-track layer parents
 		# them to the segment bodies, a `RING` one to the horizon anchor. Both are
 		# counted, so a band that is a ring reads its card count instead of a

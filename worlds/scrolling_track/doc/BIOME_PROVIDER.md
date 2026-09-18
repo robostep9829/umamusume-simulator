@@ -413,6 +413,14 @@ art), so it runs in about a second and exits non-zero on failure. It checks:
   count to the next change (counting turns as the arcs they are), the run's
   progress, and the single-biome case, where there is no change to wait for.
 
+It also refuses to pass quietly. Before the first test it asks whether every project
+script the tests build can be instantiated - a script that does not compile still
+*loads*, so the failure otherwise appears as tests that silently never ran - and after
+each test it checks that the test asserted something, because a test that stops on a
+runtime error returns normally with nothing to show for it. Either way the run ends
+non-zero and names what is missing instead of printing a summary about tests it did
+not do.
+
 The run makes its checks from the first `_process` frame rather than from
 `_initialize()`, because the root is not in the tree yet while `_initialize()` runs:
 `SceneTree::initialize()` calls the main loop's `_initialize()` and only then does
@@ -452,8 +460,10 @@ engine is the only thing that notices, and it notices by refusing to load the sc
 and naming a line rather than the lost tab. The checker does that analysis from the
 file alone: indentation is read as blocks, `var`/`const`/`for`/parameters as
 declarations, names that are neither are looked up in the engine index, and a `:=`
-built by arithmetic over the loop variable of an untyped `for … in […]` is reported as
-the Variant type it is. It also flags a `SceneTree`/`MainLoop` script that adds nodes
+whose value cannot be inferred is reported as the Variant it is - arithmetic over the
+loop variable of an untyped `for … in […]`, or an element read out of an untyped
+`Array`/`Dictionary` (`.keys()`, `.values()`, a `{`/`[` literal, a parameter typed as
+one), which is the shape that broke the overlay's layer readout for a day. It also flags a `SceneTree`/`MainLoop` script that adds nodes
 without a `_process`/`_physics_process` entry point, since that is the harness mistake
 above caught offline rather than by running the engine. Anything it cannot decide from
 one file it leaves alone.

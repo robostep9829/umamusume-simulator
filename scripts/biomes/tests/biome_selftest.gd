@@ -11,6 +11,12 @@ extends SceneTree
 ## authored artwork - so it needs no imported assets, runs in about a second and is
 ## safe to run in CI. Exit code 0 means everything passed.
 ##
+## It is written to fail loudly rather than to pass quietly: a project script that does
+## not compile is reported before a single test runs, a test that stops before its first
+## assertion is counted as a failure, and a run that dies partway never prints a summary
+## - because a self-test that says "all green" about tests it did not run is worse than
+## no self-test at all.
+##
 ## The interesting checks are the ones that would otherwise only show up hours
 ## into a run as "the scenery is slightly off on corners": a placement must land
 ## exactly on the authored exit point of straights, left turns and right turns,
@@ -55,7 +61,59 @@ func _process(_delta: float) -> bool:
 	return true
 
 
+## True while every project script the tests build can be instantiated.
+##
+## A script that does not compile - its own parse error, or the parse error of a
+## script it depends on - still loads: `ResourceFormatLoaderGDScript::load()` returns
+## the invalid resource on purpose ("Don't fail loading because of parsing error"),
+## and the class it declares resolves to that same broken resource. Calling `.new()`
+## on one is then refused inside the engine (`GDScript::_new` bails with an invalid
+## script and GDScript reports it as "Nonexistent function 'new' in base 'GDScript'"),
+## which aborts whichever test made the call - so the failure shows up as tests that
+## silently did not run. `can_instantiate()` is the engine's own `valid` flag, the same
+## one `--script` checks before it will run a main loop at all.
+func _dependencies_ready() -> bool:
+	var paths: Array[String] = [
+		"res://scripts/scrolling/track_manager.gd",
+		"res://scripts/scrolling/track_segment.gd",
+		"res://scripts/scrolling/track_level.gd",
+		"res://scripts/scrolling/infinite_track_level.gd",
+		"res://scripts/biomes/biome_provider.gd",
+		"res://scripts/biomes/biome_layer.gd",
+		"res://scripts/biomes/biome_playlist.gd",
+		"res://scripts/biomes/biome_section.gd",
+		"res://scripts/biomes/biome_director.gd",
+		"res://scripts/biomes/biome_placement.gd",
+		"res://scripts/biomes/providers/rural_biome.gd",
+	]
+	var broken := PackedStringArray()
+	for path in paths:
+		var script := load(path) as GDScript
+		if script == null or not script.can_instantiate():
+			broken.append(path)
+	if broken.is_empty():
+		return true
+	printerr(
+		"biome self-test: %d project script(s) cannot be compiled, so the tests that "
+		% broken.size()
+		+ "build them cannot run:"
+	)
+	for broken_path in broken:
+		printerr("  - %s" % broken_path)
+	printerr("biome self-test: fix the errors above and run again.")
+	return false
+
+
 func _run_tests() -> void:
+	# Reported first and alone: a script that does not compile makes every test that
+	# builds one of its classes stop at its first statement, and the run below would
+	# otherwise report "all green" with those tests missing. The engine prints the
+	# parse error itself when the script is loaded; this says which file to look at.
+	if not _dependencies_ready():
+		_finished = true
+		quit(1)
+		return
+
 	# The precondition for the tests that build nodes, checked before them so that a
 	# harness moved back into `_initialize()` reports one clear line - and skips what
 	# cannot work - instead of failing seventeen checks about an empty track.
@@ -88,8 +146,18 @@ func _run_tests() -> void:
 	else:
 		print("  · (the track, horizon, stats and atmosphere tests need a running tree)")
 	for test in tests:
+		var before := _checks
 		print("  · %s" % test.get_method())
 		test.call()
+		# A test that stops on a runtime error returns here having asserted nothing,
+		# and a run that still said "all green" would be the exact kind of lie this
+		# file exists to prevent. Every test in the list asserts something, so an
+		# unchanged count means it never got as far as its first check.
+		if _checks == before:
+			_failures.append(
+				"%s added no checks: it stopped at its first statement, see the errors above"
+				% test.get_method()
+			)
 
 	print("")
 	if _failures.is_empty():
