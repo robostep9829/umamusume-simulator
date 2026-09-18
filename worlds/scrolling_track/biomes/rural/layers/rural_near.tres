@@ -6,7 +6,7 @@
 [resource]
 script = ExtResource("1_layer")
 variants = Array[PackedScene]([ExtResource("2_tree")])
-count = 1
+count = 7
 host_every = 2
 distance_min = 13.0
 distance_max = 14.5

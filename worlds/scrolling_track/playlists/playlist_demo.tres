@@ -1,12 +1,11 @@
 [gd_resource type="Resource" script_class="BiomePlaylist" format=3 uid="uid://bjdqfib13mfdm"]
 
-[ext_resource type="Script" uid="uid://5xf1pp20qw58" path="res://scripts/biomes/biome_playlist.gd" id="1_playlist"]
-[ext_resource type="Script" uid="uid://cu1v424fvlipl" path="res://scripts/biomes/biome_provider.gd" id="2_provider"]
-[ext_resource type="Resource" path="res://worlds/scrolling_track/biomes/rural.tres" id="3_rural"]
-[ext_resource type="Resource" path="res://worlds/scrolling_track/biomes/rural_dusk.tres" id="4_rural_dusk"]
-[ext_resource type="Script" uid="uid://c741ite6obmdp" path="res://scripts/biomes/biome_section.gd" id="5_5awug"]
+[ext_resource type="Script" uid="uid://cu1v424fvlipl" path="res://scripts/biomes/biome_provider.gd" id="1_xo5gm"]
+[ext_resource type="Resource" uid="uid://cghc0g1hg0niu" path="res://worlds/scrolling_track/biomes/rural.tres" id="2_nj5ty"]
+[ext_resource type="Resource" uid="uid://ceg58cw6l0m7u" path="res://worlds/scrolling_track/biomes/rural_dusk.tres" id="3_2knbe"]
+[ext_resource type="Script" uid="uid://5xf1pp20qw58" path="res://scripts/biomes/biome_playlist.gd" id="4_dp00n"]
+[ext_resource type="Script" uid="uid://c741ite6obmdp" path="res://scripts/biomes/biome_section.gd" id="5_c5gfk"]
 
 [resource]
-script = ExtResource("1_playlist")
-biomes = Array[ExtResource("2_provider")]([ExtResource("3_rural"), ExtResource("4_rural_dusk")])
-segments_per_biome = 3
+script = ExtResource("4_dp00n")
+biomes = Array[ExtResource("1_xo5gm")]([ExtResource("2_nj5ty"), ExtResource("3_2knbe")])

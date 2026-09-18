@@ -10,14 +10,22 @@
 [ext_resource type="Script" uid="uid://vk65f2vfnwtm" path="res://scripts/biomes/biome_director.gd" id="8_biome"]
 [ext_resource type="Resource" uid="uid://bjdqfib13mfdm" path="res://worlds/scrolling_track/playlists/playlist_demo.tres" id="9_playlist"]
 [ext_resource type="Script" uid="uid://7uenwo5bciov" path="res://scripts/debug/debug_overlay.gd" id="10_debug"]
+[ext_resource type="ArrayMesh" uid="uid://ckf2mmjx46y6r" path="res://worlds/scrolling_track/floor_segments/skirt_straight.obj" id="11_kvml8"]
+[ext_resource type="ArrayMesh" uid="uid://ofo03d011vj3" path="res://worlds/scrolling_track/floor_segments/skirt_turn_left_5deg.obj" id="12_7xr46"]
 
 [node name="ScrollingTrack" type="Node3D" unique_id=97728838]
 
-[node name="TrackManager" type="Node3D" parent="." unique_id=10000001]
+[node name="TrackManager" type="Node3D" parent="." unique_id=10000001 node_paths=PackedStringArray("player")]
 script = ExtResource("1_mana")
+player = NodePath("../Player")
 infinite = true
 straight_min = 1
 straight_max = 3
+
+[node name="Player" parent="." unique_id=2027806480 instance=ExtResource("3_play")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2, 0)
+auto_run_delay = 5.0
+player_data = ExtResource("4_pdat")
 
 [node name="DirectionalLight3D" type="DirectionalLight3D" parent="." unique_id=823063132]
 transform = Transform3D(0.9236814, -0.27753508, -0.2641728, 0.37862152, 0.7669435, 0.51811534, 0.058810413, -0.57859504, 0.813492, 0, 0.76838285, -0.9386827)
@@ -47,12 +55,17 @@ track = NodePath("../TrackManager")
 playlist = ExtResource("9_playlist")
 world_environment = NodePath("../WorldEnvironment")
 
-[node name="DebugOverlay" type="CanvasLayer" parent="." unique_id=1314205677 node_paths=PackedStringArray("track", "director")]
+[node name="DebugOverlay" type="CanvasLayer" parent="." unique_id=1314205677 node_paths=PackedStringArray("track", "director", "player")]
 script = ExtResource("10_debug")
 track = NodePath("../TrackManager")
 director = NodePath("../BiomeDirector")
+player = NodePath("../Player")
 
-[node name="Player" parent="." unique_id=2027806480 instance=ExtResource("3_play")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2, 0)
-auto_run_delay = 5.0
-player_data = ExtResource("4_pdat")
+[node name="SkirtStraightPreview" type="MeshInstance3D" parent="." unique_id=871020402]
+visible = false
+mesh = ExtResource("11_kvml8")
+
+[node name="SkirtTurnPreview" type="MeshInstance3D" parent="." unique_id=1799788526]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -100)
+visible = false
+mesh = ExtResource("12_7xr46")
