@@ -79,7 +79,11 @@ func _run_tests() -> void:
 	]
 	if tree_ready:
 		tests.append_array([
-			_test_track_integration, _test_horizon, _test_debug_stats, _test_atmosphere
+			_test_first_pool,
+			_test_track_integration,
+			_test_horizon,
+			_test_debug_stats,
+			_test_atmosphere,
 		])
 	else:
 		print("  · (the track, horizon, stats and atmosphere tests need a running tree)")
@@ -534,6 +538,87 @@ func _test_track_integration() -> void:
 	_teardown([director, track, world])
 
 
+## The order a level is wired in: `TrackManager` first, so it places its whole
+## first pool in its own `_ready()` - which runs before the director's, because
+## children are readied in tree order - and announces it to nobody. In a closed
+## loop the next physics frame re-announces everything, so this only ever showed in
+## endless mode, where nothing announces the pool again until the window re-centres
+## about 26 elements later: the run opens on a bare track and the overlay's `layers`
+## line reads `near 0`, `mid 0` and `far 0` the whole time.
+func _test_first_pool() -> void:
+	var track := TrackManager.new()
+	track.infinite = true
+	track.pool_size = 6
+	track.straight_min = 1
+	track.straight_max = 2
+	track.turn_min = 1
+	track.turn_max = 2
+	track.straight_segment = _segment_resource(false)
+	track.turn_segment = _segment_resource(true)
+
+	var road := StandardMaterial3D.new()
+	var near_layer := BiomeLayer.new()
+	near_layer.meshes = [BoxMesh.new()]
+	near_layer.count = 1
+	near_layer.side = BiomeLayer.Side.BOTH
+	near_layer.distance_min = 20.0
+	near_layer.distance_max = 20.0
+	near_layer.edge_margin = 0.0
+
+	var ring := BiomeLayer.new()
+	ring.mode = BiomeLayer.Mode.RING
+	ring.meshes = [QuadMesh.new()]
+	ring.count = 4
+	ring.distance_min = 500.0
+	ring.distance_max = 700.0
+	ring.visible_range = 800.0
+
+	var provider := _provider(&"first")
+	provider.road_material_override = road
+	provider.near_layer = near_layer
+	provider.far_layer = ring
+	var playlist := BiomePlaylist.new()
+	playlist.biomes = [provider]
+
+	var world := _level_world()
+	var runner := Node3D.new()
+	track.player = runner
+	var director := BiomeDirector.new()
+	director.track = track
+	director.playlist = playlist
+	director.world_environment = world
+
+	# The scene file's order: the track and its player enter the tree first, so the
+	# window is placed - and announced - while nothing is listening yet.
+	root.add_child(track)
+	root.add_child(runner)
+	_check(
+		int(_layer_counts(director)["near"]) == 0,
+		"the track places its first pool before anything is listening"
+	)
+
+	root.add_child(director)
+	_check(
+		int(_layer_counts(director)["near"]) == 12,
+		"a director that joins late decorates the pool it found (got %d)"
+		% int(_layer_counts(director)["near"])
+	)
+	_check(int(_layer_counts(director)["mid"]) == 0, "a band with no layer stays empty")
+	_check(_count_road_bodies(track, road) == 6, "and skins every road body it found")
+
+	# A ring band is built on the horizon anchor instead of on the segment bodies, so
+	# its count has to come from there too - otherwise `far` reads 0 for every biome
+	# whose horizon is a ring, whatever the world actually contains.
+	director._set_active_provider(provider)
+	director._refresh_anchor(Vector3.ZERO)
+	_check(int(_layer_counts(director)["far"]) == 4, "a ring band counts its cards on the anchor")
+	_check(
+		int(_layer_counts(director)["near"]) == 12, "and leaves the along-track bands alone"
+	)
+
+	_teardown([director, runner, track, world])
+
+
 ## Horizon content lives on an anchor that rides with the runner, so the ring
 ## surrounds them instead of piling up in front, and is laid out per region rather
 ## than per segment.
@@ -875,6 +960,24 @@ func _tangent(segment: TrackSegment, t: float) -> Vector3:
 	var before := BiomePlacement.local_position(segment, maxf(t - step, 0.0))
 	var after := BiomePlacement.local_position(segment, minf(t + step, 1.0))
 	return (after - before).normalized()
+
+
+## The layer counts exactly as the debug overlay reads them - the numbers a player
+## sees when the scenery is missing.
+func _layer_counts(director: BiomeDirector) -> Dictionary:
+	return director.debug_stats()["layers"] as Dictionary
+
+
+## Pooled floor bodies drawing `material`, found by walking the track: in endless
+## mode the pool hangs under the window's scroll origin rather than under the track.
+func _count_road_bodies(node: Node, material: Material) -> int:
+	var total := 0
+	var mesh_instance := node.get_node_or_null("Mesh") as MeshInstance3D
+	if mesh_instance != null and mesh_instance.material_override == material:
+		total += 1
+	for child in node.get_children():
+		total += _count_road_bodies(child, material)
+	return total
 
 
 ## True when every instance of `layer` under `body` turns its -Z back towards the

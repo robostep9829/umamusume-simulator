@@ -151,8 +151,16 @@ floor body it (re)places, after the body is posed in its segment's local frame
 3. if this body now shows a different segment or a different biome, clears its
    `BiomeLayer{NEAR,MID,FAR}` container nodes and rebuilds them from the layers.
 
-Two properties fall out of that:
+Three properties fall out of that:
 
+* **The first pool is dressed before the first frame is drawn.** A level lists its
+  `TrackManager` before its `BiomeDirector`, so the track places its whole first
+  pool in its own `_ready()` - which runs first, because children are readied in
+  tree order - while nothing is listening yet. The director re-announces what it
+  finds as it becomes ready (`TrackManager.refresh_pool()`), so a run never opens
+  on a bare window. In endless mode that is not a cosmetic difference: nothing
+  announces the pool again until the window re-centres, which is ~26 elements of
+  running away.
 * **Decoration follows the track for free.** It is parented to the floor body, so
   it is correct on straights and on both turn directions, and it disappears with
   the segment when the pool recycles it. No per-frame work at all.
@@ -335,8 +343,11 @@ A whole new near prop, end to end:
 2. worlds/scrolling_track/biomes/rural/layers/rural_near.tres
    - add the scene to `variants`, keep the band and cost fields
 3. rural.tres already points at that layer, so nothing else changes
-4. BiomeDirector.refresh() (or a biome change) rebuilds every placed segment;
-   the debug overlay's `layers` line should show the new instance count
+4. BiomeDirector.refresh() rebuilds every placed segment at runtime and the debug
+   overlay's `layers` line should show the new instance count. Editing the layer
+   while the game runs is not enough on its own: the director remembers what each
+   body already wears, so it rebuilds only when that changes - `refresh()` is what
+   forgets
 ```
 
 **Props inside the playfield (layer 0).** There is no decoration slot for layer 0:
@@ -514,7 +525,7 @@ is a `CanvasLayer` that builds its own panel, finds the level's `TrackManager`,
 | `next` | the biome that follows, in metres, seconds and elements - or "this biome runs the whole track" when the playlist pins one |
 | the bar | how far through the current biome run the runner is |
 | `track` | endless or closed loop, pool size, seed / lap length |
-| `layers` | instances built per decoration layer, as they really are in the pool |
+| `layers` | instances built per decoration band, as they really are in the world: an along-track layer parents them to the segment bodies, a `RING` one to the horizon anchor, and both are counted |
 | `horizon` | cards in the ring and how far the anchor currently is |
 | `fog` | the environment that is *rendering*: fog colour (with a swatch), density, energy, sky affect, aerial perspective, sun scatter |
 | `issues` | how many problems the console reported, shown at every detail level |

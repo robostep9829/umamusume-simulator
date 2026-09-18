@@ -123,6 +123,15 @@ func _ready() -> void:
 
 	_report_playlist_problems()
 	track.segment_placed.connect(_on_segment_placed)
+	# A level lists its TrackManager before its BiomeDirector, so the track places
+	# its first pool in its own `_ready()` - which runs first - and announces it
+	# while nothing is listening. A closed loop re-announces on the next physics
+	# frame anyway, but an endless pool is only announced again when its window
+	# re-centres, about 26 elements of running away: without this the run opens on
+	# a bare track and the overlay's layer counts sit at 0 until then. A level
+	# that lists the director first is fine too - this refresh then finds nothing
+	# placed, and the track's own first placement arrives through the signal above.
+	track.refresh_pool()
 
 
 ## Problems [method BiomePlaylist.validate] found at startup, empty when the playlist
@@ -320,8 +329,16 @@ func _upcoming_runs(element_index: int, count: int = 3) -> Array[Dictionary]:
 func _layer_instance_counts() -> Dictionary:
 	var counts := {}
 	for layer in DECORATION_LAYERS:
-		var name := String(BiomeProvider.Layer.keys()[layer]).to_lower()
-		counts[name] = _count_instances(track, "BiomeLayer%s" % BiomeProvider.Layer.keys()[layer])
+		var band := BiomeProvider.Layer.keys()[layer]
+		var name := String(band).to_lower()
+		# A band's instances live in one of two places: an along-track layer parents
+		# them to the segment bodies, a `RING` one to the horizon anchor. Both are
+		# counted, so a band that is a ring reads its card count instead of a
+		# permanent 0 - the overlay's `layers` line is only worth reading if it says
+		# what is actually in the world.
+		var total := _count_instances(track, "BiomeLayer%s" % band)
+		total += _count_instances(_anchor, "Horizon%s" % band)
+		counts[name] = total
 	return counts
 
 

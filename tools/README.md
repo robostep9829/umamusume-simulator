@@ -40,7 +40,8 @@ class. Names the project declares, and names it promises through
 `tools/engine_api_allow.txt`, one per line.
 
 `check_gdscript_scope.py` is the same idea one level down: `gdparse` and `gdlint`
-check that a script *parses* and is styled, and neither can see scope, so a block of
+check that a script *parses* and is styled (the repo's `.gdlintrc` raises only the
+file-length limit, for the biome self-test - see the file itself for why), and neither can see scope, so a block of
 code that slips one tab outwards still passes both while the engine refuses to load
 the file at all - `Identifier "segment" not declared in the current scope`, naming a
 line whose only fault is that the loop that declared `segment` is now a tab away. The

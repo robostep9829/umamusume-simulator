@@ -1,0 +1,9 @@
+# gdlint configuration (gdtoolkit). Read by `gdlint` when it is run from the
+# project root; every key not listed here keeps the tool's default.
+#
+# Only the file-length limit is raised. The biome self-test is one file by design:
+# it builds its own segments, layers and track, needs no imported artwork, prints a
+# single summary line and is run by hand or in CI with one command. Splitting it at
+# an arbitrary 1000 lines would cost a reader more than it saves, and the file grows
+# with every behaviour worth a regression test.
+max-file-lines: 1200
