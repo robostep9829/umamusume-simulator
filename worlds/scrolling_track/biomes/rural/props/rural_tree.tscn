@@ -1,7 +1,7 @@
 [gd_scene format=3 uid="uid://bprc7a7jmwtu5"]
 
 [ext_resource type="Script" uid="uid://bpkcxjs7n20gk" path="res://scripts/animated_leaves/particle_tree.gd" id="1_leaves"]
-[ext_resource type="ArrayMesh" uid="uid://cobx4l3bbhs5a" path="res://worlds/scrolling_track/biomes/rural/props/leaf_mesh.tres" id="3_leaf"]
+[ext_resource type="ArrayMesh" uid="uid://cobx4l3bbhs5a" path="res://worlds/scrolling_track/props/rural/leaf_mesh.tres" id="3_leaf"]
 [ext_resource type="ArrayMesh" uid="uid://cu4j5daeqc0pi" path="res://worlds/scrolling_track/props/rural/trunk.obj" id="4_trunk"]
 [ext_resource type="Material" path="res://worlds/scrolling_track/biomes/rural/materials/tree_trunk.tres" id="5_bark"]
 
