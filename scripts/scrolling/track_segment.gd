@@ -12,6 +12,10 @@ enum Kind { STRAIGHT, TURN }
 
 @export var kind: Kind = Kind.STRAIGHT
 @export var mesh: Mesh
+## Floor that extends the playfield beyond the road mesh (verge, gutter,
+## embankment). Authored in the same local frame as `mesh`: entry at the origin,
+## -Z forward, +X right. Mirrored with the road for right turns.
+@export var floor_mesh: Mesh
 ## Track width (X extent) of the mesh.
 @export var width: float = 30.0
 ## Vertical thickness of the collider.

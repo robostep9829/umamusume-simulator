@@ -1,6 +1,7 @@
 [gd_resource type="Resource" script_class="TrackSegment" format=3 uid="uid://bnis8bqvtbnvo"]
 
 [ext_resource type="Script" uid="uid://k4ptfmmb2irt" path="res://scripts/scrolling/track_segment.gd" id="1"]
+[ext_resource type="ArrayMesh" uid="uid://ckf2mmjx46y6r" path="res://worlds/scrolling_track/floor_segments/skirt_straight.obj" id="1_k5c7e"]
 [ext_resource type="Material" uid="uid://c8xsq2iw3ca2h" path="res://worlds/scrolling_track/biomes/rural/materials/ground.tres" id="1_q1x4k"]
 
 [sub_resource type="ArrayMesh" id="ArrayMesh_k5c7e"]
@@ -22,3 +23,4 @@ blend_shape_mode = 0
 [resource]
 script = ExtResource("1")
 mesh = SubResource("ArrayMesh_k5c7e")
+floor_mesh = ExtResource("1_k5c7e")

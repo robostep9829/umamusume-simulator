@@ -387,11 +387,15 @@ func _create_pool(parent: Node) -> void:
 		var node := StaticBody3D.new()
 		var mi := MeshInstance3D.new()
 		mi.name = "Mesh"
-		mi.visibility_range_end = 500.0
+		mi.visibility_range_end = 250.0
+		var m_floor := MeshInstance3D.new()
+		m_floor.name = "Floor"
+		m_floor.visibility_range_end = 250.0    # parity with the road's own cull distance
 		var cs := CollisionShape3D.new()
 		cs.name = "Collision"
 		cs.position.y = -straight_segment.height * 0.5
 		node.add_child(mi)
+		node.add_child(m_floor)
 		node.add_child(cs)
 		parent.add_child(node)
 		_pool.append(node)
@@ -433,6 +437,10 @@ func _apply_segment(node: StaticBody3D, seg: TrackSegment) -> void:
 	var cs := node.get_node("Collision") as CollisionShape3D
 	mi.mesh = seg.mesh
 	mi.scale.x = 1.0 if seg.direction <= 0 else -1.0
+	var floor := node.get_node("Floor") as MeshInstance3D
+	floor.mesh = seg.floor_mesh
+	floor.visible = seg.floor_mesh != null
+	floor.scale.x = mi.scale.x
 	if seg.is_turn():
 		cs.shape = _turn_shape
 		cs.rotation.y = seg.turn() * 0.5
@@ -441,6 +449,7 @@ func _apply_segment(node: StaticBody3D, seg: TrackSegment) -> void:
 		cs.shape = _straight_shape
 		cs.rotation.y = 0.0
 		cs.position.z = -_straight_shape.size.z * 0.5
+	
 
 
 ## Returns the arc-length of the closest point on the centreline polyline
