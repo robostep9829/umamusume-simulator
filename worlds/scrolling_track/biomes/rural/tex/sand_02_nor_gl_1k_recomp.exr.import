@@ -2,9 +2,9 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://dldrrp8ci0lmg"
-path.s3tc="res://.godot/imported/sand_02_diff_rough_1k.png-5ec00b970fc52bcee0b45574ce2ee921.s3tc.ctex"
-path.etc2="res://.godot/imported/sand_02_diff_rough_1k.png-5ec00b970fc52bcee0b45574ce2ee921.etc2.ctex"
+uid="uid://wt7lcdvdwbrb"
+path.bptc="res://.godot/imported/sand_02_nor_gl_1k_recomp.exr-b36cb00fe1a63c0399ecfd9d8d39694f.bptc.ctex"
+path.astc="res://.godot/imported/sand_02_nor_gl_1k_recomp.exr-b36cb00fe1a63c0399ecfd9d8d39694f.astc.ctex"
 metadata={
 "imported_formats": ["s3tc_bptc", "etc2_astc"],
 "vram_texture": true
@@ -12,8 +12,8 @@ metadata={
 
 [deps]
 
-source_file="res://worlds/scrolling_track/floor_segments/biomes/rural/tex/sand_02_diff_rough_1k.png"
-dest_files=["res://.godot/imported/sand_02_diff_rough_1k.png-5ec00b970fc52bcee0b45574ce2ee921.s3tc.ctex", "res://.godot/imported/sand_02_diff_rough_1k.png-5ec00b970fc52bcee0b45574ce2ee921.etc2.ctex"]
+source_file="res://worlds/scrolling_track/biomes/rural/tex/sand_02_nor_gl_1k_recomp.exr"
+dest_files=["res://.godot/imported/sand_02_nor_gl_1k_recomp.exr-b36cb00fe1a63c0399ecfd9d8d39694f.bptc.ctex", "res://.godot/imported/sand_02_nor_gl_1k_recomp.exr-b36cb00fe1a63c0399ecfd9d8d39694f.astc.ctex"]
 
 [params]
 
@@ -23,7 +23,7 @@ compress/lossy_quality=0.7
 compress/uastc_level=0
 compress/rdo_quality_loss=0.0
 compress/hdr_compression=1
-compress/normal_map=0
+compress/normal_map=1
 compress/channel_pack=0
 mipmaps/generate=true
 mipmaps/limit=-1

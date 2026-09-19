@@ -1,0 +1,36 @@
+[gd_resource type="Resource" script_class="RuralBiome" format=3 uid="uid://cghc0g1hg0niu"]
+
+[ext_resource type="CompressedTexture3D" uid="uid://e573kqiepk0a" path="res://environment/tonemap/pbrNeutral.exr" id="1_pm2i0"]
+[ext_resource type="Script" uid="uid://cqxnxc6weq8hv" path="res://scripts/biomes/providers/rural_biome.gd" id="1_rural"]
+[ext_resource type="Sky" uid="uid://coqbbfksjyjus" path="res://environment/sky_default.tres" id="2_eg7oc"]
+[ext_resource type="Resource" uid="uid://11dbwmj245x0" path="res://worlds/scrolling_track/biomes/rural/layers/rural_far.tres" id="3_bjv66"]
+[ext_resource type="Resource" uid="uid://bmxxl1s70mdpp" path="res://worlds/scrolling_track/biomes/rural/layers/rural_mid.tres" id="4_uf1ia"]
+[ext_resource type="Resource" uid="uid://dtek1tsbwhr3l" path="res://worlds/scrolling_track/biomes/rural/layers/rural_near.tres" id="5_1a4dp"]
+[ext_resource type="Material" uid="uid://c8xsq2iw3ca2h" path="res://worlds/scrolling_track/biomes/rural/materials/ground.tres" id="6_dg30q"]
+[ext_resource type="Material" uid="uid://b4n7hfri20ovo" path="res://worlds/scrolling_track/biomes/rural/materials/rural_dirt_road.tres" id="7_umjhg"]
+
+[sub_resource type="Environment" id="Environment_5kng7"]
+background_mode = 2
+background_color = Color(0.39, 0.39, 0.39, 1)
+sky = ExtResource("2_eg7oc")
+tonemap_exposure = 0.57
+fog_enabled = true
+fog_light_color = Color(0.62, 0.71, 0.8, 1)
+fog_density = 0.0018
+fog_aerial_perspective = 0.2
+fog_sky_affect = 0.7
+adjustment_enabled = true
+adjustment_contrast = 0.45
+adjustment_saturation = 0.8
+adjustment_color_correction = ExtResource("1_pm2i0")
+
+[resource]
+script = ExtResource("1_rural")
+road_surfaces = Array[Material]([ExtResource("6_dg30q"), ExtResource("7_umjhg")])
+biome_id = &"rural"
+display_name = "Rural (open field)"
+road_material_override = ExtResource("6_dg30q")
+near_layer = ExtResource("5_1a4dp")
+mid_layer = ExtResource("4_uf1ia")
+far_layer = ExtResource("3_bjv66")
+atmosphere = SubResource("Environment_5kng7")
