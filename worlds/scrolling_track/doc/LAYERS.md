@@ -144,8 +144,9 @@ far plane, and the camera draws 250 m of world (`prefabs/third_person.tscn`). Th
 horizon therefore sits at 200-235 m: 20 cards of 115 x 22 m, the closest a ring may be
 without reading as scenery you could drive into (`BiomeLayer.RING_MIN_DISTANCE`) and
 inside the far plane, where it is drawn. A ring parked beyond the far plane is reported
-by `BiomeDirector` instead of quietly vanishing, and `tools/verify_horizon.py` checks
-both ends of the band against the camera. The fog had to be raised with it - 0.0018
+by `BiomeDirector` instead of quietly vanishing. Both ends of the band live in the
+source rather than in a copied constant - the ring's own `RING_MIN_DISTANCE` and the
+camera's far plane - so moving either one moves the band with it. The fog had to be raised with it - 0.0018
 covered the old 1.2 km ring 88% but the new one only 30%, so the rural atmosphere is at
 0.0027, which puts 42% of the horizon in fog and keeps the ridge reading as distance.
 

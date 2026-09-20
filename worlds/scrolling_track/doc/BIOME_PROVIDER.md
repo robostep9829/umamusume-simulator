@@ -262,10 +262,10 @@ invisible even though the data changed. The numbers that matter for fog are:
 | `fog_aerial_perspective` | gives the fog colour back to the sky, so a high value hides the biome's own tint |
 | `fog_light_energy` | makes a dusk haze glow rather than just grey the view |
 
-`tools/verify_atmosphere.py` checks exactly this over the demo playlist - colours far
-enough apart to notice, haze that actually reaches the horizon - so the transition
-cannot silently become a no-op. It checks only what is switched on: a biome with fog
-off, or with no `atmosphere` at all, is respected and reported rather than failed.
+The demo playlist's two atmospheres are chosen this way: colours far enough apart to
+notice, and haze that actually reaches the horizon, so the transition cannot silently
+become a no-op. Only what is switched on counts - a biome with fog off, or with no
+`atmosphere` at all, is respected rather than reported.
 
 ---
 
@@ -424,7 +424,11 @@ art), so it runs in about a second and exits non-zero on failure. It checks:
   out again when the runner leaves a region;
 * the debug readout's numbers: the run a biome covers, the distance and element
   count to the next change (counting turns as the arcs they are), the run's
-  progress, and the single-biome case, where there is no change to wait for.
+  progress, and the single-biome case, where there is no change to wait for;
+* the draw order: the bucket width the camera's far plane implies, the spread of ranks
+  over the engine's sixteen buckets - and, end to end, that the director's own ranking
+  pass writes buckets which read back front to back from a camera and leaves the bodies
+  the far plane cannot show alone.
 
 It also refuses to pass quietly, because a runtime error in GDScript does not stop the
 run: it abandons the function it happened in and the caller carries on, so a broken test
@@ -435,7 +439,7 @@ tests that silently never ran. Every test is declared `-> bool` and ends with
 `return true`, which the runner reads back: a test a runtime error abandoned returns
 nothing, and so does one that bailed out on a failure of its own, and both are reported
 by name. And a test that asserted nothing is a failure whether it finished or not. The
-summary counts the tests as well as the checks - `265 checks in 17 tests, all green` -
+summary counts the tests as well as the checks - `287 checks in 19 tests, all green` -
 so a run that lost one of them says `16 of 17` instead of hiding behind a green
 sentence. Every one of those came from a real failure: a self-test that reports "all
 green" about tests it did not run is worse than no self-test at all.
@@ -450,51 +454,6 @@ early while its bound node is outside the tree), which is how an atmosphere fade
 be created, stepped and never move. The first check the run makes is that the tree is
 up, so a harness that drifts back into `_initialize()` says so in one line instead of
 failing a dozen checks about an empty track.
-
-Godot does not have to be the only judge. `tools/` holds offline checkers, all of
-which exit non-zero and say what is wrong:
-
-```bash
-python3 tools/check_res.py $(find . -path ./.git -prune -o \( -name "*.tres" -o -name "*.tscn" \) -print)
-python3 tools/verify_placement.py     # placement/orientation invariants
-python3 tools/verify_horizon.py       # the far layer's numbers: continuity, haze, cost
-python3 tools/verify_debug_stats.py   # what the debug overlay reads
-python3 tools/verify_atmosphere.py    # that a biome change is visible in the fog
-python3 tools/check_engine_api.py     # that every engine call the scripts make exists
-python3 tools/check_gdscript_scope.py # that no name is used outside its block
-```
-
-`check_engine_api.py` reads every `name(` in the project's GDScript and asks the
-engine whether it has a method by that name, in any of its 810 classes or as a global
-function. It exists because this project is developed without a way to run Godot: a
-call that does not exist fails only when the line is reached, which for a debug view
-or an error path can be long after the code looked fine. `tween.get_total_duration()`
-was in this system's own fade for a day, and the only reason it was found is that a
-human ran the game.
-
-`check_gdscript_scope.py` covers what neither the engine nor the linters tell you
-early: whether a name is still in scope. GDScript's parse and style checks both pass a
-file whose indentation moved a block out of the loop that declared its variables - the
-engine is the only thing that notices, and it notices by refusing to load the script
-and naming a line rather than the lost tab. The checker does that analysis from the
-file alone: indentation is read as blocks, `var`/`const`/`for`/parameters as
-declarations, names that are neither are looked up in the engine index, and a `:=`
-whose value cannot be inferred is reported as the Variant it is - arithmetic over the
-loop variable of an untyped `for … in […]`, or an element read out of an untyped
-`Array`/`Dictionary` (`.keys()`, `.values()`, a `{`/`[` literal, a parameter typed as
-one), which is the shape that broke the overlay's layer readout for a day. It also flags a `SceneTree`/`MainLoop` script that adds nodes
-without a `_process`/`_physics_process` entry point, since that is the harness mistake
-above caught offline rather than by running the engine. Anything it cannot decide from
-one file it leaves alone.
-
-`check_res.py` validates the text resources - paths, types, `script_class`,
-property names, typed arrays, shader parameters, node parents - against the same
-class information Godot itself uses (a class index generated from the engine's
-`doc/classes`, see `tools/build_godot_index.py`), so a typo in a hand-authored
-`.tres` is caught before the editor is opened. The checkers that mirror the biome
-system's own numbers exist because its failures are geometric - a mirrored instance, a ring
-that drifts out of reach, a distance that reads wrong - and those are exactly the
-things a headless self-test in a text-only checkout cannot see either.
 
 ---
 
@@ -589,7 +548,7 @@ dictionary - `BiomeDirector.debug_stats()` - plus the track's inspection helpers
 playlist's (`is_single_biome()`, `run_range_at()`, `describe()`). Those are
 read-only and public on purpose: any other HUD, tool or test that wants "which
 biome is the runner in, and how long until it changes?" can use them, and
-`tools/verify_debug_stats.py` checks the arithmetic behind them.
+the biome self-test checks the arithmetic behind them.
 
 `run_range_at()` deserves a note: a biome *run* is a maximal stretch of elements
 served by one provider, measured rather than derived from `segments_per_biome`.
@@ -648,8 +607,3 @@ what was said:
 `BiomeDirector.validation_problems()` and `reported_problems()` expose both kinds for a
 test, and the debug overlay shows an `issues` line - `2 · see the Output panel` - at
 every detail level, because a phone screen has no Output panel to look at.
-
-The offline checkers in `tools/` judge the same content without Godot, and
-`tools/verify_atmosphere.py` is the one that overlaps most with startup validation: it
-looks at the atmosphere of a whole playlist, where the runtime reports one biome at a
-time.

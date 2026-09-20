@@ -4,6 +4,3 @@
 addons
 .idea
 build
-
-# Python bytecode from tools/ (the checkers are plain scripts)
-__pycache__/
