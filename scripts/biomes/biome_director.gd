@@ -141,6 +141,11 @@ func _ready() -> void:
 	# that lists the director first is fine too - this refresh then finds nothing
 	# placed, and the track's own first placement arrives through the signal above.
 	track.refresh_pool()
+	# The dressing above is finished, and it is the most expensive build of the run in
+	# a real level - 280 instanced tree scenes here. Publishing it now rather than at the
+	# end of the first frame keeps the start-up cost visible in the overlay and stops it
+	# being attributed to a frame that did something else.
+	_publish_build()
 
 
 ## Problems [method BiomePlaylist.validate] found at startup, empty when the playlist
@@ -183,8 +188,19 @@ func _report_once(key: StringName, message: String) -> void:
 	push_error(message)
 
 
-func _physics_process(_delta: float) -> void:
+func _physics_process(delta: float) -> void:
+	_advance(delta)
+	# Published *after* the frame's work, not before it: the overlay draws in `_process`
+	# of the same iteration, so a number published at the top of `_physics_process` is
+	# the previous frame's - one frame stale exactly when it matters, which is the frame
+	# that froze.
 	_publish_build()
+
+
+## One frame of the director's work: follow the player, dress whatever changed, keep
+## the atmosphere aimed at the right biome. Split out so the frame's build accounting is
+## published whatever this returns.
+func _advance(_delta: float) -> void:
 	if not enabled or track == null or playlist == null:
 		return
 	var player := track.player
@@ -456,6 +472,13 @@ func _rebuild_decoration(
 ## Moves the frame's rebuild accounting into [member _last_build] and clears it, so
 ## the overlay reads the cost of a whole frame - a re-centre places every body in
 ## one - rather than a running total nobody can attribute to anything.
+##
+## Called wherever a build finishes - the end of every physics frame, and the end of
+## `_ready()` after the level's first dressing - so the readout always describes the most
+## recent thing that was built, and while running that is the frame that just ran. It
+## keeps the last frame that built something: a frame with nothing to do leaves the
+## readout alone instead of flickering it to zero, which is what makes the number worth
+## watching while the pool turns over.
 func _publish_build() -> void:
 	if _build_segments > 0:
 		_last_build = {

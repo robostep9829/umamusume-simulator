@@ -531,11 +531,14 @@ Two more things worth knowing while iterating:
   length of the track, and an idle frame only compares 40 small dictionaries.
 * What a rebuild costs is worth watching, because it is the one place the system
   spends real time: the overlay's `build` line reports the segments and instances of
-  the last frame that rebuilt anything, with the milliseconds it took
-  (`BiomeDirector.last_build()`, published once per frame). A re-centre should read
-  a handful of segments; a number near `pool_size` means every body changed element,
-  which is 280 instanced tree scenes in the demo and a visible freeze. The self-test
-  asserts the first case for both an endless re-centre and a closed-loop step.
+  the last thing that was built, with the milliseconds it took
+  (`BiomeDirector.last_build()`). It is published wherever a build *finishes* - at the
+  end of each physics frame, and at the end of `_ready()` for the level's first
+  dressing, which is the expensive one and would otherwise be blamed on the first
+  frame. A re-centre should read a handful of segments; a number near `pool_size`
+  means every body changed element, which is 280 instanced tree scenes in the demo and
+  a visible freeze. The self-test asserts the first case for both an endless re-centre
+  and a closed-loop step.
 
 ---
 
@@ -557,7 +560,7 @@ is a `CanvasLayer` that builds its own panel, finds the level's `TrackManager`,
 | the bar | how far through the current biome run the runner is |
 | `track` | endless or closed loop, pool size, seed / lap length |
 | `layers` | instances built per decoration band, as they really are in the world: an along-track layer parents them to the segment bodies, a `RING` one to the horizon anchor, and both are counted |
-| `build` | what the last frame that rebuilt decoration cost: segments re-dressed, instances built, milliseconds spent |
+| `build` | what the last rebuild cost: segments re-dressed, instances built, milliseconds spent; a frame that built nothing leaves it as it was, so it reads as the last cost rather than flickering to zero |
 | `horizon` | cards in the ring and how far the anchor currently is |
 | `fog` | the environment that is *rendering*: fog colour (with a swatch), density, energy, sky affect, aerial perspective, sun scatter |
 | `issues` | how many problems the console reported, shown at every detail level |
