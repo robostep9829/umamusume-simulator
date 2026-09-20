@@ -47,6 +47,7 @@ var _pitch: float = 0.0
 # Sprint tracking
 var _sprint_timer: float = 0.0
 var is_sprinting: bool = false
+var speed_mul: float = 1.0
 
 # Auto run tracking
 var _idle_time: float = 0.0
@@ -54,7 +55,7 @@ var auto_forward: bool = false
 
 const WALK_ANIM_SPEED := 1.6
 const SPRINT_ANIM_SPEED := 7.0
-const STRIDE_ANIM_SPEED := 7.0
+const STRIDE_ANIM_SPEED := 14.0
 
 func _ready() -> void:
 	if not Engine.is_editor_hint():
@@ -136,11 +137,13 @@ func _apply_auto_run(input_dir: Vector2, delta: float) -> Vector2:
 		if _idle_time >= auto_run_delay:
 			auto_forward = true
 	if Input.is_action_just_pressed("move_back"):
+		speed_mul = 1.0
 		auto_forward = false
 		_idle_time = 0.0
 	# Force forward input while auto-running (unless the player is actively
 	# holding backward, which already cancelled it this frame).
 	if auto_forward and input_dir.y >= 0.0:
+		speed_mul += 0.0002
 		return Vector2(input_dir.x, -1.0)
 	return input_dir
 
@@ -170,7 +173,7 @@ func _handle_movement(delta: float) -> void:
 
 	# Choose speed based on sprint input
 	is_sprinting = Input.is_action_pressed("sprint") or auto_forward
-	var speed := sprint_speed if is_sprinting else move_speed
+	var speed := sprint_speed * speed_mul if is_sprinting else move_speed
 	
 	# Blend sprint and faster sprint animations
 	animation_tree["parameters/sprint_spd/stride_blend/blend_amount"] = clampf(remap(speed, SPRINT_ANIM_SPEED, STRIDE_ANIM_SPEED, 0.0, 1.0), 0.0, 1.0)
