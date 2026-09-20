@@ -1134,7 +1134,10 @@ func _test_atmosphere() -> bool:
 	var fade := director._blend_tween
 	if fade == null or not fade.is_valid():
 		_check(false, "entering a biome starts an atmosphere fade")
-		return
+		# `return false`: the test contract is "true only from the last line", and a
+		# bare `return` in a `-> bool` function is a compile error in Godot - nil is a
+		# hard-typed value, so it does not convert to bool.
+		return false
 	_check(director.blend_progress() < 0.5, "a fade starts at its beginning")
 	# What the fade carries, as opposed to what is swapped with the resource: a fog
 	# colour that is not in this list would jump instead of travelling.

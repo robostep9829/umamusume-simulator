@@ -21,6 +21,8 @@ only running the engine does it. This does that analysis by reading the file:
 
 * a line indented deeper than any open block, and a statement at file scope - the two
   shapes a lost or added tab leaves behind;
+* a bare `return` in a function declared to return a builtin type, which the engine
+  refuses at load the same way it refuses a `:=` it cannot infer;
 * an integer literal too large for a signed 64-bit integer, which the engine prints as
   "Cannot represent 0x…" and then substitutes INT64_MAX for;
 * a scene-tree script that adds nodes without a `_process`/`_physics_process` entry
@@ -172,6 +174,27 @@ TYPED_CONTAINER = re.compile(
 )
 
 
+# Return types a bare `return` cannot satisfy. `Variant` accepts nil and so do object
+# types (the analyzer's own check_type_compatibility() lets nil through for anything
+# that is not a builtin), but every builtin value type refuses it - and that refusal is
+# an analysis error, not a warning, so the whole script fails to load:
+#
+#     SCRIPT ERROR: Parse Error: Cannot return value of type "null" because the
+#     function return type is "bool".
+NULL_INTOLERANT_RETURN = set(VARIANT_TYPES) - {"Variant"}
+
+
+def null_intolerant(return_type: str) -> str:
+    """The builtin return type a bare `return` cannot satisfy, or "" if it can.
+
+    An object type is left alone: nil is an object value, and the engine converts it.
+    An enum is left alone too, because its name here is indistinguishable from a class
+    name and guessing would be worse than missing it.
+    """
+    name = return_type.split("[", 1)[0].strip()
+    return name if name in NULL_INTOLERANT_RETURN else ""
+
+
 def untyped_parameters(signature: str) -> set:
     """Names of parameters declared as an untyped `Array` or `Dictionary`."""
     return {name for name, _ in PARAMETER_CONTAINER.findall(signature)}
@@ -294,6 +317,7 @@ def check_file(path: Path, index: dict, classes: dict, known: set) -> list:
     file_known = set(known) | own_declarations(path)
     file_known |= inherited_names(index, extends_of(path), classes)
 
+    return_type = ""         # the declared return type of the function being walked
     declared_at = {}         # name -> line of its local declaration, anywhere in the file
     untyped_at = {}          # loop variable -> line of the `for … in […]` that made it one
     untyped_containers = set()   # names holding an untyped Array/Dictionary
@@ -303,7 +327,8 @@ def check_file(path: Path, index: dict, classes: dict, known: set) -> list:
     opens = False            # the statement above opened a block and expects a body
     opener_indent = 0
 
-    for number, indent, code in statements(path.read_text(errors="ignore").splitlines()):
+    source_lines = path.read_text(errors="ignore").splitlines()
+    for number, indent, code in statements(source_lines):
         while len(stack) > 1 and stack[-1].indent > indent:
             stack.pop()
 
@@ -347,6 +372,10 @@ def check_file(path: Path, index: dict, classes: dict, known: set) -> list:
                 # An element of a Variant is a Variant too: `var x := side[0]` is as
                 # uninferable as arithmetic over `side`.
                 untyped_containers |= pending_variants
+        declared_return = FUNC.match(code)
+        if declared_return:
+            annotation = re.search(r"\)\s*->\s*([A-Za-z_][\w.]*(?:\[[^]]*\])?)", code)
+            return_type = annotation.group(1) if annotation else ""
         function = FUNC.match(code) or SIGNAL.match(code)
         if function:
             pending = parameters(function.group(2)) | {function.group(1)}
@@ -381,6 +410,18 @@ def check_file(path: Path, index: dict, classes: dict, known: set) -> list:
                     report(number, f"`{inferred.group(1)}` has no inferable type: it is "
                                    f"an element of `{element}`, which is untyped, and "
                                    f"indexing one gives a Variant")
+
+        # `return ""` and a bare `return` fold to the same statement, because string
+        # contents are blanked before folding, so ask the physical line instead.
+        physical = source_lines[number - 1] if number <= len(source_lines) else ""
+        if re.fullmatch(r"\s*return\s*(?:#.*)?", physical):
+            refusal = null_intolerant(return_type)
+            if refusal:
+                report(number, f"`return` with no value in a function declared `-> "
+                               f"{return_type}`: nil converts to an object type but not "
+                               f"to a builtin one, and the engine refuses the whole "
+                               f"script at load - the fix is `return false`, or "
+                               f"whatever the function means by stopping here")
 
         for literal in re.findall(r"\b0x[0-9a-fA-F]+\b", code):
             if int(literal, 16) > 2 ** 63 - 1:
