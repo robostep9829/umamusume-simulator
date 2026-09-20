@@ -91,6 +91,15 @@ var _blend_progress := 1.0
 var _problems: PackedStringArray = PackedStringArray()
 var _reported: Dictionary = {}
 
+# Rebuild accounting, for the debug overlay's `build` line and for a test that wants
+# to see how much of the pool a window move re-dresses. Accumulated as the placements
+# arrive and published on the next physics frame, so the number belongs to one frame:
+# a re-centre places the whole pool at once, and what it costs is the sum of it.
+var _build_segments: int = 0
+var _build_instances: int = 0
+var _build_usec: int = 0
+var _last_build: Dictionary = {}
+
 
 func _ready() -> void:
 	_anchor = Node3D.new()
@@ -175,6 +184,7 @@ func _report_once(key: StringName, message: String) -> void:
 
 
 func _physics_process(_delta: float) -> void:
+	_publish_build()
 	if not enabled or track == null or playlist == null:
 		return
 	var player := track.player
@@ -270,6 +280,7 @@ func debug_stats() -> Dictionary:
 		"layers": {},
 		"horizon_cards": 0,
 		"horizon_distance": 0.0,
+		"build": _last_build,
 		"problems": _problems.size(),
 	}
 	if _active_provider != null:
@@ -425,6 +436,8 @@ func _skin_road(
 func _rebuild_decoration(
 	body: Node3D, segment: TrackSegment, provider: BiomeProvider, element_index: int
 ) -> void:
+	var started := Time.get_ticks_usec()
+	var instances := 0
 	for layer in DECORATION_LAYERS:
 		var host := _layer_host(body, layer)
 		_clear(host)
@@ -434,6 +447,37 @@ func _rebuild_decoration(
 		if descriptor != null and descriptor.is_usable() and not descriptor.is_ring():
 			_build_along_track(host, descriptor, segment, element_index, layer)
 		provider.decorate_layer(layer, host, element_index, segment)
+		instances += host.get_child_count()
+	_build_segments += 1
+	_build_instances += instances
+	_build_usec += Time.get_ticks_usec() - started
+
+
+## Moves the frame's rebuild accounting into [member _last_build] and clears it, so
+## the overlay reads the cost of a whole frame - a re-centre places every body in
+## one - rather than a running total nobody can attribute to anything.
+func _publish_build() -> void:
+	if _build_segments > 0:
+		_last_build = {
+			"segments": _build_segments,
+			"instances": _build_instances,
+			"usec": _build_usec,
+		}
+		_build_segments = 0
+		_build_instances = 0
+		_build_usec = 0
+
+
+## What the last frame that rebuilt anything cost: `segments` re-dressed,
+## `instances` decoration nodes built for them, `usec` spent doing it. Empty before
+## the first frame that rebuilt something.
+##
+## A window re-centre should report a handful of segments - only the elements that
+## entered it - and the same for a lap of a closed loop. A number near the pool size
+## means every body changed element, which is 280 instanced tree scenes in the demo
+## level and a visible freeze.
+func last_build() -> Dictionary:
+	return _last_build
 
 
 # --- Horizon side ------------------------------------------------------------

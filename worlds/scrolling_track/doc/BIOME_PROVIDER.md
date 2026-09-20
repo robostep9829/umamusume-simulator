@@ -164,13 +164,17 @@ Three properties fall out of that:
 * **Decoration follows the track for free.** It is parented to the floor body, so
   it is correct on straights and on both turn directions, and it disappears with
   the segment when the pool recycles it. No per-frame work at all.
-* **Re-placing is a no-op.** `segment_placed` fires for the whole pool every
-  physics frame in closed-loop mode and on every window re-centre in endless
-  mode; the director compares `(element_index, provider, segment)` per body and
-  returns early when nothing changed. Since decoration is seeded by the element
-  index, rebuilding a segment that moved to another pooled body reproduces the
-  *same* world-space result - which is why re-centring the endless window does
-  not visibly reshuffle the scenery.
+* **Re-placing is a no-op, and a re-centre is nearly one.** `segment_placed` fires
+  for the whole pool every physics frame in closed-loop mode and on every window
+  re-centre in endless mode; the director compares `(element_index, provider,
+  segment)` per body and returns early when nothing changed. That comparison is only
+  worth anything because `TrackManager._body_for_slot()` keys each body by the
+  window slot it carries, counted absolutely: a re-centre by six elements leaves the
+  elements that are still in the window on the body they are already dressed on, so
+  only the six that entered are rebuilt - six elements, not the whole pool. Since
+  decoration is seeded by the element index, even those reproduce the same
+  world-space decoration they had the last time the window covered them, which is
+  why re-centring does not visibly reshuffle the scenery.
 
 ### 2.2 Horizon: layer 3 without a seam
 
@@ -407,6 +411,10 @@ art), so it runs in about a second and exits non-zero on failure. It checks:
 * the track/director contract: every pooled body gets the road skin, a layer is
   built once per hosted element, re-placing unchanged segments keeps the *same*
   decoration nodes, and switching biome rebuilds them in place;
+* the pool ring: a body carries the window slot it is given rather than its position
+  in the array, so moving the endless window by one element and stepping the closed
+  loop by one both re-dress a single body and leave the rest as they were - the
+  property that keeps a re-centre from rebuilding 280 trees in one frame;
 * horizon rings keep their distance band, ride with the runner, and are only laid
   out again when the runner leaves a region;
 * the debug readout's numbers: the run a biome covers, the distance and element
@@ -486,7 +494,7 @@ wherever it matters:
 
 | Asset | What it is |
 |---|---|
-| `rural/layers/rural_near.tres` | the island's tree, wrapped as `rural/props/rural_tree.tscn` and placed as a scene variant: real art, one per side per segment. Its leaf `MultiMesh` is 4700 instances rebuilt per instance, so the layer hosts it on every second element only, keeps `visible_range` short and casts no shadows; a real biome should bake a lighter tree |
+| `rural/layers/rural_near.tres` | the island's tree, wrapped as `rural/props/rural_tree.tscn` and placed as a scene variant: real art, one per side per segment. Its 4700 leaf instances are laid out once per [MultiMesh] - the scene's is shared, so a rebuild no longer re-parses the layout per tree - but they are still 4700 instances to draw, which is why the layer hosts the tree on every second element, keeps `visible_range` short and casts no shadows; a real biome should bake a lighter tree |
 | `rural/props/leaf_mesh.tres` | the leaf quad baked out of `uma_island.tscn`, so the demo does not depend on `props/rural/leaf.obj` being present in the checkout |
 | `rural/layers/rural_mid.tres` | one `QuadMesh` card per segment with a flat unshaded material - a treeline, not a treeline asset |
 | `rural/layers/rural_far.tres` | fourteen Y-billboard cards on a 1.2-1.6 km ring - a horizon, not a panorama. They are still flat rectangles: replacing the card mesh with a hill silhouette is what this layer wants next |
@@ -515,6 +523,13 @@ Two more things worth knowing while iterating:
 * Everything that scales with the pool is O(pooled segments): decoration is
   parented per segment, so the cost of a biome is its layer descriptors, not the
   length of the track, and an idle frame only compares 40 small dictionaries.
+* What a rebuild costs is worth watching, because it is the one place the system
+  spends real time: the overlay's `build` line reports the segments and instances of
+  the last frame that rebuilt anything, with the milliseconds it took
+  (`BiomeDirector.last_build()`, published once per frame). A re-centre should read
+  a handful of segments; a number near `pool_size` means every body changed element,
+  which is 280 instanced tree scenes in the demo and a visible freeze. The self-test
+  asserts the first case for both an endless re-centre and a closed-loop step.
 
 ---
 
@@ -536,6 +551,7 @@ is a `CanvasLayer` that builds its own panel, finds the level's `TrackManager`,
 | the bar | how far through the current biome run the runner is |
 | `track` | endless or closed loop, pool size, seed / lap length |
 | `layers` | instances built per decoration band, as they really are in the world: an along-track layer parents them to the segment bodies, a `RING` one to the horizon anchor, and both are counted |
+| `build` | what the last frame that rebuilt decoration cost: segments re-dressed, instances built, milliseconds spent |
 | `horizon` | cards in the ring and how far the anchor currently is |
 | `fog` | the environment that is *rendering*: fog colour (with a swatch), density, energy, sky affect, aerial perspective, sun scatter |
 | `issues` | how many problems the console reported, shown at every detail level |

@@ -6,4 +6,4 @@
 # single summary line and is run by hand or in CI with one command. Splitting it at
 # an arbitrary 1000 lines would cost a reader more than it saves, and the file grows
 # with every behaviour worth a regression test.
-max-file-lines: 1200
+max-file-lines: 1400

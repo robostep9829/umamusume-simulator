@@ -410,6 +410,12 @@ func _add_extra_lines(lines: Array[String]) -> void:
 	lines.append(_field("horizon", "%d cards · %s away" % [
 		int(_stats.get("horizon_cards", 0)), _metres(float(_stats.get("horizon_distance", 0.0)))
 	]))
+	var build := _stats.get("build", {}) as Dictionary
+	if not build.is_empty():
+		lines.append(_field("build", "%d seg · %d inst · %s ms" % [
+			int(build.get("segments", 0)), int(build.get("instances", 0)),
+			String.num(float(build.get("usec", 0)) / 1000.0, 1)
+		]))
 	lines.append(_field("skin", "variant %d of %d" % [
 		int(_stats.get("variant", 0)) + 1, int(_stats.get("variants", 1))
 	]))

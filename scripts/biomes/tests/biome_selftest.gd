@@ -138,6 +138,7 @@ func _run_tests() -> void:
 	if tree_ready:
 		tests.append_array([
 			_test_first_pool,
+			_test_pool_ring,
 			_test_track_integration,
 			_test_horizon,
 			_test_debug_stats,
@@ -685,6 +686,125 @@ func _test_first_pool() -> void:
 	)
 
 	_teardown([director, runner, track, world])
+
+
+## A window that moves re-dresses the elements that entered it, and nothing else.
+##
+## The pool is keyed by the window slot each body carries, counted absolutely, so the
+## elements a re-centre keeps stay on the body they are already dressed on and the
+## director skips them - see [method TrackManager._body_for_slot]. This is the
+## difference between a re-centre costing six elements and costing the pool: the demo
+## level holds 280 instanced tree scenes, and rebuilding all of them in one frame is
+## the freeze this test locks down.
+func _test_pool_ring() -> void:
+	var track := TrackManager.new()
+	track.infinite = true
+	track.pool_size = 6
+	track.straight_min = 1
+	track.straight_max = 1
+	track.turn_min = 1
+	track.turn_max = 1
+	track.straight_segment = _segment_resource(false)
+	track.turn_segment = _segment_resource(true)
+	var runner := Node3D.new()
+	track.player = runner
+
+	var layer := BiomeLayer.new()
+	layer.meshes = [BoxMesh.new()]
+	layer.count = 1
+	layer.side = BiomeLayer.Side.LEFT
+	layer.host_every = 1
+	layer.distance_min = 20.0
+	layer.distance_max = 20.0
+	var provider := _provider(&"ringed")
+	provider.near_layer = layer
+	var playlist := BiomePlaylist.new()
+	playlist.biomes = [provider]
+
+	var world := _level_world()
+	var director := BiomeDirector.new()
+	director.track = track
+	director.playlist = playlist
+	director.world_environment = world
+	root.add_child(track)
+	root.add_child(runner)
+	root.add_child(director)
+
+	var pool := track.get_node("ScrollOrigin").get_children()
+	_check(pool.size() == 6, "the endless pool has one body per slot")
+	var ringed := true
+	for body in pool:
+		var record: Dictionary = director._records.get(body.get_instance_id(), {})
+		var carried := int(record.get("index", -1))
+		ringed = ringed and carried >= 0 and pool[posmod(carried, pool.size())] == body
+	_check(ringed, "a body carries `posmod(element_index, pool_size)`")
+
+	var before := _decoration_fingerprint(director, pool)
+	var kept := 0
+	var rebuilt := 0
+	track._recenter(track._slot_first + 1)
+	for body in pool:
+		var fingerprint := _decoration_fingerprint(director, [body])
+		if fingerprint == before[body.get_instance_id()]:
+			kept += 1
+		else:
+			rebuilt += 1
+	_check(kept == 5, "a one-element move keeps five bodies as they were (got %d)" % kept)
+	_check(rebuilt == 1, "and rebuilds the body whose element entered (got %d)" % rebuilt)
+
+	# Which is what the debug readout reports, and what the overlay's `build` line shows.
+	director._physics_process(0.0)
+	var build := director.last_build()
+	_check(int(build.get("segments", -1)) == 1, "the build readout counts the one rebuilt segment")
+	_check(int(build.get("instances", -1)) == 1, "and the one instance it built for it")
+	_check(int(build.get("usec", -1)) >= 0, "and says how long it took")
+
+	_teardown([director, runner, track, world])
+
+	# The closed loop re-places every pool on every frame, so the same ring is what
+	# keeps its re-dresses down to the elements that scrolled in.
+	var loop := TrackManager.new()
+	loop.track_level = TrackLevel.closed_racetrack(2, 1)
+	loop.pool_size = 4
+	loop.straight_segment = _segment_resource(false)
+	loop.turn_segment = _segment_resource(true)
+	var loop_world := _level_world()
+	var loop_director := BiomeDirector.new()
+	loop_director.track = loop
+	loop_director.playlist = playlist
+	loop_director.world_environment = loop_world
+	root.add_child(loop)
+	root.add_child(loop_director)
+
+	var loop_pool := loop.get_children()
+	_check(loop_pool.size() == 4, "the closed loop pools four bodies")
+	var loop_before := _decoration_fingerprint(loop_director, loop_pool)
+	# One element on: the window is indexed by the straight segment's length, which is
+	# what `_seg_length` is set from, so this moves the window by exactly one slot.
+	loop._replenish(STRAIGHT_LENGTH)
+	var loop_kept := 0
+	for body in loop_pool:
+		if _decoration_fingerprint(loop_director, [body]) == loop_before[body.get_instance_id()]:
+			loop_kept += 1
+	_check(loop_kept == 3, "a step of the closed loop keeps three of four bodies (got %d)" % loop_kept)
+
+	_teardown([loop_director, loop, loop_world])
+
+
+## What a set of bodies is currently decorated with, per body: the element it carries
+## and the identity of the decoration nodes under it. Comparing the identity is the
+## point - a rebuild replaces the nodes, a skip leaves the very same ones.
+func _decoration_fingerprint(director: BiomeDirector, bodies: Array) -> Dictionary:
+	var fingerprint := {}
+	for body in bodies:
+		var record: Dictionary = director._records.get(body.get_instance_id(), {})
+		var host := body.get_node_or_null("BiomeLayerNEAR")
+		var nodes := PackedInt64Array()
+		if host != null:
+			for child in host.get_children():
+				nodes.append(child.get_instance_id())
+		fingerprint[body.get_instance_id()] = [int(record.get("index", -1)), nodes]
+	return fingerprint
 
 
 ## Horizon content lives on an anchor that rides with the runner, so the ring

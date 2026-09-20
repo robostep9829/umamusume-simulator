@@ -152,11 +152,30 @@ func _replenish(s_p: float) -> void:
 	for k in pool_size:
 		var slot := first_slot + (k - half)
 		var L := posmod(slot, _slot_count)
-		var node := _pool[k]
+		var node := _body_for_slot(slot)
 		var segment := _segment_for(_spine_kind[L])
 		node.global_transform = _spine_transform[L]
 		_apply_segment(node, segment)
 		segment_placed.emit(L, node, segment)
+
+
+## The pooled body that carries window slot `slot`, which is counted absolutely -
+## the window's own numbering, not folded into the pool - so a body keeps its slot
+## until the window has moved on by a whole pool.
+##
+## This is what makes a re-centre cheap for whoever hangs off [signal
+## segment_placed]: advancing the window by six elements leaves every element that
+## is still in it on the body it is already dressed on, so a listener that compares
+## what a body carries (see [method BiomeDirector._on_segment_placed]) re-dresses
+## the elements that entered and nothing else. Keyed by the body's position in the
+## array, every body changed element on every re-centre and the whole pool - 280
+## trees in the demo level - was rebuilt in a single frame.
+##
+## Not folded into the *element* either: on a closed loop whose lap is not a
+## multiple of the pool, two elements of the window can share a lap slot, and
+## mapping those to one body would leave another element unplaced.
+func _body_for_slot(slot: int) -> StaticBody3D:
+	return _pool[posmod(slot, maxi(_pool.size(), 1))]
 
 
 ## --- Infinite ----------------------------------------------------------------
@@ -209,7 +228,7 @@ func _build_window() -> void:
 	_window_pt[pool_size] = local
 
 	for k in pool_size:
-		var node := _pool[k]
+		var node := _body_for_slot(_slot_first + k)
 		var segment := _segment_for(_window_kind[k])
 		node.transform = _window_tf[k]
 		_apply_segment(node, segment)
