@@ -26,20 +26,20 @@ const CAMERA_SNAP_DISTANCE := 2.0
 @export var min_pitch: float = -60.0   # look down limit (degrees)
 @export var max_pitch: float = 70.0    # look up limit (degrees)
 
-## Chase camera. The pose follows how fast the character is actually going rather
-## than a sprint flag, so 7 m/s and 21 m/s do not look the same from behind: the
-## distance and the shoulder offset lerp between the normal and the sprint pair, and
-## the fov opens from the camera's authored value to [member sprint_fov], as the speed
-## runs from [member move_speed] to [member camera_full_speed].
+## Chase camera. The distance and the fov follow how fast the character is actually
+## going, so 7 m/s and 21 m/s do not look the same from behind: they lerp between the
+## normal and the sprint pair, and the fov opens from the camera's authored value to
+## [member sprint_fov], as the speed runs from [member move_speed] to
+## [member camera_full_speed].
 ##
-## The sprint pair used to be selected by a boolean and put the camera dead centre
-## behind the character - a screenful of its back, at exactly the speed where the
-## player wants to see further ahead - and it said nothing in between. The shoulder
-## offset below keeps the road visible past the character; 0 restores the centring.
+## The shoulder offset answers to the sprint instead: over the shoulder at a walk,
+## centred while sprinting, because that is the view a sprint is for - the whole road
+## ahead, with the character on the centre line. Set [member sprint_spring_position] to
+## [member normal_spring_position] to keep the shoulder line at every speed.
 @export var normal_spring_length: float = 1.5
 @export var sprint_spring_length: float = 2.5
 @export var normal_spring_position: Vector3 = Vector3(0.5, 0.0, 0.0)
-@export var sprint_spring_position: Vector3 = Vector3(0.4, 0.0, 0.0)
+@export var sprint_spring_position: Vector3 = Vector3(0.0, 0.0, 0.0)
 @export var camera_full_speed: float = 21.0
 @export var sprint_fov: float = 62.0
 
@@ -166,9 +166,10 @@ func _apply_chase_pose(delta: float) -> void:
 	spring.spring_length = lerpf(
 		spring.spring_length, lerpf(normal_spring_length, sprint_spring_length, fast), pose
 	)
-	spring.position = spring.position.lerp(
-		normal_spring_position.lerp(sprint_spring_position, fast), pose
-	)
+	# The offset follows the sprint input, not the speed: a sprint is asked for, and the
+	# centred view is what it is for.
+	var target_offset := sprint_spring_position if is_sprinting else normal_spring_position
+	spring.position = spring.position.lerp(target_offset, pose)
 	if camera != null:
 		camera.fov = lerpf(camera.fov, lerpf(_normal_fov, sprint_fov, fast), pose)
 
