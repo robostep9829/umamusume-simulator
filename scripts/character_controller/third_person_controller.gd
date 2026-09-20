@@ -167,7 +167,7 @@ func _apply_chase_pose(delta: float) -> void:
 		spring.spring_length, lerpf(normal_spring_length, sprint_spring_length, fast), pose
 	)
 	spring.position = spring.position.lerp(
-		lerpf(normal_spring_position, sprint_spring_position, fast), pose
+		normal_spring_position.lerp(sprint_spring_position, fast), pose
 	)
 	if camera != null:
 		camera.fov = lerpf(camera.fov, lerpf(_normal_fov, sprint_fov, fast), pose)

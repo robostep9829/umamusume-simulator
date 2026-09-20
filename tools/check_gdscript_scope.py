@@ -23,6 +23,8 @@ only running the engine does it. This does that analysis by reading the file:
   shapes a lost or added tab leaves behind;
 * a bare `return` in a function declared to return a builtin type, which the engine
   refuses at load the same way it refuses a `:=` it cannot infer;
+* a Vector3 handed to `lerpf()` and friends, or anything else that is not a number
+  handed to the calls that take one kind of number;
 * an integer literal too large for a signed 64-bit integer, which the engine prints as
   "Cannot represent 0x…" and then substitutes INT64_MAX for;
 * a scene-tree script that adds nodes without a `_process`/`_physics_process` entry
@@ -174,6 +176,66 @@ TYPED_CONTAINER = re.compile(
 )
 
 
+# Global functions that take one kind of number and nothing else. GDScript picks them
+# by name, not by overload, so handing `lerpf()` a Vector3 is a parse error the engine
+# reports at load:
+#
+#     Invalid argument for "lerpf()" function: argument 1 should be "float" but is
+#     "Vector3"
+#
+# `lerp()` is the variant that takes anything, which is why the mistake survives a
+# reading - and why the engine, not the reader, has to catch it.
+FLOAT_ONLY = re.compile(r"\b(?:lerpf|clampf|maxf|minf|absf|signf|snappedf|roundf|floorf|ceilf)\s*\(")
+INT_ONLY = re.compile(r"\b(?:maxi|mini|clampi|absi|signi|snappedi|roundi|floori|ceili)\s*\(")
+
+# Builtin types that are not numbers, so passing one to the calls above is an error
+# rather than a conversion. `Variant` is absent on purpose: nothing is provable there.
+NOT_A_NUMBER = set(VARIANT_TYPES) - {"int", "float", "bool", "Variant"}
+
+DECLARED_TYPE = re.compile(r"\b(?:var|const)\s+([A-Za-z_]\w*)\s*:\s*([A-Za-z_][\w.]*)")
+PARAMETER_TYPE = re.compile(r"([A-Za-z_]\w*)\s*:\s*([A-Za-z_][\w.]*)")
+
+
+def declared_types(path: Path) -> dict:
+    """Every type this file states for a name: locals, members, parameters.
+
+    A name that is declared twice is only reported when *every* declaration is a
+    non-number, so a local that shadows a member with a different type stays quiet.
+    """
+    types: dict = {}
+    for line in path.read_text(errors="ignore").splitlines():
+        code = strip_code(line)
+        found = list(DECLARED_TYPE.finditer(code))
+        function = FUNC.match(code)
+        if function:
+            found += list(PARAMETER_TYPE.finditer(function.group(2)))
+        for match in found:
+            types.setdefault(match.group(1), set()).add(match.group(2))
+    return types
+
+
+def call_arguments(code: str, match) -> list:
+    """The top-level arguments of the call `match` starts, split on its own commas."""
+    text = code[match.end():]
+    arguments = []
+    depth = 0
+    current = ""
+    for character in text:
+        if depth == 0 and character == ")":
+            arguments.append(current)
+            return arguments
+        if character in "([{":
+            depth += 1
+        elif character in ")]}":
+            depth -= 1
+        if character == "," and depth == 0:
+            arguments.append(current)
+            current = ""
+            continue
+        current += character
+    return []
+
+
 # Return types a bare `return` cannot satisfy. `Variant` accepts nil and so do object
 # types (the analyzer's own check_type_compatibility() lets nil through for anything
 # that is not a builtin), but every builtin value type refuses it - and that refusal is
@@ -318,6 +380,7 @@ def check_file(path: Path, index: dict, classes: dict, known: set) -> list:
     file_known |= inherited_names(index, extends_of(path), classes)
 
     return_type = ""         # the declared return type of the function being walked
+    declared_types_map = declared_types(path)
     declared_at = {}         # name -> line of its local declaration, anywhere in the file
     untyped_at = {}          # loop variable -> line of the `for … in […]` that made it one
     untyped_containers = set()   # names holding an untyped Array/Dictionary
@@ -410,6 +473,19 @@ def check_file(path: Path, index: dict, classes: dict, known: set) -> list:
                     report(number, f"`{inferred.group(1)}` has no inferable type: it is "
                                    f"an element of `{element}`, which is untyped, and "
                                    f"indexing one gives a Variant")
+
+        for pattern, wanted in ((FLOAT_ONLY, "float"), (INT_ONLY, "int")):
+            for match in pattern.finditer(code):
+                for argument in call_arguments(code, match):
+                    name = argument.strip()
+                    if not re.fullmatch(r"[A-Za-z_]\w*", name):
+                        continue
+                    types = declared_types_map.get(name)
+                    if types and all(value in NOT_A_NUMBER for value in types):
+                        report(number, f"`{match.group(0).rstrip('(')}()` takes a "
+                                       f"{wanted}, and `{name}` is "
+                                       f"{'/'.join(sorted(types))}: the engine refuses "
+                                       f"the script at load")
 
         # `return ""` and a bare `return` fold to the same statement, because string
         # contents are blanked before folding, so ask the physical line instead.

@@ -13,7 +13,7 @@ quietly renders the wrong thing.
 | `verify_horizon.py` | the numbers `biomes/rural/layers/rural_far.tres` is authored with: ridge continuity, band, haze, rebuild interval |
 | `verify_debug_stats.py` | the debug overlay's readout: biome runs, distance to the next biome, run progress |
 | `check_engine_api.py` | every engine call in the project's GDScript, against the engine's own method list |
-| `check_gdscript_scope.py` | the *scope* of the project's GDScript: a name used outside the block that declares it, a `:=` value with no inferable type (arithmetic over an untyped loop variable, or an element of an untyped `Array`/`Dictionary`), a line indented past every open block, an integer literal too large for 64 bits, a bare `return` in a function declared to return a builtin type, a scene-tree script that adds nodes without a frame entry point |
+| `check_gdscript_scope.py` | the *scope* of the project's GDScript: a name used outside the block that declares it, a `:=` value with no inferable type (arithmetic over an untyped loop variable, or an element of an untyped `Array`/`Dictionary`), a line indented past every open block, an integer literal too large for 64 bits, a bare `return` in a function declared to return a builtin type, a `Vector3` handed to `lerpf()` or another call that takes one kind of number, a scene-tree script that adds nodes without a frame entry point |
 | `verify_atmosphere.py` | that a biome change is *visible*: colours far enough apart and haze that reaches the horizon, for the fogs an environment switches on |
 | `build_godot_index.py` | rebuilds `godot_class_index.json`, the class knowledge `check_res.py` runs on |
 | `resfile.py` | shared helper, not a checker: parses a `.tres`/`.tscn` and finds an asset by name, so the checkers survive a restructure |
@@ -64,6 +64,15 @@ return types that are builtin value types and never for an object type, an enum 
 `Variant`, which is where the engine accepts the same code. It reads the physical line
 rather than the folded statement, because folding blanks string contents and `return ""`
 would otherwise look exactly like the case it is looking for.
+
+The newest rule is the same shape of mistake again: GDScript picks `lerpf()` by name
+rather than by overload, so handing it a `Vector3` is not a conversion but a parse
+error - and `lerp()` takes anything, which is what makes it easy to write and hard to
+see. The rule knows the file's declared types (members, locals and parameters) and
+fires only when *every* declaration of a name is a non-number, so a local that shadows
+a member with a different type stays quiet. Validated the same way: it names the
+offending argument in a copy of the revision it was written from, and leaves a file of
+legal `lerpf`/`clampf`/`maxi`/`Vector3.lerp` calls alone.
 
 `verify_horizon.py` and `verify_atmosphere.py` read the biomes' own `.tres` files
 rather than mirroring their numbers, so tuning the demo content cannot leave them
