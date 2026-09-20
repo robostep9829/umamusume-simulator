@@ -1,11 +1,6 @@
 @tool
 extends CharacterBody3D
 
-## A single tick of movement this size is not running, it is the level moving the world
-## back under the player (`TrackManager._snap_player`), so the camera is placed there
-## with it rather than sliding after it.
-const CAMERA_SNAP_DISTANCE := 2.0
-
 ## Movement tuning
 @export var move_speed: float = 1.6
 @export var sprint_speed: float = 7.0
@@ -30,30 +25,16 @@ const CAMERA_SNAP_DISTANCE := 2.0
 @export var normal_spring_position: Vector3 = Vector3(0.5, 0.0, 0.0)
 @export var sprint_spring_position: Vector3 = Vector3(0.0, 0.0, 0.0)
 
-## Camera trail: how long the camera takes to close the gap between where the character
-## is and where it still is, and how far that gap may grow. Holding the camera where it
-## was is what lets a fast run pull away from it instead of riding welded to its back; 0
-## for [member camera_lag_time] puts it rigidly back on the character.
-@export var camera_lag_time: float = 0.1
-@export var camera_lag_max: float = 3.0
-
 @export var player_data: PlayerData:
 	set(value):
 		player_data = value
 		_update_character_mesh()
 
-# Camera trail state: the pivot's authored offset, where the camera wanted to be last
-# frame - a jump from that is a teleport, not speed - and where it actually is, in world
-# space, which the body does not carry along.
-var _pivot_rest: Vector3 = Vector3.ZERO
-var _last_ideal: Vector3 = Vector3.ZERO
-var _pivot_world: Vector3 = Vector3.ZERO
-
 
 # Cached node references
 @onready var camera_pivot: Node3D = $CameraPivot
 @onready var skeleton: Node3D = $Skeleton3D
-@onready var spring: Node3D = $CameraPivot/SpringArm3D
+@onready var spring: SpringArm3D = $CameraPivot/SpringArm3D
 @onready var animation_tree: AnimationTree = $AnimationTree
 
 # Gravity pulled from project settings so it stays consistent
@@ -77,9 +58,12 @@ const SPRINT_ANIM_SPEED := 7.0
 const STRIDE_ANIM_SPEED := 14.0
 
 func _ready() -> void:
-	_pivot_rest = camera_pivot.position
-	_last_ideal = global_transform * _pivot_rest
-	_pivot_world = _last_ideal
+	# The arm must not see the character it is attached to. The body's collider is one
+	# physics step behind its own pivot, and the arm's cast only overlooks it while the
+	# pivot still overlaps it: past `capsule_radius * physics_ticks_per_second` - the
+	# capsule's 0.352 m at 60 Hz, about 21 m/s - the character outruns that stale
+	# collider, the cast starts hitting it, and the camera collapses onto the pivot.
+	spring.add_excluded_object(get_rid())
 	if not Engine.is_editor_hint():
 		Input.mouse_mode = Input.MOUSE_MODE_CAPTURED
 	_update_character_mesh()
@@ -133,39 +117,12 @@ func _physics_process(delta: float) -> void:
 		return
 	_update_camera()
 	_handle_movement(delta)
-	# After the move, so the trail uses the position the body actually reached.
-	_apply_camera_trail(delta)
 
 
 func _update_camera() -> void:
 	# Yaw rotates the pivot horizontally, pitch tilts it vertically
 	camera_pivot.rotation.y = _yaw
 	camera_pivot.rotation.x = _pitch
-
-
-## Where the camera is, in world space: the pivot holds its own position and chases the
-## character from there, so the character pulls away under acceleration and the camera
-## cuts the corner on a turn, then closes up again. The faster the run, the further back
-## it settles - `speed * camera_lag_time` in the steady state, 2 m at 20 m/s - which is
-## what stops a fast run from looking welded to the character's back.
-##
-## The gap has to be a world space one. The pivot is a child of the body, so the body
-## carries it along every step: reading its own position back each frame finds it
-## sitting exactly at the pose again, with no gap to trail.
-func _apply_camera_trail(delta: float) -> void:
-	var ideal := global_transform * _pivot_rest
-	var teleported := ideal.distance_to(_last_ideal) > CAMERA_SNAP_DISTANCE
-	_last_ideal = ideal
-	var here := _pivot_world
-	if camera_lag_time > 0.0 and not teleported:
-		here = here.lerp(ideal, 1.0 - exp(-delta / camera_lag_time))
-		var gap := here - ideal
-		if gap.length() > camera_lag_max:
-			here = ideal + gap.normalized() * camera_lag_max
-	else:
-		here = ideal
-	_pivot_world = here
-	camera_pivot.global_position = here
 
 
 ## Auto run: idle counter. Any directional input resets the clock; only
