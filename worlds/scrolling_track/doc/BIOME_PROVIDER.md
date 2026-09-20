@@ -421,13 +421,19 @@ art), so it runs in about a second and exits non-zero on failure. It checks:
   count to the next change (counting turns as the arcs they are), the run's
   progress, and the single-biome case, where there is no change to wait for.
 
-It also refuses to pass quietly. Before the first test it asks whether every project
-script the tests build can be instantiated - a script that does not compile still
-*loads*, so the failure otherwise appears as tests that silently never ran - and after
-each test it checks that the test asserted something, because a test that stops on a
-runtime error returns normally with nothing to show for it. Either way the run ends
-non-zero and names what is missing instead of printing a summary about tests it did
-not do.
+It also refuses to pass quietly, because a runtime error in GDScript does not stop the
+run: it abandons the function it happened in and the caller carries on, so a broken test
+is simply a test with fewer checks in it. Three things guard against that. Before the
+first test the run asks whether every project script the tests build can be instantiated
+- a script that does not compile still *loads*, so the failure otherwise appears as
+tests that silently never ran. Every test is declared `-> bool` and ends with
+`return true`, which the runner reads back: a test a runtime error abandoned returns
+nothing, and so does one that bailed out on a failure of its own, and both are reported
+by name. And a test that asserted nothing is a failure whether it finished or not. The
+summary counts the tests as well as the checks - `265 checks in 17 tests, all green` -
+so a run that lost one of them says `16 of 17` instead of hiding behind a green
+sentence. Every one of those came from a real failure: a self-test that reports "all
+green" about tests it did not run is worse than no self-test at all.
 
 The run makes its checks from the first `_process` frame rather than from
 `_initialize()`, because the root is not in the tree yet while `_initialize()` runs:

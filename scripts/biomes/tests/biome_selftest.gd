@@ -12,10 +12,11 @@ extends SceneTree
 ## safe to run in CI. Exit code 0 means everything passed.
 ##
 ## It is written to fail loudly rather than to pass quietly: a project script that does
-## not compile is reported before a single test runs, a test that stops before its first
-## assertion is counted as a failure, and a run that dies partway never prints a summary
-## - because a self-test that says "all green" about tests it did not run is worse than
-## no self-test at all.
+## not compile is reported before a single test runs, every test returns `true` from its
+## last line so the runner can tell one that finished from one a runtime error abandoned
+## part way, a test that asserts nothing is counted as a failure, and a run that dies
+## before the end never prints a summary - because a self-test that says "all green"
+## about tests it did not run is worse than no self-test at all.
 ##
 ## The interesting checks are the ones that would otherwise only show up hours
 ## into a run as "the scenery is slightly off on corners": a placement must land
@@ -36,6 +37,9 @@ var _failures: PackedStringArray = PackedStringArray()
 # Set by the first frame; see _process.
 var _ran: bool = false
 var _finished: bool = false
+# Tests that ran to their end, for the summary: a smaller number than the list says
+# something stopped early, even when every check that did run passed.
+var _finished_tests: int = 0
 
 
 ## The tests run from the first `_process`, not from `_initialize`, because of *when*
@@ -121,7 +125,9 @@ func _run_tests() -> void:
 	_check(tree_ready, "the tree is running, so added nodes get their `_ready()`")
 
 	# Listed rather than called one by one, so the log says which test is running when
-	# an engine error lands between two checks.
+	# an engine error lands between two checks. Every test is `-> bool` and ends with
+	# `return true`; the runner reads that back to tell a test that finished from one a
+	# runtime error abandoned half way.
 	var tests: Array[Callable] = [
 		_test_placement_end_points,
 		_test_placement_frames,
@@ -148,23 +154,40 @@ func _run_tests() -> void:
 		print("  · (the track, horizon, stats and atmosphere tests need a running tree)")
 	for test in tests:
 		var before := _checks
-		print("  · %s" % test.get_method())
-		test.call()
-		# A test that stops on a runtime error returns here having asserted nothing,
-		# and a run that still said "all green" would be the exact kind of lie this
-		# file exists to prevent. Every test in the list asserts something, so an
-		# unchanged count means it never got as far as its first check.
+		var test_name := test.get_method()
+		print("  · %s" % test_name)
+		# A test that hits a runtime error does not run to the end - GDScript abandons
+		# the call and returns nothing from it - so every test ends with `return true`
+		# and the runner reads that back. Without it a test can lose half its checks to
+		# one bad expression and the run still says "all green": that is exactly what
+		# happened to _test_pool_ring, which reported a Dictionary against an Array and
+		# quietly skipped every check after it.
+		# (`return` with no value is legal in a `-> bool` function - nil is converted -
+		# so this also catches a test that bails out of its own accord, which is what
+		# _test_atmosphere does when the fade it is about to measure never started.)
+		var finished: Variant = test.call()
+		if finished != true:
+			_failures.append(
+				"%s did not reach its end: a runtime error abandoned it or it returned "
+				% test_name
+				+ "early (see the errors above)"
+			)
+		else:
+			_finished_tests += 1
+		# A test that asserted nothing is a test that did nothing, whether it reached
+		# its end or not.
 		if _checks == before:
 			_failures.append(
-				"%s added no checks: it stopped at its first statement, see the errors above"
-				% test.get_method()
+				"%s added no checks: every test here asserts something" % test_name
 			)
 
 	print("")
 	if _failures.is_empty():
-		print("biome self-test: %d checks, all green." % _checks)
+		print("biome self-test: %d checks in %d tests, all green." % [_checks, _finished_tests])
 	else:
-		print("biome self-test: %d checks, %d FAILED" % [_checks, _failures.size()])
+		print("biome self-test: %d checks in %d of %d tests, %d FAILED" % [
+			_checks, _finished_tests, tests.size(), _failures.size()
+		])
 		for failure in _failures:
 			print("  - %s" % failure)
 	_finished = true
@@ -175,7 +198,7 @@ func _run_tests() -> void:
 
 ## t = 1 must land on the segment's authored exit point, for every segment kind
 ## and both turn directions.
-func _test_placement_end_points() -> void:
+func _test_placement_end_points() -> bool:
 	for segment in [_straight(), _turn(-1), _turn(1)]:
 		_check_vector(
 			BiomePlacement.local_position(segment, 1.0),
@@ -192,13 +215,14 @@ func _test_placement_end_points() -> void:
 			is_equal_approx(BiomePlacement.length(segment), expected_length),
 			"arc length of %s is the centreline length" % _segment_name(segment)
 		)
+	return true
 
 
 ## The frame a decoration is posed in must follow the centreline: its -Z is the
 ## direction of travel and its +X stays right of the runner. Without this, a layer
 ## sits at the right place but faces the wrong way on every curve, which is
 ## exactly what a mirrored heading convention produces.
-func _test_placement_frames() -> void:
+func _test_placement_frames() -> bool:
 	for segment in [_straight(), _turn(-1), _turn(1)]:
 		var name := _segment_name(segment)
 		for t in [0.0, 0.25, 0.5, 0.75, 1.0]:
@@ -229,11 +253,12 @@ func _test_placement_frames() -> void:
 					(-facing.z).dot(towards_road) > 1.0 - FRAME_EPSILON,
 					"face_track looks back at the road on side %s of %s at t = %s" % [side, name, t]
 				)
+	return true
 
 
 ## A left-hand turn is the mirror image of a right-hand turn: a layer must not
 ## have to care which way the track bends.
-func _test_placement_mirrors() -> void:
+func _test_placement_mirrors() -> bool:
 	for t in [0.25, 0.5, 1.0]:
 		var right := BiomePlacement.local_position(_turn(1), t, 15.0, 0.0)
 		var left := BiomePlacement.local_position(_turn(-1), t, -15.0, 0.0)
@@ -250,10 +275,11 @@ func _test_placement_mirrors() -> void:
 	var right_heading := BiomePlacement.heading_at(_turn(1), 0.5)
 	var left_heading := BiomePlacement.heading_at(_turn(-1), 0.5)
 	_check(is_equal_approx(right_heading, -left_heading), "turn headings mirror each other")
+	return true
 
 
 ## Lateral offsets stay perpendicular to the track and keep their distance.
-func _test_placement_lateral() -> void:
+func _test_placement_lateral() -> bool:
 	for segment in [_straight(), _turn(-1), _turn(1)]:
 		var name := _segment_name(segment)
 		for t in [0.0, 0.4, 1.0]:
@@ -267,10 +293,11 @@ func _test_placement_lateral() -> void:
 			BiomePlacement.local_position(segment, 0.5, 0.0, 3.0).y == 3.0,
 			"lift is along Y on %s" % name
 		)
+	return true
 
 
 ## Decoration must be reproducible: recycling a segment may not shuffle it.
-func _test_placement_determinism() -> void:
+func _test_placement_determinism() -> bool:
 	var a := BiomePlacement.instance_rng(7, 2, 1234, 1).randf()
 	var b := BiomePlacement.instance_rng(7, 2, 1234, 1).randf()
 	var c := BiomePlacement.instance_rng(7, 2, 1235, 1).randf()
@@ -278,6 +305,7 @@ func _test_placement_determinism() -> void:
 	_check(a == b, "the same placement request always yields the same random value")
 	_check(a != c, "a different element yields a different random value")
 	_check(a != d, "a different layer yields a different random value")
+	return true
 
 
 ## The mix has to use the whole 64-bit range. Both of its constants are above
@@ -285,7 +313,7 @@ func _test_placement_determinism() -> void:
 ## for it: the finaliser then multiplies by the same constant twice and every seed
 ## lands in the top of the range. Distinct seeds are not enough to catch that - the
 ## crowded ones are still distinct - so this counts the high bytes they cover.
-func _test_seed_spread() -> void:
+func _test_seed_spread() -> bool:
 	var element_bytes := {}
 	var slot_bytes := {}
 	for element in 12:
@@ -296,11 +324,12 @@ func _test_seed_spread() -> void:
 		+ "int64 range (covered %d high bytes)" % element_bytes.size())
 	_check(slot_bytes.size() >= 5, "8 slots of one element spread their seeds over the "
 		+ "int64 range (covered %d high bytes)" % slot_bytes.size())
+	return true
 
 
 ## --- playlists ---------------------------------------------------------------
 
-func _test_playlist_auto() -> void:
+func _test_playlist_auto() -> bool:
 	var first := _provider(&"first")
 	var second := _provider(&"second")
 	var playlist := BiomePlaylist.new()
@@ -337,9 +366,10 @@ func _test_playlist_auto() -> void:
 		var drawn := shuffled.provider_at(round_index * 10)
 		differs = differs or other_seed.provider_at(round_index * 10) != drawn
 	_check(differs, "a different shuffle seed walks the biomes in a different order")
+	return true
 
 
-func _test_playlist_single() -> void:
+func _test_playlist_single() -> bool:
 	var only := _provider(&"only")
 	var playlist := BiomePlaylist.new()
 	playlist.biomes = [only]
@@ -351,10 +381,11 @@ func _test_playlist_single() -> void:
 	zero_length.biomes = [only, _provider(&"unused")]
 	zero_length.segments_per_biome = 0
 	_check(zero_length.provider_at(9999) == only, "segments_per_biome = 0 pins the first biome")
+	return true
 
 
 ## A closed lap authors its running order instead: sections repeat around it.
-func _test_playlist_sections() -> void:
+func _test_playlist_sections() -> bool:
 	var meadow := _provider(&"meadow")
 	var town := _provider(&"town")
 	var first := BiomeSection.new()
@@ -376,13 +407,14 @@ func _test_playlist_sections() -> void:
 	_check(playlist.section_index_at(30) == 1, "section_index_at() finds the second section")
 	_check(playlist.section_start(1) == 30, "section_start() reports where a section begins")
 	_check(playlist.validate().is_empty(), "a well-formed section playlist validates")
+	return true
 
 
 ## --- rural provider ----------------------------------------------------------
 
 ## The demo biome groups its road surfaces, so the road changes every few hundred
 ## metres instead of flickering from element to element.
-func _test_road_surfaces() -> void:
+func _test_road_surfaces() -> bool:
 	var biome := RuralBiome.new()
 	biome.biome_id = &"rural"
 	var grass := StandardMaterial3D.new()
@@ -403,9 +435,10 @@ func _test_road_surfaces() -> void:
 	plain.biome_id = &"plain"
 	_check(plain.road_variant_count() == 1, "without surfaces the base class's road is used")
 	_check(plain.road_variant(7) == 0, "a single authored skin is used everywhere")
+	return true
 
 
-func _test_validation() -> void:
+func _test_validation() -> bool:
 	var empty := BiomePlaylist.new()
 	_check(not empty.validate().is_empty(), "an empty playlist is reported as a problem")
 
@@ -483,6 +516,7 @@ func _test_validation() -> void:
 	reporter._report_once(&"other", "self-test: the first report of \"other\" (expected)")
 	_check(reporter.reported_problems().size() == 2, "a repeated problem is reported once")
 	reporter.free()
+	return true
 
 
 ## The problems `resource` reports, joined, for substring checks. Taken as a
@@ -508,7 +542,7 @@ func section_of(provider: BiomeProvider, segments: int) -> BiomeSection:
 
 ## The contract that matters at runtime: the track announces its pooled
 ## segments, the director dresses them, and re-placing a segment changes nothing.
-func _test_track_integration() -> void:
+func _test_track_integration() -> bool:
 	var track := TrackManager.new()
 	track.track_level = TrackLevel.closed_racetrack(2, 3)
 	track.pool_size = 6
@@ -605,6 +639,7 @@ func _test_track_integration() -> void:
 	_check(index >= 0 and index < lap, "element_index_at() reports an element of the lap")
 
 	_teardown([director, track, world])
+	return true
 
 
 ## The order a level is wired in: `TrackManager` first, so it places its whole
@@ -614,7 +649,7 @@ func _test_track_integration() -> void:
 ## endless mode, where nothing announces the pool again until the window re-centres
 ## about 26 elements later: the run opens on a bare track and the overlay's `layers`
 ## line reads `near 0`, `mid 0` and `far 0` the whole time.
-func _test_first_pool() -> void:
+func _test_first_pool() -> bool:
 	var track := TrackManager.new()
 	track.infinite = true
 	track.pool_size = 6
@@ -686,6 +721,7 @@ func _test_first_pool() -> void:
 	)
 
 	_teardown([director, runner, track, world])
+	return true
 
 
 ## A window that moves re-dresses the elements that entered it, and nothing else.
@@ -696,7 +732,7 @@ func _test_first_pool() -> void:
 ## difference between a re-centre costing six elements and costing the pool: the demo
 ## level holds 280 instanced tree scenes, and rebuilding all of them in one frame is
 ## the freeze this test locks down.
-func _test_pool_ring() -> void:
+func _test_pool_ring() -> bool:
 	var track := TrackManager.new()
 	track.infinite = true
 	track.pool_size = 6
@@ -739,13 +775,12 @@ func _test_pool_ring() -> void:
 		ringed = ringed and carried >= 0 and pool[posmod(carried, pool.size())] == body
 	_check(ringed, "a body carries `posmod(element_index, pool_size)`")
 
-	var before := _decoration_fingerprint(director, pool)
+	var before := _worn_by(director, pool)
 	var kept := 0
 	var rebuilt := 0
 	track._recenter(track._slot_first + 1)
 	for body in pool:
-		var fingerprint := _decoration_fingerprint(director, [body])
-		if fingerprint == before[body.get_instance_id()]:
+		if _still_wearing(director, body, before):
 			kept += 1
 		else:
 			rebuilt += 1
@@ -778,39 +813,60 @@ func _test_pool_ring() -> void:
 
 	var loop_pool := loop.get_children()
 	_check(loop_pool.size() == 4, "the closed loop pools four bodies")
-	var loop_before := _decoration_fingerprint(loop_director, loop_pool)
+	var loop_before := _worn_by(loop_director, loop_pool)
 	# One element on: the window is indexed by the straight segment's length, which is
 	# what `_seg_length` is set from, so this moves the window by exactly one slot.
 	loop._replenish(STRAIGHT_LENGTH)
 	var loop_kept := 0
 	for body in loop_pool:
-		if _decoration_fingerprint(loop_director, [body]) == loop_before[body.get_instance_id()]:
+		if _still_wearing(loop_director, body, loop_before):
 			loop_kept += 1
 	_check(loop_kept == 3, "a step of the closed loop keeps three of four bodies (got %d)" % loop_kept)
 
 	_teardown([loop_director, loop, loop_world])
+	return true
 
 
-## What a set of bodies is currently decorated with, per body: the element it carries
-## and the identity of the decoration nodes under it. Comparing the identity is the
-## point - a rebuild replaces the nodes, a skip leaves the very same ones.
-func _decoration_fingerprint(director: BiomeDirector, bodies: Array) -> Dictionary:
-	var fingerprint := {}
+## What every body in `bodies` is wearing right now, by body: the element it carries
+## and the decoration node under its NEAR band. The node is kept as a node rather than
+## as an id or a count, because identity is the whole question - a rebuild builds a
+## fresh node and drops the old one, a skip leaves the very same node in place.
+func _worn_by(director: BiomeDirector, bodies: Array) -> Dictionary:
+	var worn := {}
 	for body in bodies:
-		var record: Dictionary = director._records.get(body.get_instance_id(), {})
-		var host := body.get_node_or_null("BiomeLayerNEAR")
-		var nodes := PackedInt64Array()
-		if host != null:
-			for child in host.get_children():
-				nodes.append(child.get_instance_id())
-		fingerprint[body.get_instance_id()] = [int(record.get("index", -1)), nodes]
-	return fingerprint
+		worn[body.get_instance_id()] = {
+			"index": _carried_element(director, body),
+			"node": _decoration_of(body),
+		}
+	return worn
+
+
+## True when `body` still carries the element and the very decoration node it did in
+## `worn` - the two ways a body can come through a window move unchanged.
+func _still_wearing(director: BiomeDirector, body: Node, worn: Dictionary) -> bool:
+	var was: Dictionary = worn[body.get_instance_id()]
+	var same := _carried_element(director, body) == int(was["index"])
+	return same and _decoration_of(body) == was["node"]
+
+
+## The element a body carries according to the director, or -1 when it has none.
+func _carried_element(director: BiomeDirector, body: Node) -> int:
+	var record: Dictionary = director._records.get(body.get_instance_id(), {})
+	return int(record.get("index", -1))
+
+
+## The first node in a body's NEAR band, or `null`.
+func _decoration_of(body: Node) -> Node:
+	var host := body.get_node_or_null("BiomeLayerNEAR")
+	if host == null or host.get_child_count() == 0:
+		return null
+	return host.get_child(0)
 
 
 ## Horizon content lives on an anchor that rides with the runner, so the ring
 ## surrounds them instead of piling up in front, and is laid out per region rather
 ## than per segment.
-func _test_horizon() -> void:
+func _test_horizon() -> bool:
 	var ring := BiomeLayer.new()
 	ring.mode = BiomeLayer.Mode.RING
 	ring.meshes = [QuadMesh.new()]
@@ -896,11 +952,12 @@ func _test_horizon() -> void:
 		)
 
 	_teardown([director, track, world])
+	return true
 
 
 ## The debug overlay reads the biome system through these: the run a biome covers,
 ## how far the next change is, and the state dictionary itself.
-func _test_debug_stats() -> void:
+func _test_debug_stats() -> bool:
 	var first := _provider(&"first")
 	var second := _provider(&"second")
 	var playlist := BiomePlaylist.new()
@@ -1007,6 +1064,7 @@ func _test_debug_stats() -> void:
 	_check((flat["upcoming"] as Array).is_empty(), "a single-biome track has nothing coming")
 
 	_teardown([director, track, runner, world])
+	return true
 
 
 ## --- helpers -----------------------------------------------------------------
@@ -1017,7 +1075,7 @@ func _test_debug_stats() -> void:
 ## overlay reads it - through the *live* [Environment] - because "the fog did not
 ## change with the biome" is exactly the kind of failure a test that only looks at
 ## the biome's own `.tres` file cannot see.
-func _test_atmosphere() -> void:
+func _test_atmosphere() -> bool:
 	var world := _level_world()
 	var level := world.environment
 
@@ -1113,6 +1171,7 @@ func _test_atmosphere() -> void:
 	_check_environment(director, clear.atmosphere, "a biome that leaves fog off renders fog off")
 
 	_teardown([director, track, runner, world])
+	return true
 
 
 ## Checks the fog the world is rendering against the one a biome asked for. Every
