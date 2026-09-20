@@ -30,7 +30,9 @@ const CAMERA_SNAP_DISTANCE := 2.0
 ## going, so 7 m/s and 21 m/s do not look the same from behind: they lerp between the
 ## normal and the sprint pair, and the fov opens from the camera's authored value to
 ## [member sprint_fov], as the speed runs from [member move_speed] to
-## [member camera_full_speed].
+## [member camera_full_speed]. Past that they keep going into the extra room of
+## [member camera_over_speed], because the auto run has no top speed and a pose that
+## stops answering the speed looks welded to the character's back.
 ##
 ## The shoulder offset answers to the sprint instead: over the shoulder at a walk,
 ## centred while sprinting, because that is the view a sprint is for - the whole road
@@ -42,12 +44,21 @@ const CAMERA_SNAP_DISTANCE := 2.0
 @export var sprint_spring_position: Vector3 = Vector3(0.0, 0.0, 0.0)
 @export var camera_full_speed: float = 21.0
 @export var sprint_fov: float = 62.0
+## How much more pose the speed can buy past [member camera_full_speed], as a multiple
+## of the normal-to-sprint swing: 1.0 lets it buy as much again, reaching a 3.5 m arm
+## and a 73.8 degree fov on a long run. It keeps climbing at the same rate per m/s as
+## the ramp below and eases into this, so there is no speed where the camera stops
+## answering. 0 freezes the pose at [member camera_full_speed].
+@export var camera_over_speed: float = 1.0
 
-## Time constants, in seconds, and the limit they work within: how long the distance,
+## Time constants, in seconds, and the gap they work within: how long the distance,
 ## offset and fov take to reach a pose, how long the camera takes to close a gap it is
-## allowed to have, and how large that gap may get. Without the limit a 0.1 s constant
-## would leave the camera 2 m back at 20 m/s, which is a different camera rather than a
-## nudge. 0 for [member camera_lag_time] keeps it rigidly on the character's back.
+## allowed to have, and the gap it aims to keep. That aim is where the pivot is pulled
+## to rather than a limit on the gap - the character keeps gaining ground while the gap
+## closes, so a run settles at about [member camera_lag_max] plus
+## `speed * camera_lag_time` behind the character: 0.1 s is 2 m at 20 m/s, and that is
+## what makes the camera trail further the faster the run goes. 0 for
+## [member camera_lag_time] keeps it rigidly on the character's back.
 @export var camera_pose_time: float = 0.25
 @export var camera_lag_time: float = 0.1
 @export var camera_lag_max: float = 1.0
@@ -159,9 +170,7 @@ func _update_camera() -> void:
 ## Where the camera sits and how wide it looks, from how fast the character is going.
 func _apply_chase_pose(delta: float) -> void:
 	var speed := Vector2(velocity.x, velocity.z).length()
-	var fast := clampf(
-		(speed - move_speed) / maxf(camera_full_speed - move_speed, 0.001), 0.0, 1.0
-	)
+	var fast := _speed_pose(speed)
 	var pose := 1.0 - exp(-delta / maxf(camera_pose_time, 0.001))
 	spring.spring_length = lerpf(
 		spring.spring_length, lerpf(normal_spring_length, sprint_spring_length, fast), pose
@@ -189,6 +198,17 @@ func _apply_chase_pose(delta: float) -> void:
 	camera_pivot.global_position = camera_pivot.global_position.lerp(
 		target, 1.0 - exp(-delta / camera_lag_time)
 	)
+
+
+## How far the pose has moved from the normal pair toward the sprint pair and past it:
+## 0 at [member move_speed], 1 at [member camera_full_speed], and above that it keeps
+## climbing at the same rate per m/s, easing into [member camera_over_speed] more.
+func _speed_pose(speed: float) -> float:
+	var span := maxf(camera_full_speed - move_speed, 0.001)
+	var ramp := (speed - move_speed) / span
+	if ramp <= 1.0:
+		return clampf(ramp, 0.0, 1.0)
+	return 1.0 + camera_over_speed * (1.0 - exp(-(ramp - 1.0)))
 
 
 ## Auto run: idle counter. Any directional input resets the clock; only
