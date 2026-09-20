@@ -2,10 +2,18 @@
 """Geometry check of a biome's horizon ring, as authored.
 
 A `RING` layer is the one decoration layer whose numbers are not visible in the
-editor: the cards sit 1.2-1.6 km away, on an anchor that rides with the runner.
-What matters about them is whether the ridge stays continuous (no holes of sky
-between the cards), whether it sits in the far band of `doc/LAYERS.md`, how much
+editor: the cards sit hundreds of metres away, on an anchor that rides with the
+runner. What matters about them is whether the ridge stays continuous (no holes of
+sky between the cards), whether it sits in the far band of `doc/LAYERS.md`, how much
 haze covers it, and how often it is laid out again.
+
+The band is bounded on both ends, and neither end belongs to the layer file. The
+near end is `BiomeLayer.RING_MIN_DISTANCE` - closer than that the horizon reads as
+scenery the runner could reach - and it is read from the script that defines it. The
+far end is the camera's far plane, read from `prefabs/third_person.tscn`: past it a
+card is culled and never drawn, so a ring authored 1.2 km out against a 250 m camera
+is invisible rather than far away. The card's *corners* have to clear the far plane
+too, or the ridge is clipped into a straight edge.
 
 The ring and its fog are read from the assets that author them - the biome's
 `far_layer` and its `atmosphere`, wherever those live and whether the atmosphere is
@@ -30,6 +38,39 @@ SLOT_JITTER = 0.15
 ELEMENT_LENGTH = 100.0
 SPEED = 25.0
 EYE_HEIGHT = 2.0
+# Godot's own default, used when the camera does not set one
+CAMERA_FAR_DEFAULT = 4000.0
+RING_MIN_DEFAULT = 200.0
+
+
+def ring_min_distance() -> float:
+    """`BiomeLayer.RING_MIN_DISTANCE`, read from the script that defines it."""
+    source = resfile.find_asset("biome_layer.gd", under="scripts").read_text()
+    for line in source.splitlines():
+        if line.startswith("const RING_MIN_DISTANCE"):
+            return float(line.split(":=")[1].strip())
+    return RING_MIN_DEFAULT
+
+
+def camera_far() -> float:
+    """The far plane of the camera that draws the level.
+
+    Read as text rather than through `resfile`, which parses `[resource]` and
+    `[sub_resource]` sections: a scene's camera is a `[node]`, and the only number
+    that matters here is that node's `far`.
+    """
+    text = resfile.find_asset("third_person.tscn", under="prefabs").read_text()
+    inside_camera = False
+    for line in text.splitlines():
+        if line.startswith("[node "):
+            inside_camera = 'name="Camera3D"' in line
+        elif inside_camera and line.startswith("far = "):
+            return float(line.removeprefix("far = "))
+    return CAMERA_FAR_DEFAULT
+
+
+ring_min = ring_min_distance()
+far_plane = camera_far()
 
 
 def biome_files() -> list:
@@ -100,13 +141,24 @@ for path in paths:
         print(f"      at {distance:7.0f} m: {haze * 100:4.0f}% haze, ridge {ridge:4.1f} deg tall")
     print(f"      laid out again every {host_every * ELEMENT_LENGTH:.0f} m = "
           f"{interval:.0f} s of running")
+    print(f"      band limits: {ring_min:g} m to the camera's far plane at {far_plane:g} m")
 
     if gap_worst > 0.0:
         failures.append(f"{layer.origin}: the ridge can break by "
                         f"{math.degrees(gap_worst):.1f} deg of sky")
-    if dist_min < 300.0:
+    if dist_min < ring_min:
         failures.append(
-            f"{layer.origin}: a ring card could be close enough to drive past ({dist_min:g} m)")
+            f"{layer.origin}: a ring card could be close enough to drive past "
+            f"({dist_min:g} m, want at least {ring_min:g} m)")
+    if dist_max > far_plane:
+        failures.append(
+            f"{layer.origin}: the ring is at {dist_max:g} m, past the camera's far plane "
+            f"({far_plane:g} m), so it is never drawn")
+    corner = math.hypot(dist_max, width * layer.number("scale_max", 1.0) / 2.0)
+    if corner > far_plane:
+        failures.append(
+            f"{layer.origin}: a card's far corner reaches {corner:.0f} m, past the camera's "
+            f"far plane ({far_plane:g} m), where it is clipped")
     if interval < 60.0:
         failures.append(f"{layer.origin}: the horizon is laid out again every {interval:.0f} s, "
                         f"which would crawl")
@@ -116,4 +168,4 @@ if failures:
     for failure in failures:
         print("  -", failure)
     sys.exit(1)
-print("\nthe ridge stays continuous, sits in the far band, and holds for a whole region")
+print("\nthe ridge stays continuous, sits between both band limits, and holds for a region")

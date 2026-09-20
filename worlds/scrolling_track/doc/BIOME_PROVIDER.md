@@ -92,6 +92,7 @@ A layer is data: what to instance, how far away, how many, how jittered.
 | `scale_min/max`, `yaw_scatter`, `face_track` | how it is oriented and sized |
 | `fit_to_segment` | stretch a mesh so one copy spans its share of the segment, longest horizontal side aligned with the track. Built for railings, fences and hedges whose authored length you do not want to match by hand |
 | `visible_range`, `cast_shadow` | cost controls |
+| `override_render_priority`, `render_priority` | draw order within the frame. Off by default, so a layer draws with the priorities its materials were authored with; with the override on, every material of the layer is replaced by a copy carrying `render_priority` - higher draws later - which is what puts the road before the trunks before the canopies. The field is not free: see the draw-order section of `LAYERS.md` |
 | `seed` | offsets this layer's slice of the director's decoration seed |
 
 A `RING` layer ignores `side`, `edge_margin` and `along_scatter` (its instances
@@ -312,7 +313,7 @@ Which band takes what:
 |---|---|---|---|
 | 1 - near, 15-60 m | trees, bushes, fences, lamps, mailboxes, benches - things the player can recognise as objects | `variants`, one scene per prop, `count` 1-2 per side | `host_every` for density (2-4 is often enough), `visible_range` around 300 m, `cast_shadow` off for anything small |
 | 2 - mid, 60-200 m | tree lines, rooftops, hedges, poles, walls: silhouettes, not objects | `meshes`, one card or block per kind, `multimesh = true` | `fit_to_segment` for strips that must tile without gaps, `visible_range` ~600 m, `cast_shadow` off, `host_every` if one copy spans several elements |
-| 3 - far, 1 km+ | far hills, a town edge, atmospheric haze | `mode = RING`, one card in `meshes`, an unshaded or billboard material in `mesh_material` | `count` = cards around the circle (12-16 usually closes it), `host_every` = elements the silhouette may last for, `visible_range` past the ring, `cast_shadow` off |
+| 3 - far, just inside the camera's far plane (200-240 m with the demo's 250 m) | far hills, a town edge, atmospheric haze | `mode = RING`, one card in `meshes`, an unshaded or billboard material in `mesh_material` | `count` and the card width together decide whether the ridge has holes: the arc each card covers has to beat its slot plus the 15% slot jitter (20 cards of 115 m close a 200-235 m ring), `host_every` = elements the silhouette may last for, `visible_range` past the ring, `cast_shadow` off |
 
 Layer 0 is not a `BiomeLayer`: the road is assigned on the provider itself, through
 `road_material_override` (or `road_skins`, which cycles per element, or
@@ -327,9 +328,13 @@ Four things that decide whether a layer looks right:
   will look like it has holes in it.
 * **Distance bands come from `LAYERS.md`, not from the code**, and they are about
   the *player's* perception: near dressing should not be so far away that it reads
-  as mid scenery, and a ring card closer than ~1 km reads as something the runner
-  could reach. The playfield of the demo is a 30 m road strip, which is why
+  as mid scenery, and a ring card close enough to read as something the runner
+  could reach belongs at the ring's near limit (`BiomeLayer.RING_MIN_DISTANCE`,
+  200 m). The playfield of the demo is a 30 m road strip, which is why
   `rural_near.tres` sits at 13-14.5 m - widen it once there is ground to stand on.
+  The other end of a ring's band is the camera's far plane, which no layer can see:
+  with `Camera3D.far` at 250 m the rural horizon sits at 200-240 m, and the director
+  reports a ring parked past the far plane rather than letting it vanish.
 * **`mesh_material` is a `material_override`.** One material for every mesh of the
   layer, and it wins over the mesh's own material. When two props need different
   looks, they are two scenes in `variants`, or two layers in different bands.

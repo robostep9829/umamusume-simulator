@@ -4,6 +4,9 @@
 # Only the file-length limit is raised. The biome self-test is one file by design:
 # it builds its own segments, layers and track, needs no imported artwork, prints a
 # single summary line and is run by hand or in CI with one command. Splitting it at
-# an arbitrary 1000 lines would cost a reader more than it saves, and the file grows
-# with every behaviour worth a regression test.
-max-file-lines: 1400
+# an arbitrary line count would cost a reader more than it saves, and the file grows
+# with every behaviour worth a regression test - the draw-order arithmetic took it
+# past 1400, and the end-to-end ranking test - the one that drives the director's own
+# pass instead of only its arithmetic - past 1500. The cap moves rather than the tests
+# being cut.
+max-file-lines: 1650

@@ -971,6 +971,7 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.6, 0, 0)
 spring_length = 1.5
 
 [node name="Camera3D" type="Camera3D" parent="CameraPivot/SpringArm3D" unique_id=160364595]
+far = 250.0
 fov = 50.2
 
 [node name="AnimationTree" type="AnimationTree" parent="." unique_id=1500092216]

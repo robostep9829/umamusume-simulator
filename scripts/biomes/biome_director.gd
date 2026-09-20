@@ -60,6 +60,12 @@ const DECORATION_LAYERS: Array[int] = [
 	BiomeProvider.Layer.FAR,
 ]
 
+## Seconds between two passes of the front-to-back ranking. The buckets are metres wide
+## and only the *order* of two neighbours changes as the runner moves, so a handful of
+## passes a second is indistinguishable from one per frame for a fraction of the cost.
+## See [BiomeDrawOrder].
+const RANKING_INTERVAL := 0.1
+
 ## Track to dress. When left empty, a [TrackManager] among the director's
 ## siblings (or its parent) is used, which is the usual scene layout.
 @export var track: TrackManager
@@ -90,6 +96,12 @@ var _blend_progress := 1.0
 # already printed, so a report never repeats itself (see _report_once).
 var _problems: PackedStringArray = PackedStringArray()
 var _reported: Dictionary = {}
+
+# Draw-order bookkeeping: one material per (source material, priority) so a whole layer
+# shares its overridden materials - and therefore its draw call - instead of each
+# instance getting a copy, and the seconds since the last front-to-back pass.
+var _priority_materials: Dictionary = {}
+var _rank_elapsed := 0.0
 
 # Rebuild accounting, for the debug overlay's `build` line and for a test that wants
 # to see how much of the pool a window move re-dresses. Accumulated as the placements
@@ -200,7 +212,7 @@ func _physics_process(delta: float) -> void:
 ## One frame of the director's work: follow the player, dress whatever changed, keep
 ## the atmosphere aimed at the right biome. Split out so the frame's build accounting is
 ## published whatever this returns.
-func _advance(_delta: float) -> void:
+func _advance(delta: float) -> void:
 	if not enabled or track == null or playlist == null:
 		return
 	var player := track.player
@@ -217,6 +229,13 @@ func _advance(_delta: float) -> void:
 	var provider := playlist.provider_at(track.element_index_at(position))
 	if provider != _active_provider:
 		_set_active_provider(provider)
+
+	# Last, so the frame's new instances are ranked in the pass that follows them
+	# rather than waiting for the next one.
+	_rank_elapsed += delta
+	if _rank_elapsed >= RANKING_INTERVAL:
+		_rank_elapsed = 0.0
+		_rank_decorations()
 
 
 ## Biome the player is running in, or `null` before the first physics frame.
@@ -738,8 +757,164 @@ func _configure_instance(node: Node, descriptor: BiomeLayer) -> void:
 			geometry.visibility_range_end = descriptor.visible_range
 		if not descriptor.cast_shadow:
 			geometry.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+		# Origin-based depth, so the distance the engine sorts by is the distance
+		# [BiomeDrawOrder] can compute: a tree's bounds centre sits in its canopy, and
+		# a horizon card's is metres above the ground it was authored around.
+		geometry.sorting_use_aabb_center = false
+		if descriptor.override_render_priority:
+			_apply_render_priority(geometry, descriptor.render_priority)
 	for child in node.get_children():
 		_configure_instance(child, descriptor)
+
+
+# --- Draw order --------------------------------------------------------------
+#
+# The order the opaque pass is submitted in is decided by one packed key, and distance
+# is the last field of it - see [BiomeDrawOrder] for the key itself. Two things follow
+# from that, and they are the two halves of this section:
+#
+# * `render_priority` orders *groups*. It is the first field of the key, so it is the
+#   only way a project can say "the road, then the trunks, then the canopies", and it
+#   has to come from somewhere other than the material: a layer's props carry their
+#   material inside their scenes and meshes, and those assets are shared with other
+#   levels, so a [BiomeLayer] declares the priority and the director applies it to a
+#   copy of the material.
+# * the sixteen distance buckets order the instances *inside* one group, which is what
+#   `_rank_decorations` hands out. Without it a layer's instances tie on every field
+#   and come out in whatever order the engine's sort left them in.
+
+
+## Forces `priority` onto the material `geometry` draws with, through a copy of it that
+## every instance of the layer shares.
+##
+## A copy rather than the material itself: the layer's materials are shared - the leaf
+## material lives inside `leaf_mesh.tres` and `uma_island` draws it too - so editing one
+## would reorder somebody else's level. One copy per (material, priority) and not one per
+## instance, so the instances still batch.
+func _apply_render_priority(geometry: GeometryInstance3D, priority: int) -> void:
+	var material := _effective_material(geometry)
+	if material == null:
+		return
+	var key := "%d:%d" % [material.get_instance_id(), priority]
+	var clone: Material = _priority_materials.get(key)
+	if clone == null:
+		clone = material.duplicate() as Material
+		clone.render_priority = priority
+		_priority_materials[key] = clone
+	geometry.material_override = clone
+
+
+## The material `geometry` ends up drawing with: its own override if it has one, else the
+## first surface material of the mesh it draws. There is no engine call for this on a
+## [MultiMeshInstance3D], and a scene's props carry their material in the mesh - the
+## tree's leaves are a [ShaderMaterial] inside `leaf_mesh.tres` - so both cases are read
+## here by hand.
+func _effective_material(geometry: GeometryInstance3D) -> Material:
+	if geometry.material_override != null:
+		return geometry.material_override
+	var mesh: Mesh = null
+	if geometry is MeshInstance3D:
+		mesh = (geometry as MeshInstance3D).mesh
+	elif geometry is MultiMeshInstance3D:
+		var holder := geometry as MultiMeshInstance3D
+		if holder.multimesh != null:
+			mesh = holder.multimesh.mesh
+	if mesh == null or mesh.get_surface_count() == 0:
+		return null
+	return mesh.surface_get_material(0)
+
+
+## The camera the frame will be drawn with, or `null` in a run without one - a headless
+## test, for instance, where the ranking has nothing to rank by.
+func _active_camera() -> Camera3D:
+	var viewport := get_viewport()
+	if viewport == null:
+		return null
+	return viewport.get_camera_3d()
+
+
+## Gives every instance of every band a place in the engine's sixteen distance buckets,
+## nearest first: see [BiomeDrawOrder] for what that can and cannot order.
+##
+## One pass per layer, and only over the bodies that are near enough to have a drawn
+## instance at all, so the walk is a few dozen nodes rather than the whole pool.
+func _rank_decorations() -> void:
+	var camera := _active_camera()
+	if camera == null:
+		return
+	var origin := camera.global_position
+	var far := camera.get_far()
+	var near := camera.get_near()
+	# The far plane cuts the world at `far` and a band's own `visible_range` can only
+	# pull that in, so nothing beyond this can be drawn. One bucket of slack, so a node
+	# sitting exactly on the boundary is still ranked.
+	var limit := far + BiomeDrawOrder.bucket_size(far, near)
+	for layer in DECORATION_LAYERS:
+		# `Layer.keys()` is an untyped `Array`, so the element is a `Variant` and a `:=`
+		# here would be refused by the analyzer; the cast names the type.
+		var band := String(BiomeProvider.Layer.keys()[layer])
+		var nodes: Array[GeometryInstance3D] = []
+		_collect_instances(track, "BiomeLayer%s" % band, origin, limit, nodes)
+		_collect_instances(_anchor, "Horizon%s" % band, origin, limit, nodes)
+		BiomeDrawOrder.rank(nodes, origin, far, near)
+
+
+## Every [GeometryInstance3D] under a `container_name` node of `root`, skipping whole
+## subtrees further than `limit` from `origin`.
+##
+## The containers are children of the segment bodies (or of the horizon anchor), and a
+## body is one node, so the distance check prunes a reused body - and everything it
+## carries - before the walk descends into it.
+func _collect_instances(
+	root: Node, container_name: String, origin: Vector3, limit: float, into: Array[GeometryInstance3D]
+) -> void:
+	if root == null:
+		return
+	if root.name == container_name:
+		_collect_geometry(root, into)
+		return
+	for child in root.get_children():
+		if not (child is Node3D):
+			continue
+		var holder := child as Node3D
+		if origin.distance_to(holder.global_position) > limit:
+			continue
+		_collect_instances(child, container_name, origin, limit, into)
+
+
+func _collect_geometry(node: Node, into: Array[GeometryInstance3D]) -> void:
+	for child in node.get_children():
+		if child is GeometryInstance3D:
+			into.append(child as GeometryInstance3D)
+		_collect_geometry(child, into)
+
+
+## Reports a horizon ring parked beyond the camera's far plane, where nothing will ever
+## draw it.
+##
+## The camera's far plane is the one limit a [BiomeLayer] cannot check for itself - it is
+## a property of the level's camera, not of the layer - so the layer's own validation
+## cannot see it, and a ring that is silently never drawn looks exactly like a ring whose
+## biome was never reached.
+func _report_ring_reach(provider: BiomeProvider) -> void:
+	var camera := _active_camera()
+	if camera == null:
+		return
+	var far := camera.get_far()
+	for layer in DECORATION_LAYERS:
+		var descriptor := provider.decoration(layer)
+		if descriptor == null or not descriptor.is_usable() or not descriptor.is_ring():
+			continue
+		if descriptor.distance_max <= far:
+			continue
+		_report_once(
+			StringName("ring_beyond_far:%s" % _path_of(descriptor)),
+			"BiomeDirector: the horizon of `%s` sits at %s m, past the camera's far "
+			% [_path_of(descriptor), String.num(descriptor.distance_max, 0)]
+			+ "plane (%s m), so it is never drawn. Bring the ring inside the far plane "
+			% String.num(far, 0)
+			+ "or raise `Camera3D.far`."
+		)
 
 
 # --- Biomes and atmosphere ---------------------------------------------------
@@ -764,6 +939,10 @@ func _set_active_provider(provider: BiomeProvider) -> void:
 	_horizon_regions.clear()
 	_rebuild_horizon()
 	_blend_environment(_target_environment(provider), first)
+	if provider != null:
+		# Checked on every change, not only at startup: a biome is data, and the ring
+		# of a biome the run has not reached yet has not been looked at by anything.
+		_report_ring_reach(provider)
 	biome_changed.emit(provider)
 
 

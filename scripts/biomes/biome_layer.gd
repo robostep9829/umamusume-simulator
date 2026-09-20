@@ -45,7 +45,12 @@ enum Side {
 ## Closest a [constant Mode.RING] may sit, in metres. Closer than this the horizon
 ## stops reading as distance and starts reading as scenery the runner could reach -
 ## and could drive past, since a ring card is not anchored to anything.
-const RING_MIN_DISTANCE := 300.0
+##
+## The other end of the band is the camera's far plane, which is not this resource's to
+## know: `prefabs/third_person.tscn` draws 250 m of world, so the rural horizon sits at
+## 200-240 m and a [BiomeDirector] reports a ring parked past the far plane as an error
+## rather than letting it vanish.
+const RING_MIN_DISTANCE := 200.0
 
 ## Uncheck to keep an authored layer around but inactive.
 @export var enabled: bool = true
@@ -121,6 +126,23 @@ const RING_MIN_DISTANCE := 300.0
 ## Uncheck for layers whose shadows would never be visible (horizon cards).
 @export var cast_shadow: bool = true
 
+@export_group("Draw order")
+## Ignore the `render_priority` authored in this layer's materials and use
+## [member render_priority] on all of them instead.
+##
+## Off by default, so a layer draws with the priorities its materials were authored
+## with. The override exists because those materials are usually shared - the leaf
+## material lives inside `leaf_mesh.tres`, which `uma_island` also draws - and a layer
+## is the unit the frame's draw order is authored in. See the draw-order section of
+## `worlds/scrolling_track/doc/LAYERS.md`.
+@export var override_render_priority: bool = false
+## Draw priority of every material of this layer, applied when
+## [member override_render_priority] is on. Higher draws later: it is the first field of
+## the engine's opaque sort key, so it orders whole groups of the frame - not the
+## instances of one layer against each other, which is what the director's distance
+## ranking does inside a group.
+@export_range(-128, 127) var render_priority: int = 0
+
 
 ## False when the layer has nothing to draw, either because it is disabled or
 ## because no content was authored. The director skips it in that case, which is
@@ -157,6 +179,12 @@ func validate() -> PackedStringArray:
 		problems.append("`distance_max` is smaller than `distance_min`")
 	if fit_to_segment and meshes.is_empty():
 		problems.append("`fit_to_segment` needs `meshes`, it is ignored for scenes")
+	if render_priority != 0 and not override_render_priority:
+		problems.append(
+			"`render_priority` (%d) is set but `override_render_priority` is off, so the "
+			% render_priority
+			+ "materials keep their own priority and this layer ignores it"
+		)
 
 	if not variants.is_empty() and not meshes.is_empty():
 		problems.append(
