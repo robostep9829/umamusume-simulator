@@ -552,7 +552,7 @@ is a `CanvasLayer` that builds its own panel, finds the level's `TrackManager`,
 |---|---|
 | `fps / frame / physics` | frame rate and the two process times, in ms |
 | `s` | metres along the centreline to the runner, counted from the start of the endless level or from the closed loop's origin, plus the lap and the distance left in it |
-| `speed` | the player's velocity, in m/s |
+| `speed` | the player's velocity, in m/s and in km/h |
 | `element` | the element index under the runner, whether it is a straight or which way it turns, and how far into it they are |
 | `pos` | the player's world position |
 | `biome` | the active provider's `biome_id` and `display_name` |

@@ -320,7 +320,8 @@ func _add_player_lines(lines: Array[String]) -> void:
 	if player == null:
 		lines.append(_field("player", "not found", WARN_COLOR))
 		return
-	lines.append(_field("speed", "%s m/s" % String.num(_player_speed(), 1)))
+	var speed := _player_speed()
+	lines.append(_field("speed", "%s m/s · %s" % [String.num(speed, 1), _kmh(speed)]))
 	var position := player.global_position
 	lines.append(_field("pos", "%s, %s, %s" % [
 		_thousands(position.x), _thousands(position.y), _thousands(position.z)
@@ -478,6 +479,12 @@ func _fade_text() -> String:
 
 func _metres(value: float) -> String:
 	return "%s m" % _thousands(value)
+
+
+## A speed in km/h: the game's own numbers are m/s, and 21 m/s is 76 km/h, which is
+## the unit a road reads in.
+func _kmh(speed: float) -> String:
+	return "%s km/h" % String.num(speed * 3.6, 1)
 
 
 func _player_speed() -> float:
