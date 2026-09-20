@@ -52,6 +52,9 @@ var is_sprinting: bool = false
 var _idle_time: float = 0.0
 var auto_forward: bool = false
 
+const WALK_ANIM_SPEED := 1.6
+const SPRINT_ANIM_SPEED := 7.0
+const STRIDE_ANIM_SPEED := 7.0
 
 func _ready() -> void:
 	if not Engine.is_editor_hint():
@@ -168,7 +171,11 @@ func _handle_movement(delta: float) -> void:
 	# Choose speed based on sprint input
 	is_sprinting = Input.is_action_pressed("sprint") or auto_forward
 	var speed := sprint_speed if is_sprinting else move_speed
-
+	
+	# Blend sprint and faster sprint animations
+	animation_tree["parameters/sprint_spd/stride_blend/blend_amount"] = clampf(remap(speed, SPRINT_ANIM_SPEED, STRIDE_ANIM_SPEED, 0.0, 1.0), 0.0, 1.0)
+	animation_tree["parameters/sprint_spd/stride_speed_mul/scale"] = clampf(remap(speed, STRIDE_ANIM_SPEED, 2 * STRIDE_ANIM_SPEED, 1.0, 2.0), 1.0, INF)
+	
 	if is_sprinting:
 		_sprint_timer += delta
 	else:
