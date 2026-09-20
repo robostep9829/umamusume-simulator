@@ -1,13 +1,9 @@
 @tool
 extends CharacterBody3D
 
-const WALK_ANIM_SPEED := 1.6
-const SPRINT_ANIM_SPEED := 7.0
-const STRIDE_ANIM_SPEED := 14.0
-
-## A single tick of movement this size is not running, it is the level moving the
-## world back under the player (`TrackManager._snap_player`), so the camera is placed
-## there with it rather than sliding after it.
+## A single tick of movement this size is not running, it is the level moving the world
+## back under the player (`TrackManager._snap_player`), so the camera is placed there
+## with it rather than sliding after it.
 const CAMERA_SNAP_DISTANCE := 2.0
 
 ## Movement tuning
@@ -26,83 +22,62 @@ const CAMERA_SNAP_DISTANCE := 2.0
 @export var min_pitch: float = -60.0   # look down limit (degrees)
 @export var max_pitch: float = 70.0    # look up limit (degrees)
 
-## Chase camera. The distance and the fov follow how fast the character is actually
-## going, so 7 m/s and 21 m/s do not look the same from behind: they lerp between the
-## normal and the sprint pair, and the fov opens from the camera's authored value to
-## [member sprint_fov], as the speed runs from [member move_speed] to
-## [member camera_full_speed]. Past that they keep going into the extra room of
-## [member camera_over_speed], because the auto run has no top speed and a pose that
-## stops answering the speed looks welded to the character's back.
-##
-## The shoulder offset answers to the sprint instead: over the shoulder at a walk,
-## centred while sprinting, because that is the view a sprint is for - the whole road
-## ahead, with the character on the centre line. Set [member sprint_spring_position] to
-## [member normal_spring_position] to keep the shoulder line at every speed.
+## Sprint camera
 @export var normal_spring_length: float = 1.5
 @export var sprint_spring_length: float = 2.5
+@export var sprint_zoom_time: float = 0.2
+
 @export var normal_spring_position: Vector3 = Vector3(0.5, 0.0, 0.0)
 @export var sprint_spring_position: Vector3 = Vector3(0.0, 0.0, 0.0)
-@export var camera_full_speed: float = 21.0
-@export var sprint_fov: float = 62.0
-## How much more pose the speed can buy past [member camera_full_speed], as a multiple
-## of the normal-to-sprint swing: 1.0 lets it buy as much again, reaching a 3.5 m arm
-## and a 73.8 degree fov on a long run. It keeps climbing at the same rate per m/s as
-## the ramp below and eases into this, so there is no speed where the camera stops
-## answering. 0 freezes the pose at [member camera_full_speed].
-@export var camera_over_speed: float = 1.0
 
-## Time constants, in seconds, and the gap the second one works within: how long the
-## distance, offset and fov take to reach a pose, how long the camera takes to close a
-## gap between where the character is and where the camera still is, and how large that
-## gap may get. The camera holds its own position and chases, so the gap grows with the
-## speed - about `speed * camera_lag_time`, 2 m at 20 m/s - which is what makes a run
-## trail the camera instead of looking welded to the character's back. 0 for
-## [member camera_lag_time] keeps it rigidly on the character's back.
-@export var camera_pose_time: float = 0.25
+## Camera trail: how long the camera takes to close the gap between where the character
+## is and where it still is, and how far that gap may grow. Holding the camera where it
+## was is what lets a fast run pull away from it instead of riding welded to its back; 0
+## for [member camera_lag_time] puts it rigidly back on the character.
 @export var camera_lag_time: float = 0.1
 @export var camera_lag_max: float = 3.0
-
 
 @export var player_data: PlayerData:
 	set(value):
 		player_data = value
 		_update_character_mesh()
 
-# Gravity pulled from project settings so it stays consistent
-var gravity: float = ProjectSettings.get_setting("physics/3d/default_gravity")
-
-# Sprint tracking (`is_sprinting` also drives the animation tree's transitions) and
-# auto run, which any directional input resets and only `move_back` cancels.
-var is_sprinting: bool = false
-var speed_mul: float = 1.0
-var auto_forward: bool = false
-
-# Camera rotation and chase state
-var _yaw: float = 0.0
-var _pitch: float = 0.0
-# The pivot's authored offset, the fov the pose opens from, where the camera wanted to
-# be last frame - a jump from that is a teleport, not speed - and where it actually is,
-# which the body does not carry along.
+# Camera trail state: the pivot's authored offset, where the camera wanted to be last
+# frame - a jump from that is a teleport, not speed - and where it actually is, in world
+# space, which the body does not carry along.
 var _pivot_rest: Vector3 = Vector3.ZERO
-var _normal_fov: float = 50.2
 var _last_ideal: Vector3 = Vector3.ZERO
 var _pivot_world: Vector3 = Vector3.ZERO
 
-# Auto run: seconds without input, and the flag that starts it (see `_apply_auto_run`)
-var _idle_time: float = 0.0
 
 # Cached node references
 @onready var camera_pivot: Node3D = $CameraPivot
 @onready var skeleton: Node3D = $Skeleton3D
-@onready var spring: SpringArm3D = $CameraPivot/SpringArm3D
-@onready var camera: Camera3D = $CameraPivot/SpringArm3D/Camera3D
+@onready var spring: Node3D = $CameraPivot/SpringArm3D
 @onready var animation_tree: AnimationTree = $AnimationTree
 
+# Gravity pulled from project settings so it stays consistent
+var gravity: float = ProjectSettings.get_setting("physics/3d/default_gravity")
+
+# Camera rotation state
+var _yaw: float = 0.0
+var _pitch: float = 0.0
+
+# Sprint tracking
+var _sprint_timer: float = 0.0
+var is_sprinting: bool = false
+var speed_mul: float = 1.0
+
+# Auto run tracking
+var _idle_time: float = 0.0
+var auto_forward: bool = false
+
+const WALK_ANIM_SPEED := 1.6
+const SPRINT_ANIM_SPEED := 7.0
+const STRIDE_ANIM_SPEED := 14.0
 
 func _ready() -> void:
 	_pivot_rest = camera_pivot.position
-	if camera != null:
-		_normal_fov = camera.fov
 	_last_ideal = global_transform * _pivot_rest
 	_pivot_world = _last_ideal
 	if not Engine.is_editor_hint():
@@ -124,7 +99,7 @@ func _update_character_mesh() -> void:
 	old.replace_by(new_mesh)
 	old.queue_free()
 	skeleton = new_mesh
-
+	
 	if player_data.spring_bone_settings:
 		for child in skeleton.get_children():
 			if child is SpringBoneSimulator3D:
@@ -156,11 +131,10 @@ func _unhandled_input(event: InputEvent) -> void:
 func _physics_process(delta: float) -> void:
 	if Engine.is_editor_hint():
 		return
-	# Aim before moving, because the movement direction is read off the pivot; pose
-	# after, so it uses this frame's speed and the position the body actually reached.
 	_update_camera()
 	_handle_movement(delta)
-	_apply_chase_pose(delta)
+	# After the move, so the trail uses the position the body actually reached.
+	_apply_camera_trail(delta)
 
 
 func _update_camera() -> void:
@@ -169,30 +143,16 @@ func _update_camera() -> void:
 	camera_pivot.rotation.x = _pitch
 
 
-## Where the camera sits and how wide it looks, from how fast the character is going.
-func _apply_chase_pose(delta: float) -> void:
-	var speed := Vector2(velocity.x, velocity.z).length()
-	var fast := _speed_pose(speed)
-	var pose := 1.0 - exp(-delta / maxf(camera_pose_time, 0.001))
-	spring.spring_length = lerpf(
-		spring.spring_length, lerpf(normal_spring_length, sprint_spring_length, fast), pose
-	)
-	# The offset follows the sprint input, not the speed: a sprint is asked for, and the
-	# centred view is what it is for.
-	var target_offset := sprint_spring_position if is_sprinting else normal_spring_position
-	spring.position = spring.position.lerp(target_offset, pose)
-	if camera != null:
-		camera.fov = lerpf(camera.fov, lerpf(_normal_fov, sprint_fov, fast), pose)
-
-	# The pose above is where the camera wants to be; this is the part of it that
-	# cannot be reached instantly, so the character pulls away under acceleration and
-	# the camera cuts the corner on a turn, then closes up again.
-	#
-	# The gap has to be a world space one. The pivot is a child of the body, so the
-	# body carries it along every step: reading its own position back each frame finds
-	# it sitting exactly at the pose again, with no gap to trail, and the camera rides
-	# welded to the character's back. Keeping the world position the camera had last
-	# frame is what makes the character run away from it.
+## Where the camera is, in world space: the pivot holds its own position and chases the
+## character from there, so the character pulls away under acceleration and the camera
+## cuts the corner on a turn, then closes up again. The faster the run, the further back
+## it settles - `speed * camera_lag_time` in the steady state, 2 m at 20 m/s - which is
+## what stops a fast run from looking welded to the character's back.
+##
+## The gap has to be a world space one. The pivot is a child of the body, so the body
+## carries it along every step: reading its own position back each frame finds it
+## sitting exactly at the pose again, with no gap to trail.
+func _apply_camera_trail(delta: float) -> void:
 	var ideal := global_transform * _pivot_rest
 	var teleported := ideal.distance_to(_last_ideal) > CAMERA_SNAP_DISTANCE
 	_last_ideal = ideal
@@ -206,17 +166,6 @@ func _apply_chase_pose(delta: float) -> void:
 		here = ideal
 	_pivot_world = here
 	camera_pivot.global_position = here
-
-
-## How far the pose has moved from the normal pair toward the sprint pair and past it:
-## 0 at [member move_speed], 1 at [member camera_full_speed], and above that it keeps
-## climbing at the same rate per m/s, easing into [member camera_over_speed] more.
-func _speed_pose(speed: float) -> float:
-	var span := maxf(camera_full_speed - move_speed, 0.001)
-	var ramp := (speed - move_speed) / span
-	if ramp <= 1.0:
-		return clampf(ramp, 0.0, 1.0)
-	return 1.0 + camera_over_speed * (1.0 - exp(-(ramp - 1.0)))
 
 
 ## Auto run: idle counter. Any directional input resets the clock; only
@@ -274,15 +223,21 @@ func _handle_movement(delta: float) -> void:
 	# Choose speed based on sprint input
 	is_sprinting = Input.is_action_pressed("sprint") or auto_forward
 	var speed := sprint_speed * speed_mul if is_sprinting else move_speed
-
+	
 	# Blend sprint and faster sprint animations
-	animation_tree["parameters/sprint_spd/stride_blend/blend_amount"] = clampf(
-		remap(speed, SPRINT_ANIM_SPEED, STRIDE_ANIM_SPEED, 0.0, 1.0), 0.0, 1.0
-	)
-	animation_tree["parameters/sprint_spd/stride_speed_mul/scale"] = clampf(
-		remap(speed, STRIDE_ANIM_SPEED, 2 * STRIDE_ANIM_SPEED, 1.0, 2.0), 1.0, INF
-	)
+	animation_tree["parameters/sprint_spd/stride_blend/blend_amount"] = clampf(remap(speed, SPRINT_ANIM_SPEED, STRIDE_ANIM_SPEED, 0.0, 1.0), 0.0, 1.0)
+	animation_tree["parameters/sprint_spd/stride_speed_mul/scale"] = clampf(remap(speed, STRIDE_ANIM_SPEED, 2 * STRIDE_ANIM_SPEED, 1.0, 2.0), 1.0, INF)
+	
+	if is_sprinting:
+		_sprint_timer += delta
+	else:
+		_sprint_timer = 0.0
 
+	var target_length := sprint_spring_length if _sprint_timer >= sprint_zoom_time else normal_spring_length
+	spring.spring_length = lerpf(spring.spring_length, target_length, 3 * delta)
+	var target_offset := sprint_spring_position if _sprint_timer >= sprint_zoom_time else normal_spring_position
+	spring.position = lerp(spring.position, target_offset, acceleration * delta)
+	
 	# Smoothly accelerate toward the target horizontal velocity
 	var target_velocity := direction * speed
 	velocity.x = lerp(velocity.x, target_velocity.x, acceleration * delta)
@@ -292,5 +247,5 @@ func _handle_movement(delta: float) -> void:
 	if direction != Vector3.ZERO:
 		var target_yaw := atan2(direction.x, direction.z)
 		skeleton.rotation.y = lerp_angle(skeleton.rotation.y, target_yaw, rotation_speed * delta)
-
+	
 	move_and_slide()
