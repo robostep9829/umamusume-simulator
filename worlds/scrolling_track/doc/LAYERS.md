@@ -191,11 +191,23 @@ Three things follow, and they are the whole of what this project can do about dr
 ### What a layer authors
 
 * **`render_priority`** (with `override_render_priority` on) places a band in the frame:
-  it is the first field of the key, so it orders whole groups. The rural bands use
-  `1` near, `2` mid, `3` far, above the road and the ground (the materials they are
-  authored with, `0`) and the character (`-1`, in its own materials). The override is
-  applied to a *copy* of each material, one per (material, priority), because the leaf
-  material lives inside `leaf_mesh.tres` and `uma_island` draws it too.
+  it is the first field of the key, so it orders whole groups. The rural set is `0` for
+  the leaves, `1` for the trunks and anything else the near layer places, `2` for the road
+  and the ground under it, `3` mid, `4` far - with the character below all of them (`-1`,
+  in its own materials), so it draws first. The road and the floor move together, because
+  they cannot be separated: this biome skins the road with the very material the floor's
+  mesh carries, and the road's tiles alternate between it and `rural_dirt_road.tres`, so
+  one number covers both. Layer 0 is placed by the provider (`override_road_priority`,
+  `road_render_priority`), the three bands by their own layer. The override is applied to a
+  *copy* of each material, one per (material, priority), because the leaf material lives
+  inside `leaf_mesh.tres` and `uma_island` draws it too.
+* **`prop_priorities`** orders the nodes *inside* one prop, by node name - the near layer
+  says `{"Leaves": 0, "Trunk": 1}`. It is the only way a canopy can be drawn before the
+  trunk of its own tree: inside one group the engine compares the shader id before
+  anything else can separate two instances, and these two are different shaders (the
+  canopy a `ShaderMaterial`, the trunk a `StandardMaterial3D`), so no distance can order
+  them against each other. A name that matches no node of the layer's props is reported by
+  the director, which is the first place that sees both the map and the node names.
 * **The sixteen distance buckets** are handed out by `BiomeDirector._rank_decorations`,
   which ranks the instances of a band nearest first and writes the bucket each one needs
   into `GeometryInstance3D.sorting_offset` (the engine computes

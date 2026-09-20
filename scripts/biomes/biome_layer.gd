@@ -142,6 +142,29 @@ const RING_MIN_DISTANCE := 200.0
 ## instances of one layer against each other, which is what the director's distance
 ## ranking does inside a group.
 @export_range(-128, 127) var render_priority: int = 0
+## Priorities for individual nodes of a prop scene, looked up by node name: a tree says
+## `{"Leaves": 0, "Trunk": 1}` and its canopy draws before its bark.
+##
+## Separate groups are the only way to order these two at all. Within one group the engine
+## compares the shader id before anything else can separate them - the leaf canopy is a
+## [ShaderMaterial], the trunk a [StandardMaterial3D] - so a distance ranking can never put
+## the leaves of a tree before its trunk, however close that trunk is.
+##
+## A name that no node of the layer's props answers to is reported by [BiomeDirector],
+## which is the first place that knows the props' node names.
+@export var prop_priorities: Dictionary[String, int] = {}
+
+
+## Draw priority one node of a prop takes: its own entry in [member prop_priorities] if
+## it has one, else the layer's [member render_priority].
+##
+## Keys are matched as strings, so a hand-authored `{"Leaves": 0}` and a node named
+## `&"Leaves"` meet; the map is a handful of entries, so the lookup is a short walk.
+func priority_for(node_name: StringName) -> int:
+	for key in prop_priorities:
+		if String(key) == String(node_name):
+			return int(prop_priorities[key])
+	return render_priority
 
 
 ## False when the layer has nothing to draw, either because it is disabled or
@@ -183,6 +206,11 @@ func validate() -> PackedStringArray:
 		problems.append(
 			"`render_priority` (%d) is set but `override_render_priority` is off, so the "
 			% render_priority
+			+ "materials keep their own priority and this layer ignores it"
+		)
+	if not prop_priorities.is_empty() and not override_render_priority:
+		problems.append(
+			"`prop_priorities` is set but `override_render_priority` is off, so the "
 			+ "materials keep their own priority and this layer ignores it"
 		)
 

@@ -466,6 +466,60 @@ func _skin_road(
 	if road_mesh != null:
 		mesh_instance.mesh = road_mesh
 	mesh_instance.material_override = provider.road_material(segment, variant)
+	if provider.override_road_priority:
+		_apply_render_priority(mesh_instance, provider.road_render_priority)
+	_skin_floor(body, provider)
+
+
+## The ground the road stands on, at the priority the biome asks for.
+##
+## The road and the floor are one group in the frame's draw order, and they have to move
+## together: a biome can skin its road with the very material its floor is made of, and
+## [TrackManager]'s pool carries the floor mesh - the skirt that material is baked into -
+## in a `Floor` child beside the road's `Mesh`. The road is moved by [method _skin_road],
+## which has its material in hand anyway; this is the other half, moved on a copy of the
+## material the floor's mesh carries.
+##
+## A biome that asks for no override clears the copy again, so the floor follows the biome
+## that is running rather than the one that ran before it.
+func _skin_floor(body: Node3D, provider: BiomeProvider) -> void:
+	var floor_instance := body.get_node_or_null("Floor") as MeshInstance3D
+	if floor_instance == null:
+		return
+	floor_instance.material_override = null
+	if provider.override_road_priority:
+		_apply_render_priority(floor_instance, provider.road_render_priority)
+
+
+## Reports a `prop_priorities` entry that no node of a prop answers to.
+##
+## A [BiomeLayer] cannot check its own map: it never sees its props, and a scene's node
+## names are the scene's business. This is the first place that has both, so a typo -
+## `"Leaf"` for `"Leaves"` - is reported here instead of becoming a priority that is
+## silently never applied.
+func _report_unknown_prop_names(prop: Node, source: PackedScene, descriptor: BiomeLayer) -> void:
+	if descriptor.prop_priorities.is_empty():
+		return
+	var names := PackedStringArray()
+	_collect_node_names(prop, names)
+	for key in descriptor.prop_priorities:
+		var wanted := String(key)
+		if names.has(wanted):
+			continue
+		_report_once(
+			StringName("prop_priority_name:%s:%s" % [descriptor.resource_path, wanted]),
+			"BiomeDirector: `%s` gives the node `%s` a draw priority, but no node of `%s` "
+			% [_path_of(descriptor), wanted, _path_of(source)]
+			+ "is named that, so the priority is never applied."
+		)
+
+
+## Every node name in a subtree, for the report above.
+func _collect_node_names(node: Node, into: PackedStringArray) -> void:
+	into.append(String(node.name))
+	for child in node.get_children():
+		_collect_node_names(child, into)
+
 
 
 func _rebuild_decoration(
@@ -690,6 +744,7 @@ func _spawn(
 			return null
 		scene_instance.transform = placement
 		_configure_instance(scene_instance, descriptor)
+		_report_unknown_prop_names(scene_instance, scene, descriptor)
 		host.add_child(scene_instance)
 		return scene_instance
 
@@ -762,7 +817,7 @@ func _configure_instance(node: Node, descriptor: BiomeLayer) -> void:
 		# a horizon card's is metres above the ground it was authored around.
 		geometry.sorting_use_aabb_center = false
 		if descriptor.override_render_priority:
-			_apply_render_priority(geometry, descriptor.render_priority)
+			_apply_render_priority(geometry, descriptor.priority_for(geometry.name))
 	for child in node.get_children():
 		_configure_instance(child, descriptor)
 

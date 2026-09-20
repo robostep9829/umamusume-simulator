@@ -526,6 +526,29 @@ func _test_validation() -> bool:
 		"a layer that sets both the priority and the override is accepted"
 	)
 
+	# Per-prop priorities are the only way a canopy can be ordered against the trunk of its
+	# own tree: within one priority group the engine compares the shader id before anything
+	# else can separate them, and the canopy is a ShaderMaterial while the trunk is a
+	# StandardMaterial3D. The map is keyed by node name, so a name it does not know falls
+	# back to the layer's own number rather than to nothing.
+	var tree := BiomeLayer.new()
+	tree.meshes = [BoxMesh.new()]
+	tree.override_render_priority = true
+	tree.render_priority = 1
+	tree.prop_priorities = {"Leaves": 0, "Trunk": 1}
+	_check(tree.priority_for(&"Leaves") == 0, "a named node takes the priority the map gives it")
+	_check(tree.priority_for(&"Trunk") == 1, "the map's second name is its own priority too")
+	_check(
+		tree.priority_for(&"Fence") == 1,
+		"a node the map does not name falls back to the layer's priority"
+	)
+	var unnamed := BiomeLayer.new()
+	unnamed.meshes = [BoxMesh.new()]
+	unnamed.prop_priorities = {"Leaves": 0}
+	_check_problem(
+		unnamed, "prop_priorities", "per-prop priorities without the override are reported"
+	)
+
 	# And the reporting itself: the same problem is printed once, however many times
 	# the failing code path runs (a pooled body is re-dressed every element).
 	var reporter := BiomeDirector.new()
@@ -535,6 +558,39 @@ func _test_validation() -> bool:
 	reporter._report_once(&"same", "self-test: the second report of \"same\" is swallowed")
 	reporter._report_once(&"other", "self-test: the first report of \"other\" (expected)")
 	_check(reporter.reported_problems().size() == 2, "a repeated problem is reported once")
+
+	# And the one thing a layer cannot check about itself: a `prop_priorities` entry that
+	# names no node of the props the layer spawns is a priority that would be silently never
+	# applied, and only the director holds the map and the node names at the same time.
+	var before := reporter.reported_problems().size()
+	var prop_node := Node3D.new()
+	prop_node.name = "Prop"
+	var canopy := MeshInstance3D.new()
+	canopy.name = "Leaves"
+	prop_node.add_child(canopy)
+	canopy.owner = prop_node
+	var prop_scene := PackedScene.new()
+	prop_scene.pack(prop_node)
+	var naming := BiomeLayer.new()
+	naming.meshes = [BoxMesh.new()]
+	naming.override_render_priority = true
+	naming.prop_priorities = {"Leaves": 0, "Leaf": 1}
+	reporter._report_unknown_prop_names(prop_node, prop_scene, naming)
+	_check(
+		reporter.reported_problems().has(&"prop_priority_name::Leaf"),
+		"a prop priority that names no node of the prop is reported"
+	)
+	_check(
+		not reporter.reported_problems().has(&"prop_priority_name::Leaves"),
+		"the name the prop does answer to is not reported"
+	)
+	naming.prop_priorities = {"Leaves": 0}
+	reporter._report_unknown_prop_names(prop_node, prop_scene, naming)
+	_check(
+		reporter.reported_problems().size() == before + 1,
+		"a map the props answer to adds no report"
+	)
+	prop_node.free()
 	reporter.free()
 	return true
 
@@ -797,6 +853,50 @@ func _test_ranking_integration() -> bool:
 	_check(
 		buckets[0] < buckets[buckets.size() - 1],
 		"the band spans more than one bucket, so the order is a real one and not a tie"
+	)
+
+	# Layer 0 is a group like any other, and the biome decides where it sits: the road
+	# tiles and the floor the pool carries beside them move to the biome's priority, on
+	# copies of the materials they were authored with - the shared ones are never retouched.
+	var road_material := StandardMaterial3D.new()
+	var floor_material := StandardMaterial3D.new()
+	var floor_mesh := BoxMesh.new()
+	floor_mesh.surface_set_material(0, floor_material)
+	provider.road_material_override = road_material
+	provider.override_road_priority = true
+	provider.road_render_priority = 2
+	track.straight_segment.floor_mesh = floor_mesh
+	track.turn_segment.floor_mesh = floor_mesh
+	track.refresh_pool()
+
+	var body := track.get_child(0) as Node3D
+	var road := body.get_node_or_null("Mesh") as MeshInstance3D
+	var floor_instance := body.get_node_or_null("Floor") as MeshInstance3D
+	_check(road != null and floor_instance != null, "a pooled body carries the road and the floor")
+	_check(
+		road.material_override != null and road.material_override != road_material
+		and road.material_override.render_priority == 2,
+		"the road moves to the floor's priority, on a copy of its material"
+	)
+	_check(
+		floor_instance.material_override != null
+		and floor_instance.material_override.render_priority == 2,
+		"the floor the road stands on moves with it"
+	)
+	_check(
+		road_material.render_priority == 0 and floor_material.render_priority == 0,
+		"the materials the road and the floor were authored with are left alone"
+	)
+
+	# A biome that asks for no override leaves the floor as its own mesh has it, instead of
+	# keeping the copy the biome running before it applied.
+	provider.override_road_priority = false
+	track.refresh_pool()
+	body = track.get_child(0) as Node3D
+	floor_instance = body.get_node_or_null("Floor") as MeshInstance3D
+	_check(
+		floor_instance.material_override == null,
+		"a biome without the override clears the floor's copy"
 	)
 
 	_teardown([track, director, world, camera])

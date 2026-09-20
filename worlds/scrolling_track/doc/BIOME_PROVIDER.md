@@ -92,7 +92,8 @@ A layer is data: what to instance, how far away, how many, how jittered.
 | `scale_min/max`, `yaw_scatter`, `face_track` | how it is oriented and sized |
 | `fit_to_segment` | stretch a mesh so one copy spans its share of the segment, longest horizontal side aligned with the track. Built for railings, fences and hedges whose authored length you do not want to match by hand |
 | `visible_range`, `cast_shadow` | cost controls |
-| `override_render_priority`, `render_priority` | draw order within the frame. Off by default, so a layer draws with the priorities its materials were authored with; with the override on, every material of the layer is replaced by a copy carrying `render_priority` - higher draws later - which is what puts the road before the trunks before the canopies. The field is not free: see the draw-order section of `LAYERS.md` |
+| `override_render_priority`, `render_priority` | draw order within the frame. Off by default, so a layer draws with the priorities its materials were authored with; with the override on, every material of the layer is replaced by a copy carrying `render_priority` - higher draws later. The rural set is leaves `0`, trunks and the rest of the near layer `1`, road and ground `2`, mid `3`, far `4`, under the character's `-1`. The field is not free: see the draw-order section of `LAYERS.md` |
+| `prop_priorities` | per node name, the priority that node draws at: `{"Leaves": 0, "Trunk": 1}` puts a canopy before the trunk of its own tree, which no distance can do (the two are different shaders, and the shader id is compared first inside a group). Names the props do not have are reported by the director |
 | `seed` | offsets this layer's slice of the director's decoration seed |
 
 A `RING` layer ignores `side`, `edge_margin` and `along_scatter` (its instances
@@ -318,7 +319,10 @@ Which band takes what:
 Layer 0 is not a `BiomeLayer`: the road is assigned on the provider itself, through
 `road_material_override` (or `road_skins`, which cycles per element, or
 `road_surfaces` of [RuralBiome] for a surface that changes every few elements) and
-`road_mesh_override`.
+`road_mesh_override`. Its place in the draw order is assigned there too:
+`override_road_priority` with `road_render_priority` moves the road *and* the ground the
+pool carries beside it, on copies of their materials - the rural biome puts all of it at
+`2`, after the trees standing on it.
 
 Four things that decide whether a layer looks right:
 
@@ -363,7 +367,9 @@ A whole new near prop, end to end:
 `decoration(ROAD)` is never asked (the default returns `null` for it) and
 `decorate_layer()` is never called with `ROAD`. What layer 0 takes is the road
 itself - `road_mesh_override` for geometry, `road_skins` / `road_variant()` /
-`road_surfaces` for the surface, all applied by `_skin_road()` on every placement.
+`road_surfaces` for the surface, and `override_road_priority` /
+`road_render_priority` for where it sits among the bands, all applied by
+`_skin_road()` on every placement.
 
 Nothing validates the bands, though: `distance_min` and `distance_max` are just
 metres from the centreline, so a `near_layer` is free to stand inside the playfield.

@@ -19,3 +19,7 @@ visible_range = 320.0
 cast_shadow = false
 override_render_priority = true
 render_priority = 1
+prop_priorities = Dictionary[String, int]({
+"Leaves": 0,
+"Trunk": 1
+})
