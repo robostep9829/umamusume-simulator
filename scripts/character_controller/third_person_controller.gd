@@ -51,17 +51,16 @@ const CAMERA_SNAP_DISTANCE := 2.0
 ## answering. 0 freezes the pose at [member camera_full_speed].
 @export var camera_over_speed: float = 1.0
 
-## Time constants, in seconds, and the gap they work within: how long the distance,
-## offset and fov take to reach a pose, how long the camera takes to close a gap it is
-## allowed to have, and the gap it aims to keep. That aim is where the pivot is pulled
-## to rather than a limit on the gap - the character keeps gaining ground while the gap
-## closes, so a run settles at about [member camera_lag_max] plus
-## `speed * camera_lag_time` behind the character: 0.1 s is 2 m at 20 m/s, and that is
-## what makes the camera trail further the faster the run goes. 0 for
+## Time constants, in seconds, and the gap the second one works within: how long the
+## distance, offset and fov take to reach a pose, how long the camera takes to close a
+## gap between where the character is and where the camera still is, and how large that
+## gap may get. The camera holds its own position and chases, so the gap grows with the
+## speed - about `speed * camera_lag_time`, 2 m at 20 m/s - which is what makes a run
+## trail the camera instead of looking welded to the character's back. 0 for
 ## [member camera_lag_time] keeps it rigidly on the character's back.
 @export var camera_pose_time: float = 0.25
 @export var camera_lag_time: float = 0.1
-@export var camera_lag_max: float = 1.0
+@export var camera_lag_max: float = 3.0
 
 
 @export var player_data: PlayerData:
@@ -81,11 +80,13 @@ var auto_forward: bool = false
 # Camera rotation and chase state
 var _yaw: float = 0.0
 var _pitch: float = 0.0
-# The pivot's authored offset, the fov the pose opens from, and where the camera
-# wanted to be last frame - a jump from that is a teleport, not speed.
+# The pivot's authored offset, the fov the pose opens from, where the camera wanted to
+# be last frame - a jump from that is a teleport, not speed - and where it actually is,
+# which the body does not carry along.
 var _pivot_rest: Vector3 = Vector3.ZERO
 var _normal_fov: float = 50.2
 var _last_ideal: Vector3 = Vector3.ZERO
+var _pivot_world: Vector3 = Vector3.ZERO
 
 # Auto run: seconds without input, and the flag that starts it (see `_apply_auto_run`)
 var _idle_time: float = 0.0
@@ -103,6 +104,7 @@ func _ready() -> void:
 	if camera != null:
 		_normal_fov = camera.fov
 	_last_ideal = global_transform * _pivot_rest
+	_pivot_world = _last_ideal
 	if not Engine.is_editor_hint():
 		Input.mouse_mode = Input.MOUSE_MODE_CAPTURED
 	_update_character_mesh()
@@ -185,19 +187,25 @@ func _apply_chase_pose(delta: float) -> void:
 	# The pose above is where the camera wants to be; this is the part of it that
 	# cannot be reached instantly, so the character pulls away under acceleration and
 	# the camera cuts the corner on a turn, then closes up again.
+	#
+	# The gap has to be a world space one. The pivot is a child of the body, so the
+	# body carries it along every step: reading its own position back each frame finds
+	# it sitting exactly at the pose again, with no gap to trail, and the camera rides
+	# welded to the character's back. Keeping the world position the camera had last
+	# frame is what makes the character run away from it.
 	var ideal := global_transform * _pivot_rest
 	var teleported := ideal.distance_to(_last_ideal) > CAMERA_SNAP_DISTANCE
 	_last_ideal = ideal
-	if camera_lag_time <= 0.0 or teleported:
-		camera_pivot.global_position = ideal
-		return
-	var target := ideal
-	var trail := camera_pivot.global_position - ideal
-	if trail.length() > camera_lag_max:
-		target = ideal + trail.normalized() * camera_lag_max
-	camera_pivot.global_position = camera_pivot.global_position.lerp(
-		target, 1.0 - exp(-delta / camera_lag_time)
-	)
+	var here := _pivot_world
+	if camera_lag_time > 0.0 and not teleported:
+		here = here.lerp(ideal, 1.0 - exp(-delta / camera_lag_time))
+		var gap := here - ideal
+		if gap.length() > camera_lag_max:
+			here = ideal + gap.normalized() * camera_lag_max
+	else:
+		here = ideal
+	_pivot_world = here
+	camera_pivot.global_position = here
 
 
 ## How far the pose has moved from the normal pair toward the sprint pair and past it:
