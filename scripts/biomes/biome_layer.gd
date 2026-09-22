@@ -83,6 +83,9 @@ const RING_MIN_DISTANCE := 200.0
 ## RING: how many elements may pass before the horizon is allowed to change, so a
 ## far biome can keep one silhouette for a long while (1 = every re-snap).
 @export var host_every: int = 1
+
+@export var frequency_min: int = 1
+@export var frequency_max: int = 1
 ## Distance from the centreline (ALONG_TRACK) or ring radius (RING), in metres.
 ## The LAYERS.md bands are roughly: 15-60 m for layer 1, 60-200 m for layer 2,
 ## 200 m and beyond for layer 3.

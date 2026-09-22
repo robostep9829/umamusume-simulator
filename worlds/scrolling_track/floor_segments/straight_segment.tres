@@ -1,26 +1,55 @@
-[gd_resource type="Resource" script_class="TrackSegment" format=3 uid="uid://bnis8bqvtbnvo"]
+[gd_resource type="Resource" script_class="TrackSegment" format=4 uid="uid://bnis8bqvtbnvo"]
 
 [ext_resource type="Script" uid="uid://k4ptfmmb2irt" path="res://scripts/scrolling/track_segment.gd" id="1"]
-[ext_resource type="ArrayMesh" uid="uid://ckf2mmjx46y6r" path="res://worlds/scrolling_track/floor_segments/skirt_straight.obj" id="1_k5c7e"]
 [ext_resource type="Material" uid="uid://c8xsq2iw3ca2h" path="res://worlds/scrolling_track/biomes/rural/materials/ground.tres" id="1_q1x4k"]
+
+[sub_resource type="ArrayMesh" id="ArrayMesh_4uhpb"]
+_surfaces = [{
+"aabb": AABB(-100, 0, -100, 200, 1e-05, 100),
+"format": 34896613377,
+"index_count": 12,
+"index_data": PackedByteArray("AAABAAIAAgABAAMABAAFAAYABgAFAAcA"),
+"name": "SkirtsStraight",
+"primitive": 3,
+"uv_scale": Vector4(0, 0, 0, 0),
+"vertex_count": 8,
+"vertex_data": PackedByteArray("//8AAP//AAAykwAA//8AAP//AAAAAAAAMpMAAAAAAADMbAAA//8AAAAAAAD//wAAzGwAAAAAAAAAAAAAAAAAAA==")
+}]
+blend_shape_mode = 0
+
+[sub_resource type="ArrayMesh" id="ArrayMesh_q1x4k"]
+_surfaces = [{
+"aabb": AABB(-100, 0, -100, 200, 1e-05, 100),
+"attribute_data": PackedByteArray("//////9//////wAA/38AAP9///8AAP///38AAAAAAAA="),
+"format": 34896613399,
+"index_count": 12,
+"index_data": PackedByteArray("AAABAAIAAgABAAMABAAFAAYABgAFAAcA"),
+"name": "SkirtsStraight",
+"primitive": 3,
+"uv_scale": Vector4(0, 0, 0, 0),
+"vertex_count": 8,
+"vertex_data": PackedByteArray("//8AAP///78ykwAA////v///AAAAAP+/MpMAAAAA/7/MbAAA////vwAAAAD///+/zGwAAAAA/78AAAAAAAD/v////3////9/////f////3////9/////f////3////9/")
+}]
+blend_shape_mode = 0
+shadow_mesh = SubResource("ArrayMesh_4uhpb")
 
 [sub_resource type="ArrayMesh" id="ArrayMesh_k5c7e"]
 _surfaces = [{
 "aabb": AABB(-15, -8e-06, -100, 30, 1e-05, 100),
-"attribute_data": PackedByteArray(3, 0, 3, 0, 205, 76, 3, 0, 3, 0, 251, 255, 205, 76, 251, 255),
+"attribute_data": PackedByteArray("AwADAM1MAwADAPv/zUz7/w=="),
 "format": 34896613399,
 "index_count": 6,
-"index_data": PackedByteArray(0, 0, 1, 0, 2, 0, 2, 0, 1, 0, 3, 0),
+"index_data": PackedByteArray("AAABAAIAAgABAAMA"),
 "material": ExtResource("1_q1x4k"),
 "name": "Plane.001",
 "primitive": 3,
 "uv_scale": Vector4(0, 0, 0, 0),
 "vertex_count": 4,
-"vertex_data": PackedByteArray(255, 255, 204, 204, 255, 255, 255, 255, 0, 0, 204, 204, 255, 255, 255, 255, 255, 255, 0, 0, 0, 0, 255, 255, 0, 0, 0, 0, 0, 0, 255, 255, 255, 127, 255, 191, 255, 127, 255, 191, 255, 127, 255, 191, 255, 127, 255, 191)
+"vertex_data": PackedByteArray("///MzP////8AAMzM////////AAAAAP//AAAAAAAA////f/+//3//v/9//7//f/+/")
 }]
 blend_shape_mode = 0
 
 [resource]
 script = ExtResource("1")
 mesh = SubResource("ArrayMesh_k5c7e")
-floor_mesh = ExtResource("1_k5c7e")
+floor_mesh = SubResource("ArrayMesh_q1x4k")

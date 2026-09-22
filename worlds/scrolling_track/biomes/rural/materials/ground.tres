@@ -37,7 +37,7 @@ color_ramp = SubResource("Gradient_g77uk")
 seamless = true
 
 [resource]
-render_priority = 0
+render_priority = 3
 shader = ExtResource("1_25ay8")
 shader_parameter/tex_grass = ExtResource("4_7ibs6")
 shader_parameter/tex_sand = ExtResource("6_fqla0")

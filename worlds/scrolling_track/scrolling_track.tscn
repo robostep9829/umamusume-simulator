@@ -11,6 +11,7 @@
 [ext_resource type="Resource" uid="uid://bjdqfib13mfdm" path="res://worlds/scrolling_track/playlists/playlist_demo.tres" id="9_playlist"]
 [ext_resource type="Script" uid="uid://7uenwo5bciov" path="res://scripts/debug/debug_overlay.gd" id="10_debug"]
 [ext_resource type="ArrayMesh" uid="uid://ckf2mmjx46y6r" path="res://worlds/scrolling_track/floor_segments/skirt_straight.obj" id="11_kvml8"]
+[ext_resource type="Material" uid="uid://bpos7h0cxwgln" path="res://worlds/scrolling_track/biomes/rural/materials/skirts_grassy.tres" id="12_5fob0"]
 [ext_resource type="ArrayMesh" uid="uid://ofo03d011vj3" path="res://worlds/scrolling_track/floor_segments/skirt_turn_left_5deg.obj" id="12_7xr46"]
 
 [node name="ScrollingTrack" type="Node3D" unique_id=97728838]
@@ -37,7 +38,6 @@ environment = ExtResource("4_la2pr")
 
 [node name="StraightPreview" type="MeshInstance3D" parent="." unique_id=1591104222]
 process_mode = 4
-visible = false
 mesh = ExtResource("5_7g5pp")
 surface_material_override/0 = ExtResource("6_7g5pp")
 
@@ -56,14 +56,15 @@ playlist = ExtResource("9_playlist")
 world_environment = NodePath("../WorldEnvironment")
 
 [node name="DebugOverlay" type="CanvasLayer" parent="." unique_id=1314205677 node_paths=PackedStringArray("track", "director", "player")]
+visible = false
 script = ExtResource("10_debug")
 track = NodePath("../TrackManager")
 director = NodePath("../BiomeDirector")
 player = NodePath("../Player")
 
 [node name="SkirtStraightPreview" type="MeshInstance3D" parent="." unique_id=871020402]
-visible = false
 mesh = ExtResource("11_kvml8")
+surface_material_override/0 = ExtResource("12_5fob0")
 
 [node name="SkirtTurnPreview" type="MeshInstance3D" parent="." unique_id=1799788526]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -100)

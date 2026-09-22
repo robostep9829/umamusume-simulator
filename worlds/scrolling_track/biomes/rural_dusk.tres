@@ -6,14 +6,14 @@
 [ext_resource type="Resource" uid="uid://11dbwmj245x0" path="res://worlds/scrolling_track/biomes/rural/layers/rural_far.tres" id="3_iwufl"]
 [ext_resource type="Resource" uid="uid://bmxxl1s70mdpp" path="res://worlds/scrolling_track/biomes/rural/layers/rural_mid.tres" id="4_n1nvo"]
 [ext_resource type="Resource" uid="uid://dtek1tsbwhr3l" path="res://worlds/scrolling_track/biomes/rural/layers/rural_near.tres" id="5_57e3f"]
-[ext_resource type="Material" uid="uid://b4n7hfri20ovo" path="res://worlds/scrolling_track/biomes/rural/materials/rural_dirt_road.tres" id="6_wa067"]
+[ext_resource type="Material" uid="uid://c8xsq2iw3ca2h" path="res://worlds/scrolling_track/biomes/rural/materials/ground.tres" id="6_iwufl"]
+[ext_resource type="Material" uid="uid://bpos7h0cxwgln" path="res://worlds/scrolling_track/biomes/rural/materials/skirts_grassy.tres" id="9_n1nvo"]
 
 [sub_resource type="Environment" id="Environment_bibh1"]
 background_mode = 2
 background_color = Color(0.39, 0.39, 0.39, 1)
 sky = ExtResource("2_6nkt7")
 tonemap_exposure = 0.52
-fog_enabled = true
 fog_light_color = Color(0.85, 0.45, 0.32, 1)
 fog_light_energy = 1.2
 fog_sun_scatter = 0.15
@@ -27,13 +27,11 @@ adjustment_color_correction = ExtResource("1_mq0mn")
 
 [resource]
 script = ExtResource("1_rural")
-road_surfaces = Array[Material]([ExtResource("6_wa067")])
 road_surface_every = 1
 biome_id = &"rural_dusk"
 display_name = "Rural (dusk)"
-road_material_override = ExtResource("6_wa067")
-override_road_priority = true
-road_render_priority = 2
+road_material_override = ExtResource("6_iwufl")
+skirt_material_override = ExtResource("9_n1nvo")
 near_layer = ExtResource("5_57e3f")
 mid_layer = ExtResource("4_n1nvo")
 far_layer = ExtResource("3_iwufl")

@@ -486,7 +486,8 @@ func _skin_floor(body: Node3D, provider: BiomeProvider) -> void:
 	var floor_instance := body.get_node_or_null("Floor") as MeshInstance3D
 	if floor_instance == null:
 		return
-	floor_instance.material_override = null
+	#floor_instance.material_override = null
+	floor_instance.material_override = provider.skirt_material()
 	if provider.override_road_priority:
 		_apply_render_priority(floor_instance, provider.road_render_priority)
 
@@ -645,7 +646,10 @@ func _rebuild_horizon() -> void:
 func _build_along_track(
 	host: Node3D, descriptor: BiomeLayer, segment: TrackSegment, element_index: int, layer: int
 ) -> void:
-	if descriptor.host_every > 1 and posmod(element_index, descriptor.host_every) != 0:
+	# if descriptor.host_every > 1 and posmod(element_index, descriptor.host_every) != 0:
+	# 	return
+	var spawn_chance: int = randi_range(descriptor.frequency_min, descriptor.frequency_max)
+	if posmod(element_index, spawn_chance):
 		return
 	var sides := _sides_of(descriptor.side)
 	var per_side := maxi(descriptor.count, 1)

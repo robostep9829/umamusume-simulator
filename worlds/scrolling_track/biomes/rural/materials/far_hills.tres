@@ -1,6 +1,6 @@
-[gd_resource type="StandardMaterial3D" format=3]
+[gd_resource type="StandardMaterial3D" format=3 uid="uid://cpamy0sxf71u6"]
 
 [resource]
 shading_mode = 0
-albedo_color = Color(0.42, 0.51, 0.57, 1)
+albedo_color = Color(0.2596, 0.38287333, 0.44, 1)
 billboard_mode = 2

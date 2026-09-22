@@ -60,6 +60,8 @@ const FEATURE_PARK_STRETCH := &"park_stretch"
 @export_group("Road skin (layer 0)")
 ## Road material. `null` keeps the material authored inside the segment's mesh.
 @export var road_material_override: Material
+## Skirt material. The mesh that extends the road sideways.
+@export var skirt_material_override: Material
 ## Extra skins cycled along the biome. When this is not empty it is used instead
 ## of [member road_material_override], one element after the other, which is how a
 ## biome varies its surface - worn patches, dirt spilling onto the track, a
@@ -128,6 +130,8 @@ func road_material(_segment: TrackSegment, _variant: int) -> Material:
 		return road_material_override
 	return road_skins[posmod(_variant, road_skins.size())]
 
+func skirt_material() -> Material:
+	return skirt_material_override
 
 ## Replacement mesh for the road of `segment`, or `null` to keep the authored
 ## one. A replacement must keep the segment's width, length and origin so that

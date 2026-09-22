@@ -1,7 +1,7 @@
 [gd_resource type="Resource" script_class="BiomeLayer" format=3 uid="uid://11dbwmj245x0"]
 
 [ext_resource type="Script" uid="uid://dl0u5uw0i1tal" path="res://scripts/biomes/biome_layer.gd" id="1_layer"]
-[ext_resource type="Material" path="res://worlds/scrolling_track/biomes/rural/materials/far_hills.tres" id="2_far_hills"]
+[ext_resource type="Material" uid="uid://cpamy0sxf71u6" path="res://worlds/scrolling_track/biomes/rural/materials/far_hills.tres" id="2_far_hills"]
 
 [sub_resource type="QuadMesh" id="QuadMesh_hills"]
 size = Vector2(115, 22)
@@ -20,5 +20,3 @@ scale_min = 0.9
 scale_max = 1.3
 visible_range = 400.0
 cast_shadow = false
-override_render_priority = true
-render_priority = 4
