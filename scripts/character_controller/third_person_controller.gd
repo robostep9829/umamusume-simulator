@@ -1,5 +1,6 @@
 @tool
 extends CharacterBody3D
+class_name ThirdPersonController
 
 ## Movement tuning
 @export var move_speed: float = 1.6

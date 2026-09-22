@@ -81,6 +81,7 @@ move_left={
 
 3d_render/layer_2="Landscape"
 3d_render/layer_3="Face/Skin"
+3d_render/layer_4="Character"
 
 [physics]
 
