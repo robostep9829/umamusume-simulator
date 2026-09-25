@@ -71,21 +71,6 @@ const FEATURE_PARK_STRETCH := &"park_stretch"
 ## geometry (a raised curb, a wider shoulder). Must keep the segment's size and
 ## origin so chaining, colliders and decoration stay valid.
 @export var road_mesh_override: Mesh
-## Move layer 0 - the road and the ground under it - to [member road_render_priority].
-##
-## Layer 0 is a group in the frame like any other, so it has a priority like any other;
-## left alone it is whatever the road and floor materials were authored with. The rural
-## biome turns this on and puts the floor at 2, after the trees standing on it: the
-## canopies and trunks then shade first and the ground behind them is depth-rejected.
-##
-## The road and the floor move together whatever this says, because in a biome that
-## skins its road with the material its floor is made of, splitting them would leave the
-## road's own tiles in two different groups. Both are moved on copies of their material,
-## so a shared asset is never retouched.
-@export var override_road_priority: bool = false
-## Draw priority of the road and the floor, in the same scale as
-## [member BiomeLayer.render_priority]: higher draws later.
-@export_range(-128, 127) var road_render_priority: int = 0
 
 @export_group("Decoration layers (1-3)")
 ## Layers 1-3 of LAYERS.md, as authored [BiomeLayer] resources. A layer left
@@ -223,12 +208,6 @@ func validate() -> PackedStringArray:
 		problems.append("`biome_id` is empty; it identifies the biome in logs and save data")
 	if road_variant_count() <= 0:
 		problems.append("`road_variant_count()` must be at least 1")
-	if road_render_priority != 0 and not override_road_priority:
-		problems.append(
-			"`road_render_priority` (%d) is set but `override_road_priority` is off, "
-			% road_render_priority
-			+ "so the road and the floor keep their own priority and this biome ignores it"
-		)
 	for i in road_skins.size():
 		if road_skins[i] == null:
 			problems.append("`road_skins[%d]` is empty, so that element is unpainted" % i)

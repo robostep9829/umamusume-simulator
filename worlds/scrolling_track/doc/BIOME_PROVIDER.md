@@ -86,17 +86,18 @@ A layer is data: what to instance, how far away, how many, how jittered.
 | `variants` / `meshes` | scenes (a tree, a house) or meshes (cheap repeated props) |
 | `multimesh` | one draw call per segment for a whole layer; forces the first mesh |
 | `count`, `side` | instances per segment and side, or the number of instances around a ring |
-| `host_every` | `ALONG_TRACK`: only every N-th element is dressed. `RING`: how many elements the horizon may stay unchanged |
+| `host_every` | `RING` only: how many elements may pass before the horizon is laid out again |
+| `frequency_min/max` | along-track sparsity: each element draws its own period from the decoration seed and is dressed only when its index is a multiple of it, so 1..6 dresses roughly one element in six |
 | `distance_min/max` | metres from the centreline, or the ring radius |
 | `edge_margin`, `along_scatter`, `lateral_scatter`, `lift`, `lift_scatter` | where exactly inside those bounds an instance ends up |
 | `scale_min/max`, `yaw_scatter`, `face_track` | how it is oriented and sized |
-| `fit_to_segment` | stretch a mesh so one copy spans its share of the segment, longest horizontal side aligned with the track. Built for railings, fences and hedges whose authored length you do not want to match by hand |
+| `fit_to_segment` | stretch a mesh so one copy spans its share of the segment - for railings, fences and hedges whose authored length you would otherwise match by hand |
 | `visible_range`, `cast_shadow` | cost controls |
 | `seed` | offsets this layer's slice of the director's decoration seed |
 
-A `RING` layer ignores `side`, `edge_margin` and `along_scatter` (its instances
-are spread evenly around the circle). `host_every` works in both modes, with the
-meaning above.
+A `RING` layer ignores `side`, `edge_margin` and `along_scatter` (its instances are
+spread evenly around the circle), and an along-track layer ignores `host_every`: the
+two modes decide how often they change in different ways.
 
 ### 1.4 `BiomePlaylist` - which biome runs where
 
@@ -184,9 +185,9 @@ with the runner - position only, never rotation - so:
 * the horizon **surrounds** them in every direction instead of piling up in a cone
   ahead of them. A ring whose cards all end up in front is the classic way to make
   distant scenery read as floating cards;
-* it cannot be outrun: every card stays exactly `distance_min..distance_max` away,
-  whatever the runner does, so a `RING` layer belongs to the far band and wants a
-  `distance_min` of a kilometre or more;
+* it cannot be outrun: every card stays exactly `distance_min..distance_max` away
+  whatever the runner does, so a `RING` layer belongs to the far band, where the
+  band's own limits are `BiomeLayer.RING_MIN_DISTANCE` and the camera's far plane;
 * it does not show the seams of the segment pool.
 
 The ring is laid out again only when the runner moves into another region of
@@ -197,7 +198,7 @@ leaves the anchor untouched.
 
 Because `_build_ring()` spreads the cards one slot apart with a slot jitter of at
 most 15 %, a ring whose cards are about as wide as a slot is continuous: the ridge
-of `rural/layers/rural_far.tres` (14 cards of 1200 x 110 m on a 1.2-1.6 km ring)
+of `rural/layers/rural_far.tres` (20 cards of 115 x 22 m on a 200-235 m ring)
 overlaps itself even in the worst case instead of leaving holes of empty sky.
 
 ### 2.3 Atmosphere: the one thing that must not change at a chunk boundary
@@ -229,7 +230,7 @@ tonemap). The one consequence worth knowing is that the switch is not interpolat
 it is swapped with the rest of the resource - so going from a fogged biome to an
 unfogged one cuts the fog instead of fading it out.
 
-[b]A biome's `atmosphere` is a whole environment, not a patch on the level's.[/b]
+**A biome's `atmosphere` is a whole environment, not a patch on the level's.**
 While a biome that has one is active, the `WorldEnvironment` renders that file, so
 a fog setting left in the level's own environment (`environment/new_environment.tres`)
 only survives until the first biome is applied. Turning fog on there and waiting for
@@ -246,8 +247,8 @@ completely.
 
 The demos show why a biome should carry its own `atmosphere` even when it is a
 day-lit one: `rural.tres` carries one as an inline `Environment` (the project's
-sky and tonemapping, plus fog and a haze colour), and that fog is what turns a
-1.5 km card into distant scenery instead of a crisp rectangle. Without it,
+sky and tonemapping, plus fog and a haze colour), and that fog is what turns the
+far end of the view into distance instead of a crisp rectangle. Without it,
 everything past the playfield is as sharp as the road.
 
 Two biomes have to differ *where the player is looking*, or the transition is
@@ -255,7 +256,7 @@ invisible even though the data changed. The numbers that matter for fog are:
 
 | Field | Why it decides whether a change is seen |
 |---|---|
-| `fog_density` | metres of air per unit of haze: the demo's day biome reaches 88 % at its own 1.2 km horizon, dusk 99 % |
+| `fog_density` | metres of air per unit of haze: the demo's two atmospheres are 0.0027 and 0.0042, so the same geometry sits in much thicker air after the change |
 | `fog_light_color` | the colour the distance takes; the clearest signal a biome has |
 | `fog_sky_affect` | how much of that colour the *sky* takes - and the sky is most of the picture |
 | `fog_aerial_perspective` | gives the fog colour back to the sky, so a high value hides the biome's own tint |
@@ -273,11 +274,10 @@ become a no-op. Only what is switched on counts - a biome with fog off, or with 
 1. **Road.** Make a material with the ground shader of the biome (or an existing
    one). Either reference it directly or put several into `road_skins` so the
    surface varies along the biome.
-2. **Layers.** Duplicate `rural/layers/rural_near.tres` (beside the road,
-   15-60 m), `rural/layers/rural_mid.tres` (60-200 m) and
-   `rural/layers/rural_far.tres` (the ring), or write new ones,
-   and assign the artwork as described in 3.1. Keep the bands of `LAYERS.md`; the
-   director does not enforce them.
+2. **Layers.** Duplicate `rural/layers/rural_near.tres`, `rural/layers/rural_mid.tres`
+   and `rural/layers/rural_far.tres` - one per band of `LAYERS.md`, whose distance
+   limits 3.1 lists - or write new ones, and assign the artwork as described there.
+   The director does not enforce the bands.
 3. **Atmosphere.** Optional: an `Environment` in `atmosphere` for a different
    time of day or weather; the transition is automatic.
 4. **Biome.** Duplicate `rural.tres`, set `biome_id`, `display_name` and the
@@ -310,29 +310,34 @@ Which band takes what:
 
 | Layer | Content of `LAYERS.md` | Assign it as | Cost knobs that matter |
 |---|---|---|---|
-| 1 - near, 15-60 m | trees, bushes, fences, lamps, mailboxes, benches - things the player can recognise as objects | `variants`, one scene per prop, `count` 1-2 per side | `host_every` for density (2-4 is often enough), `visible_range` around 300 m, `cast_shadow` off for anything small |
-| 2 - mid, 60-200 m | tree lines, rooftops, hedges, poles, walls: silhouettes, not objects | `meshes`, one card or block per kind, `multimesh = true` | `fit_to_segment` for strips that must tile without gaps, `visible_range` ~600 m, `cast_shadow` off, `host_every` if one copy spans several elements |
-| 3 - far, 1 km+ | far hills, a town edge, atmospheric haze | `mode = RING`, one card in `meshes`, an unshaded or billboard material in `mesh_material` | `count` = cards around the circle (12-16 usually closes it), `host_every` = elements the silhouette may last for, `visible_range` past the ring, `cast_shadow` off |
+| 1 - near, 15-60 m | trees, bushes, fences, lamps, mailboxes, benches - things the player can recognise as objects | `variants`, one scene per prop; or `meshes` with `multimesh` when the band is one repeated piece of geometry, as the demo's fence is | `frequency_min/max` for density (a wide range leaves visible gaps), `visible_range` around 300 m, `cast_shadow` off for anything small |
+| 2 - mid, 60-200 m | tree lines, rooftops, hedges, poles, walls: silhouettes, not objects | `meshes`, one card or block per kind, `multimesh = true` | `fit_to_segment` for strips that must tile without gaps, `visible_range` ~600 m, `cast_shadow` off, `frequency_min/max` if the band should not dress every element |
+| 3 - far, `RING_MIN_DISTANCE` up to the camera's far plane | far hills, a town edge, atmospheric haze | `mode = RING`, one card in `meshes`, an unshaded or billboard material in `mesh_material` | `count` and the card width together decide whether the ridge has holes (2.2 does the arithmetic), `host_every` = elements the silhouette may last for, `visible_range` past the ring, `cast_shadow` off |
 
 Layer 0 is not a `BiomeLayer`: the road is assigned on the provider itself, through
 `road_material_override` (or `road_skins`, which cycles per element, or
 `road_surfaces` of [RuralBiome] for a surface that changes every few elements) and
-`road_mesh_override`. Its place in the draw order is assigned there too:
-`override_road_priority` with `road_render_priority` moves the road *and* the ground the
-pool carries beside it, on copies of their materials - the rural biome puts all of it at
-`2`, after the trees standing on it.
+`road_mesh_override`. Its two priority fields - `override_road_priority` and
+`road_render_priority` - are the leftover of a reverted draw-order pass and nothing
+reads them today; a biome currently draws with the priorities its materials were
+authored with.
 
 Four things that decide whether a layer looks right:
 
-* **`host_every` is a promise about size.** A layer hosted on every N-th element
-  dresses only those elements, so the artwork has to cover the span it skipped: a
-  treeline card built for `host_every = 4` must be four segments long, or the layer
-  will look like it has holes in it.
-* **Distance bands come from `LAYERS.md`, not from the code**, and they are about
-  the *player's* perception: near dressing should not be so far away that it reads
-  as mid scenery, and a ring card closer than ~1 km reads as something the runner
-  could reach. The playfield of the demo is a 30 m road strip, which is why
-  `rural_near.tres` sits at 13-14.5 m - widen it once there is ground to stand on.
+* **A sparse layer is a layer with gaps.** Nothing stitches the elements it skips
+  together: a layer dressed by a `frequency` range comes in stretches, each of them
+  continuous only inside its own segment. Where the look is one uninterrupted run -
+  a hedge, a railing, a treeline - the answer is geometry that spans the element
+  (`fit_to_segment`) on every element, not a sparser gate.
+* **Distance bands come from `LAYERS.md`, not from the code**, and they are about the
+  *player's* perception: near dressing should not be so far away that it reads as mid
+  scenery. The one band limit the code does police is the ring's floor,
+  `BiomeLayer.RING_MIN_DISTANCE` (200 m) - closer than that a card reads as scenery the
+  runner could reach, and drive past. Its ceiling is not a layer's to choose:
+  `prefabs/third_person.tscn` draws 250 m of world, and a ring past the far plane is
+  simply not rendered. The demo's playfield is a bare 30 m road strip with no ground
+  beside it, which is why `rural_near.tres` stands at 13.0 m - widen it once there is
+  terrain to stand on.
 * **`mesh_material` is a `material_override`.** One material for every mesh of the
   layer, and it wins over the mesh's own material. When two props need different
   looks, they are two scenes in `variants`, or two layers in different bands.
@@ -342,13 +347,15 @@ Four things that decide whether a layer looks right:
   Give each layer its own `seed` only if you want the same band to look different
   between two providers or two layers of one biome.
 
-A whole new near prop, end to end:
+A whole new prop that is a scene, end to end:
 
 ```text
 1. worlds/scrolling_track/biomes/rural/props/roadside_bush.tscn
    - root Node3D, mesh children, their own materials
-2. worlds/scrolling_track/biomes/rural/layers/rural_near.tres
-   - add the scene to `variants`, keep the band and cost fields
+2. worlds/scrolling_track/biomes/rural/layers/rural_mid.tres
+   - the rural band that instances scenes today: add the file to `variants` and keep
+     the band and cost fields. `rural_near.tres` is a `multimesh` fence layer, where a
+     `variants` entry would win and leave the fence unbuilt
 3. rural.tres already points at that layer, so nothing else changes
 4. BiomeDirector.refresh() rebuilds every placed segment at runtime and the debug
    overlay's `layers` line should show the new instance count. Editing the layer
@@ -357,27 +364,24 @@ A whole new near prop, end to end:
    forgets
 ```
 
-**Props inside the playfield (layer 0).** There is no decoration slot for layer 0:
+**Props inside the playfield (layer 0).** There is no decoration slot for it:
 `decoration(ROAD)` is never asked (the default returns `null` for it) and
 `decorate_layer()` is never called with `ROAD`. What layer 0 takes is the road
-itself - `road_mesh_override` for geometry, `road_skins` / `road_variant()` /
-`road_surfaces` for the surface, and `override_road_priority` /
-`road_render_priority` for where it sits among the bands, all applied by
-`_skin_road()` on every placement.
+itself, which `_skin_road()` assigns on every placement from the provider fields
+listed above.
 
 Nothing validates the bands, though: `distance_min` and `distance_max` are just
 metres from the centreline, so a `near_layer` is free to stand inside the playfield.
-The demo already does it - the road is 30 m wide and `rural_near.tres` places trees at
-13-14.5 m, in the decorative margin `LAYERS.md` describes ("outer 3-6 m on each side").
-Three things come with it:
+The demo already does it - the road is 30 m wide and `rural_near.tres` runs its fence
+at 13.0 m, in the decorative margin `LAYERS.md` describes ("outer 3-6 m on each
+side"). Three things come with it:
 
 * Keep the running corridor clear. A 30 m playfield with an 18-24 m corridor leaves
   about 3-6 m of margin per side; anything closer than that is in the runner's path.
 * Props there are visual. `BiomeLayer` instances are geometry with no collision, so
   the runner passes through them - unless the prop scene carries its own
   `StaticBody3D`, in which case it stops the runner but still has no gameplay meaning
-  (no scoring, no despawn, no spawning rules). Real obstacles are the `obstacle_skins`
-  hook of 1.2, which is declared and not consumed yet.
+  (no scoring, no despawn, no spawning rules). Real obstacles are the 1.2 hook.
 * They pop in at the pool edge. Scenery at 90-150 m hides the pool window; a prop two
   metres from the runner appears in front of them, so keep those low and small, and do
   not expect `visible_range` to help.
@@ -388,7 +392,7 @@ placed close, that is a fourth slot (`road_layer`) plus a branch in `decoration(
 
 One slot per band is a deliberate limit, not an oversight: three bands with a list
 each covers "what is near, what is middle, what is horizon" without a scene graph
-to maintain. When a band needs two *independent* layers - trees at 13 m and bushes
+to maintain. When a band needs two *independent* layers - a fence at 13 m and bushes
 at 22 m, placed with different counts and seeds - either mix both assets in that
 band's lists (the director spreads them over the same band), or add the second one
 by hand in `decorate_layer()`. Turning the slots into arrays is a small change to
@@ -419,41 +423,26 @@ art), so it runs in about a second and exits non-zero on failure. It checks:
 * the pool ring: a body carries the window slot it is given rather than its position
   in the array, so moving the endless window by one element and stepping the closed
   loop by one both re-dress a single body and leave the rest as they were - the
-  property that keeps a re-centre from rebuilding 280 trees in one frame;
+  property that keeps a re-centre from rebuilding the whole pool in one frame;
+* the spawn gate: an element a layer dresses only every N-th time is hosted the same
+  way every time it is rebuilt, which is the same determinism claim one level up;
 * horizon rings keep their distance band, ride with the runner, and are only laid
   out again when the runner leaves a region;
 * the debug readout's numbers: the run a biome covers, the distance and element
   count to the next change (counting turns as the arcs they are), the run's
-  progress, and the single-biome case, where there is no change to wait for;
-* the draw order: the bucket width the camera's far plane implies, the spread of ranks
-  over the engine's sixteen buckets - and, end to end, that the director's own ranking
-  pass writes buckets which read back front to back from a camera and leaves the bodies
-  the far plane cannot show alone.
+  progress, and the single-biome case, where there is no change to wait for.
 
-It also refuses to pass quietly, because a runtime error in GDScript does not stop the
-run: it abandons the function it happened in and the caller carries on, so a broken test
-is simply a test with fewer checks in it. Three things guard against that. Before the
-first test the run asks whether every project script the tests build can be instantiated
-- a script that does not compile still *loads*, so the failure otherwise appears as
-tests that silently never ran. Every test is declared `-> bool` and ends with
-`return true`, which the runner reads back: a test a runtime error abandoned returns
-nothing, and so does one that bailed out on a failure of its own, and both are reported
-by name. And a test that asserted nothing is a failure whether it finished or not. The
-summary counts the tests as well as the checks - `287 checks in 19 tests, all green` -
-so a run that lost one of them says `16 of 17` instead of hiding behind a green
-sentence. Every one of those came from a real failure: a self-test that reports "all
-green" about tests it did not run is worse than no self-test at all.
-
-The run makes its checks from the first `_process` frame rather than from
-`_initialize()`, because the root is not in the tree yet while `_initialize()` runs:
-`SceneTree::initialize()` calls the main loop's `_initialize()` and only then does
-`root->_set_tree(this)`. A node added a line earlier never enters the tree, so its
-`_ready()` never runs - the track pools no bodies, the horizon has no anchor - and a
-[Tween] bound to it is stepped and silently does nothing (`Tween::step()` returns
-early while its bound node is outside the tree), which is how an atmosphere fade can
-be created, stepped and never move. The first check the run makes is that the tree is
-up, so a harness that drifts back into `_initialize()` says so in one line instead of
-failing a dozen checks about an empty track.
+It also refuses to pass quietly, because a runtime error in GDScript abandons the
+function it happened in and the caller carries on - so a broken test would otherwise be
+nothing but a run with fewer checks in it. Every test is declared `-> bool` and ends
+with `return true`, which the runner reads back; a test that asserted nothing is a
+failure whether it finished or not; and a run whose tree never came up names the tests
+it skipped instead of reporting the shorter suite as a passing one. The summary counts
+tests as well as checks - `252 checks in 18 tests, all green` - so a lost test says
+`17 of 18` rather than hiding behind a green sentence. Why each of those guards is
+there, including why the run starts from the first `_process` frame and not from
+`_initialize()`, is in the file's own header comments; every one of them came from a
+real failure.
 
 ---
 
@@ -464,18 +453,13 @@ wherever it matters:
 
 | Asset | What it is |
 |---|---|
-| `rural/layers/rural_near.tres` | the island's tree, wrapped as `rural/props/rural_tree.tscn` and placed as a scene variant: real art, one per side per segment. Its 4700 leaf instances are laid out once per [MultiMesh] - the scene's is shared, so a rebuild no longer re-parses the layout per tree - but they are still 4700 instances to draw, which is why the layer hosts the tree on every second element, keeps `visible_range` short and casts no shadows; a real biome should bake a lighter tree |
+| `rural/layers/rural_near.tres` | the wooden fence: `props/rural/fence_segment_wooden.obj` instanced through one [MultiMesh] per segment, 64 copies at 13.0 m, painted with the trunk material. `frequency_max = 6` makes it the demo of the seeded spawn gate - the fence arrives on about one element in six - and the `host_every = 3` the file also carries is a ring field this layer ignores |
 | `rural/props/leaf_mesh.tres` | the leaf quad baked out of `uma_island.tscn`, so the demo does not depend on `props/rural/leaf.obj` being present in the checkout |
-| `rural/layers/rural_mid.tres` | one `QuadMesh` card per segment with a flat unshaded material - a treeline, not a treeline asset |
-| `rural/layers/rural_far.tres` | fourteen Y-billboard cards on a 1.2-1.6 km ring - a horizon, not a panorama. They are still flat rectangles: replacing the card mesh with a hill silhouette is what this layer wants next |
+| `rural/layers/rural_mid.tres` | the island's tree, wrapped as `rural/props/rural_tree.tscn` and placed as a scene variant: real art, 4 per side between 18 and 70 m. Its 4700 leaf instances are laid out once per [MultiMesh], which is why the layer keeps `visible_range` short and casts no shadows; a real biome should bake a lighter tree |
+| `rural/layers/rural_far.tres` | twenty billboard cards of 115 x 22 m on a 200-235 m ring - a horizon, not a panorama. They are still flat rectangles: replacing the card mesh with a hill silhouette is what this layer wants next. Only `rural_dusk` points at it, so the day biome runs without a horizon of its own |
 | the base `Environment` in `rural.tres` | an inline sub-resource: background, sky and the fog that hazes the far band out. A real biome would light its own sky, not reuse the island's |
 | `rural_dusk.tres` | a second biome so that transitions are visible at all; it is rural again with the dirt road texture and its own inline dusk `Environment`, and should be replaced by the first real biome (city or suburbs) |
 | `rural/materials/*.tres` | flat colours with `TODO`-less names, because they will be replaced wholesale |
-
-One thing to know about the demo level: `scrolling_track.tscn` is a bare 30 m road
-strip with no terrain beside it, so the near layer keeps its trees *on* the strip
-(13-14.5 m from the centreline, just inside the edge). In a level with ground,
-widen `distance_min`/`distance_max` to the 15-60 m band of `LAYERS.md`.
 
 One geometric detail about `fit_to_segment`: a stretched strip is aligned with
 the track's chord, not with the arc. On a 5-degree turn of 1200 m radius that is
@@ -484,12 +468,11 @@ with a small step instead of a perfect seam. It is invisible next to a real
 mesh; if it ever matters, wrap the strip in a short scene and do not use
 `fit_to_segment`.
 
-Two more things worth knowing while iterating:
+Three more things worth knowing while iterating:
 
 * Biomes are play-time only. `TrackManager` is not a `@tool` script, so no biome
-  work happens while the editor is paused; press Play. `BiomeDirector.refresh()`
-  re-applies everything to a running world (it calls `TrackManager.refresh_pool()`,
-  which re-places and re-announces every pooled segment).
+  work happens while the editor is paused; press Play, and see step 4 of 3.1 for
+  re-applying an edit to a running world.
 * Everything that scales with the pool is O(pooled segments): decoration is
   parented per segment, so the cost of a biome is its layer descriptors, not the
   length of the track, and an idle frame only compares 40 small dictionaries.
@@ -500,9 +483,9 @@ Two more things worth knowing while iterating:
   end of each physics frame, and at the end of `_ready()` for the level's first
   dressing, which is the expensive one and would otherwise be blamed on the first
   frame. A re-centre should read a handful of segments; a number near `pool_size`
-  means every body changed element, which is 280 instanced tree scenes in the demo and
-  a visible freeze. The self-test asserts the first case for both an endless re-centre
-  and a closed-loop step.
+  means every body changed element, which in the demo is a few hundred instanced tree
+  scenes and a visible freeze. The self-test asserts the first case for both an endless
+  re-centre and a closed-loop step.
 
 ---
 
@@ -579,7 +562,7 @@ has 3 problem(s), biomes still run:
   - rural_dusk: MID layer `visible_range` (120.0 m) is closer than `distance_max` (200.0 m),
     so part of this layer is never visible
   - rural_dusk: FAR layer a ring card at `distance_min` = 60.0 m could be driven past;
-    the horizon belongs beyond 300 m
+    the horizon belongs beyond 200 m
   - both `biomes` and `sections` are set: the sections win, so the 2 biome(s) in `biomes`
     are never used
 ```

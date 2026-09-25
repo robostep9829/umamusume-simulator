@@ -72,14 +72,19 @@ const RING_MIN_DISTANCE := 200.0
 ## Which side of the track gets instances. Ignored in RING mode, which always
 ## closes the circle.
 @export var side: BiomeLayer.Side = Side.BOTH
-## ALONG_TRACK: host the layer on every N-th element only. The objects themselves
-## have to cover the skipped span (a tree line built for `host_every = 4` must be
-## as long as four segments), otherwise the layer will look like it has holes.
 ## RING: how many elements may pass before the horizon is allowed to change, so a
-## far biome can keep one silhouette for a long while (1 = every re-snap).
+## far biome can keep one silhouette for a long while (1 = every re-snap). Along-track
+## layers are rebuilt by every element that hosts them, so this does nothing there -
+## [member frequency_min] is what makes an along-track layer sparse.
 @export var host_every: int = 1
 
+## Sparsity of an along-track layer: each element draws its own period from the
+## director's decoration seed and is dressed only when its index is a multiple of it,
+## so a 1..6 range dresses about one element in six. The gap is real - nothing
+## stitches the skipped elements together - so a band that must read as one
+## uninterrupted run wants [member fit_to_segment] on every element instead.
 @export var frequency_min: int = 1
+## Upper end of the period [member frequency_min] draws.
 @export var frequency_max: int = 1
 ## Distance from the centreline (ALONG_TRACK) or ring radius (RING), in metres.
 ## The LAYERS.md bands are roughly: 15-60 m for layer 1, 60-200 m for layer 2,

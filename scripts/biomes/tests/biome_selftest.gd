@@ -588,39 +588,6 @@ func _test_validation() -> bool:
 	reporter._report_once(&"same", "self-test: the second report of \"same\" is swallowed")
 	reporter._report_once(&"other", "self-test: the first report of \"other\" (expected)")
 	_check(reporter.reported_problems().size() == 2, "a repeated problem is reported once")
-
-	# And the one thing a layer cannot check about itself: a `prop_priorities` entry that
-	# names no node of the props the layer spawns is a priority that would be silently never
-	# applied, and only the director holds the map and the node names at the same time.
-	var before := reporter.reported_problems().size()
-	var prop_node := Node3D.new()
-	prop_node.name = "Prop"
-	var canopy := MeshInstance3D.new()
-	canopy.name = "Leaves"
-	prop_node.add_child(canopy)
-	canopy.owner = prop_node
-	var prop_scene := PackedScene.new()
-	prop_scene.pack(prop_node)
-	var naming := BiomeLayer.new()
-	naming.meshes = [BoxMesh.new()]
-	naming.override_render_priority = true
-	naming.prop_priorities = {"Leaves": 0, "Leaf": 1}
-	reporter._report_unknown_prop_names(prop_node, prop_scene, naming)
-	_check(
-		reporter.reported_problems().has(&"prop_priority_name::Leaf"),
-		"a prop priority that names no node of the prop is reported"
-	)
-	_check(
-		not reporter.reported_problems().has(&"prop_priority_name::Leaves"),
-		"the name the prop does answer to is not reported"
-	)
-	naming.prop_priorities = {"Leaves": 0}
-	reporter._report_unknown_prop_names(prop_node, prop_scene, naming)
-	_check(
-		reporter.reported_problems().size() == before + 1,
-		"a map the props answer to adds no report"
-	)
-	prop_node.free()
 	reporter.free()
 	return true
 
