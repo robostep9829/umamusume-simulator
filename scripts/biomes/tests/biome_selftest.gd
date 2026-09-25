@@ -122,7 +122,6 @@ func _run_tests() -> void:
 	# harness moved back into `_initialize()` reports one clear line - and skips what
 	# cannot work - instead of failing seventeen checks about an empty track.
 	var tree_ready := root.is_inside_tree()
-	_check(tree_ready, "the tree is running, so added nodes get their `_ready()`")
 
 	# Listed rather than called one by one, so the log says which test is running when
 	# an engine error lands between two checks. Every test is `-> bool` and ends with
@@ -134,6 +133,7 @@ func _run_tests() -> void:
 		_test_placement_mirrors,
 		_test_placement_lateral,
 		_test_placement_determinism,
+		_test_spawn_gate_determinism,
 		_test_seed_spread,
 		_test_playlist_auto,
 		_test_playlist_single,
@@ -143,17 +143,18 @@ func _run_tests() -> void:
 		_test_draw_order,
 	]
 	if tree_ready:
-		tests.append_array([
-			_test_first_pool,
-			_test_pool_ring,
-			_test_track_integration,
-			_test_ranking_integration,
-			_test_horizon,
-			_test_debug_stats,
-			_test_atmosphere,
-		])
+		tests.append_array(_tree_tests())
 	else:
-		print("  · (the track, horizon, stats and atmosphere tests need a running tree)")
+		# A failure, not a log line: the run exits non-zero, and it says which tests it
+		# never ran, because "all green" about a third of the suite that did not run is
+		# the exact thing this file is written not to do.
+		var skipped: Array[String] = []
+		for tree_test in _tree_tests():
+			skipped.append(tree_test.get_method())
+		_failures.append(
+			"the tree is not running, so %d tests never ran: %s"
+			% [skipped.size(), ", ".join(skipped)]
+		)
 	for test in tests:
 		var before := _checks
 		var test_name := test.get_method()
@@ -187,13 +188,30 @@ func _run_tests() -> void:
 	if _failures.is_empty():
 		print("biome self-test: %d checks in %d tests, all green." % [_checks, _finished_tests])
 	else:
-		print("biome self-test: %d checks in %d of %d tests, %d FAILED" % [
+		# stderr, both lines: a CI job that splits the streams must show why it went red,
+		# not just that it did.
+		printerr("biome self-test: %d checks in %d of %d tests, %d FAILED" % [
 			_checks, _finished_tests, tests.size(), _failures.size()
 		])
 		for failure in _failures:
-			print("  - %s" % failure)
+			printerr("  - %s" % failure)
 	_finished = true
 	quit(0 if _failures.is_empty() else 1)
+
+
+## The tests that build nodes, and so only work once the root is in the tree (see
+## [_process]). A separate list so a run that lost that frame can name the tests it
+## skipped rather than reporting a shorter suite as a passing one.
+func _tree_tests() -> Array[Callable]:
+	return [
+		_test_first_pool,
+		_test_pool_ring,
+		_test_track_integration,
+		_test_ranking_integration,
+		_test_horizon,
+		_test_debug_stats,
+		_test_atmosphere,
+	]
 
 
 ## --- placement ---------------------------------------------------------------
@@ -212,7 +230,11 @@ func _test_placement_end_points() -> bool:
 			Vector3.ZERO,
 			"placement at t = 0 is the segment origin for %s" % _segment_name(segment)
 		)
-		var expected_length := STRAIGHT_LENGTH if not segment.is_turn() else 104.7198
+		var expected_length := STRAIGHT_LENGTH
+		if segment.is_turn():
+			# The arc, not the chord: written as the formula so a change to the turn's
+			# authored constants moves this expectation with it.
+			expected_length = deg_to_rad(TURN_DEGREES) * TURN_RADIUS
 		_check(
 			is_equal_approx(BiomePlacement.length(segment), expected_length),
 			"arc length of %s is the centreline length" % _segment_name(segment)
@@ -236,12 +258,10 @@ func _test_placement_frames() -> bool:
 				"the frame at t = %s of %s follows the centreline (got %s, expected %s)"
 					% [t, name, forward, tangent]
 			)
+			# absf: a right axis pointing *back* along the travel would be as wrong as
+			# one pointing forward, and a signed comparison would pass it.
 			_check(
-				absf(frame.x.dot(forward)) < FRAME_EPSILON,
-				"the frame stays square to the track at t = %s of %s" % [t, name]
-			)
-			_check(
-				(frame * Vector3(1.0, 0.0, 0.0)).dot(tangent) < FRAME_EPSILON,
+				absf(frame.x.dot(tangent)) < FRAME_EPSILON,
 				"the frame's right stays perpendicular to travel at t = %s of %s" % [t, name]
 			)
 		# A layer that faces the track: the yaw the director uses for `face_track`
@@ -308,6 +328,59 @@ func _test_placement_determinism() -> bool:
 	_check(a != c, "a different element yields a different random value")
 	_check(a != d, "a different layer yields a different random value")
 	return true
+
+
+## Whether an element is hosted at all is a decision the gate in
+## [method BiomeDirector._build_along_track] takes from a period drawn between
+## `frequency_min` and `frequency_max`. It has to come from the layer seed and the
+## element index: a pooled body re-hosts an element when the track window slides, and
+## a period drawn from the global RNG would skip an element it built the first time,
+## which reads as the scenery reshuffling. The authored near layer is the one asset
+## that uses a range (`frequency_max = 6` in `rural_near.tres`), so this mirrors it
+## rather than the 1/1 every other test runs with - and 1/1 cannot catch this at all,
+## because every element is hosted whatever the period is.
+func _test_spawn_gate_determinism() -> bool:
+	var layer := BiomeLayer.new()
+	layer.meshes = [BoxMesh.new()]
+	layer.count = 1
+	layer.side = BiomeLayer.Side.LEFT
+	layer.frequency_min = 1
+	layer.frequency_max = 6
+	layer.distance_min = 20.0
+	layer.distance_max = 20.0
+	var director := BiomeDirector.new()
+	director.decor_seed = 987654321
+	var segment := _straight()
+	var identical := true
+	var hosted := 0
+	for element in 24:
+		var first := _gate_signature(director, layer, segment, element)
+		var second := _gate_signature(director, layer, segment, element)
+		identical = identical and first == second
+		if first != "":
+			hosted += 1
+	_check(identical, "the same element builds the same decoration twice over (24 elements)")
+	# Without these the check above passes for a gate that hosts everything, which is
+	# what every other layer in the suite does.
+	_check(hosted > 0, "a 1..6 period hosts something in 24 elements (got %d)" % hosted)
+	_check(hosted < 24, "and skips something in 24 elements (got %d)" % hosted)
+	return true
+
+
+## The decoration one element would get, spelled as the transforms of the nodes the
+## director placed for it - so two builds of it can be compared for equality. The
+## class is named rather than the node, because an out-of-tree node gets an engine
+## counter for its name (`@MeshInstance3D@7`) that says nothing about the placement.
+func _gate_signature(
+	director: BiomeDirector, layer: BiomeLayer, segment: TrackSegment, element: int
+) -> String:
+	var host := Node3D.new()
+	director._build_along_track(host, layer, segment, element, BiomeProvider.Layer.NEAR)
+	var signature := ""
+	for child in host.get_children():
+		signature += "%s|%s\n" % [child.get_class(), (child as Node3D).transform]
+	host.free()
+	return signature
 
 
 ## The mix has to use the whole 64-bit range. Both of its constants are above
@@ -754,19 +827,9 @@ func section_of(provider: BiomeProvider, segments: int) -> BiomeSection:
 ## finds the hosted instances at all, that the far-plane limit keeps it off the ones the
 ## camera cannot see, and that what it writes reads back as front-to-back.
 func _test_ranking_integration() -> bool:
-	var track := TrackManager.new()
-	track.track_level = TrackLevel.closed_racetrack(2, 3)
-	track.pool_size = 6
-	track.straight_segment = _segment_resource(false)
-	track.turn_segment = _segment_resource(true)
-
-	var near_layer := BiomeLayer.new()
-	near_layer.meshes = [BoxMesh.new()]
-	near_layer.count = 3
-	near_layer.side = BiomeLayer.Side.BOTH
-	near_layer.distance_min = 20.0
+	var track := _racetrack(2, 3, 6)
+	var near_layer := _box_layer(3)
 	near_layer.distance_max = 40.0
-	near_layer.edge_margin = 0.0
 
 	var provider := _provider(&"ranked")
 	provider.near_layer = near_layer
@@ -775,10 +838,7 @@ func _test_ranking_integration() -> bool:
 	playlist.biomes = [provider]
 
 	var world := _level_world()
-	var director := BiomeDirector.new()
-	director.track = track
-	director.playlist = playlist
-	director.world_environment = world
+	var director := _wired_director(track, playlist, world)
 
 	root.add_child(track)
 	root.add_child(director)
@@ -904,21 +964,9 @@ func _test_ranking_integration() -> bool:
 
 
 func _test_track_integration() -> bool:
-	var track := TrackManager.new()
-	track.track_level = TrackLevel.closed_racetrack(2, 3)
-	track.pool_size = 6
-	# Authored segments (and their meshes) are skipped, so the test needs no
-	# imported artwork.
-	track.straight_segment = _segment_resource(false)
-	track.turn_segment = _segment_resource(true)
+	var track := _racetrack(2, 3, 6)
 
-	var near_layer := BiomeLayer.new()
-	near_layer.meshes = [BoxMesh.new()]
-	near_layer.count = 1
-	near_layer.side = BiomeLayer.Side.BOTH
-	near_layer.distance_min = 20.0
-	near_layer.distance_max = 20.0
-	near_layer.edge_margin = 0.0
+	var near_layer := _box_layer(1)
 	near_layer.face_track = true
 
 	var first_road := StandardMaterial3D.new()
@@ -934,10 +982,7 @@ func _test_track_integration() -> bool:
 	playlist.segments_per_biome = 4
 
 	var world := _level_world()
-	var director := BiomeDirector.new()
-	director.track = track
-	director.playlist = playlist
-	director.world_environment = world
+	var director := _wired_director(track, playlist, world)
 
 	root.add_child(track)
 	root.add_child(director)
@@ -1011,24 +1056,10 @@ func _test_track_integration() -> bool:
 ## about 26 elements later: the run opens on a bare track and the overlay's `layers`
 ## line reads `near 0`, `mid 0` and `far 0` the whole time.
 func _test_first_pool() -> bool:
-	var track := TrackManager.new()
-	track.infinite = true
-	track.pool_size = 6
-	track.straight_min = 1
-	track.straight_max = 2
-	track.turn_min = 1
-	track.turn_max = 2
-	track.straight_segment = _segment_resource(false)
-	track.turn_segment = _segment_resource(true)
+	var track := _endless_track(1, 2, 1, 2, 6)
 
 	var road := StandardMaterial3D.new()
-	var near_layer := BiomeLayer.new()
-	near_layer.meshes = [BoxMesh.new()]
-	near_layer.count = 1
-	near_layer.side = BiomeLayer.Side.BOTH
-	near_layer.distance_min = 20.0
-	near_layer.distance_max = 20.0
-	near_layer.edge_margin = 0.0
+	var near_layer := _box_layer(1)
 
 	var ring := BiomeLayer.new()
 	ring.mode = BiomeLayer.Mode.RING
@@ -1048,10 +1079,7 @@ func _test_first_pool() -> bool:
 	var world := _level_world()
 	var runner := Node3D.new()
 	track.player = runner
-	var director := BiomeDirector.new()
-	director.track = track
-	director.playlist = playlist
-	director.world_environment = world
+	var director := _wired_director(track, playlist, world)
 
 	# The scene file's order: the track and its player enter the tree first, so the
 	# window is placed - and announced - while nothing is listening yet.
@@ -1094,35 +1122,18 @@ func _test_first_pool() -> bool:
 ## level holds 280 instanced tree scenes, and rebuilding all of them in one frame is
 ## the freeze this test locks down.
 func _test_pool_ring() -> bool:
-	var track := TrackManager.new()
-	track.infinite = true
-	track.pool_size = 6
-	track.straight_min = 1
-	track.straight_max = 1
-	track.turn_min = 1
-	track.turn_max = 1
-	track.straight_segment = _segment_resource(false)
-	track.turn_segment = _segment_resource(true)
+	var track := _endless_track(1, 1, 1, 1, 6)
 	var runner := Node3D.new()
 	track.player = runner
 
-	var layer := BiomeLayer.new()
-	layer.meshes = [BoxMesh.new()]
-	layer.count = 1
-	layer.side = BiomeLayer.Side.LEFT
-	layer.host_every = 1
-	layer.distance_min = 20.0
-	layer.distance_max = 20.0
+	var layer := _box_layer(1, BiomeLayer.Side.LEFT)
 	var provider := _provider(&"ringed")
 	provider.near_layer = layer
 	var playlist := BiomePlaylist.new()
 	playlist.biomes = [provider]
 
 	var world := _level_world()
-	var director := BiomeDirector.new()
-	director.track = track
-	director.playlist = playlist
-	director.world_environment = world
+	var director := _wired_director(track, playlist, world)
 	root.add_child(track)
 	root.add_child(runner)
 	root.add_child(director)
@@ -1159,16 +1170,9 @@ func _test_pool_ring() -> bool:
 
 	# The closed loop re-places every pool on every frame, so the same ring is what
 	# keeps its re-dresses down to the elements that scrolled in.
-	var loop := TrackManager.new()
-	loop.track_level = TrackLevel.closed_racetrack(2, 1)
-	loop.pool_size = 4
-	loop.straight_segment = _segment_resource(false)
-	loop.turn_segment = _segment_resource(true)
+	var loop := _racetrack(2, 1, 4)
 	var loop_world := _level_world()
-	var loop_director := BiomeDirector.new()
-	loop_director.track = loop
-	loop_director.playlist = playlist
-	loop_director.world_environment = loop_world
+	var loop_director := _wired_director(loop, playlist, loop_world)
 	root.add_child(loop)
 	root.add_child(loop_director)
 
@@ -1249,10 +1253,7 @@ func _test_horizon() -> bool:
 	track.straight_segment = _segment_resource(false)
 	track.turn_segment = _segment_resource(true)
 	var world := _level_world()
-	var director := BiomeDirector.new()
-	director.track = track
-	director.playlist = playlist
-	director.world_environment = world
+	var director := _wired_director(track, playlist, world)
 	root.add_child(track)
 	root.add_child(director)
 
@@ -1356,10 +1357,7 @@ func _test_debug_stats() -> bool:
 	var runner := Node3D.new()
 	track.player = runner
 	var world := _level_world()
-	var director := BiomeDirector.new()
-	director.track = track
-	director.playlist = playlist
-	director.world_environment = world
+	var director := _wired_director(track, playlist, world)
 	root.add_child(track)
 	root.add_child(runner)
 	root.add_child(director)
@@ -1430,8 +1428,6 @@ func _test_debug_stats() -> bool:
 
 ## --- helpers -----------------------------------------------------------------
 
-## Centreline tangent at `t`, measured from the placement itself so the check does
-## not simply restate the formula it is testing.
 ## The part of a biome change the player sees first. Written the way the debug
 ## overlay reads it - through the *live* [Environment] - because "the fog did not
 ## change with the biome" is exactly the kind of failure a test that only looks at
@@ -1456,10 +1452,7 @@ func _test_atmosphere() -> bool:
 	var runner := Node3D.new()
 	track.player = runner
 
-	var director := BiomeDirector.new()
-	director.track = track
-	director.playlist = playlist
-	director.world_environment = world
+	var director := _wired_director(track, playlist, world)
 	director.environment_transition_time = 2.0
 	root.add_child(track)
 	root.add_child(runner)
@@ -1566,6 +1559,8 @@ func _environment(colour: Color, density: float, fog: bool = true) -> Environmen
 	return environment
 
 
+## Centreline tangent at `t`, measured from the placement itself so the check does
+## not simply restate the formula it is testing.
 func _tangent(segment: TrackSegment, t: float) -> Vector3:
 	var step := 0.001
 	var before := BiomePlacement.local_position(segment, maxf(t - step, 0.0))
@@ -1645,6 +1640,62 @@ func _segment_resource(is_turn: bool) -> TrackSegment:
 	segment.width = 30.0
 	segment.height = 0.4
 	return segment
+
+
+## A closed racetrack with [method _segment_resource]'s stand-in meshes, so an
+## integration test needs no imported artwork.
+func _racetrack(straights: int, turns: int, pool_size: int) -> TrackManager:
+	var track := TrackManager.new()
+	track.track_level = TrackLevel.closed_racetrack(straights, turns)
+	track.pool_size = pool_size
+	track.straight_segment = _segment_resource(false)
+	track.turn_segment = _segment_resource(true)
+	return track
+
+
+## An endless track with the generator's run lengths pinned, so the window a test
+## sees is known rather than random. `pool_size` is spelled out at every call: the
+## track's own default is a full level's worth of bodies.
+func _endless_track(
+	straight_min: int, straight_max: int, turn_min: int, turn_max: int, pool_size: int
+) -> TrackManager:
+	var track := TrackManager.new()
+	track.infinite = true
+	track.pool_size = pool_size
+	track.straight_min = straight_min
+	track.straight_max = straight_max
+	track.turn_min = turn_min
+	track.turn_max = turn_max
+	track.straight_segment = _segment_resource(false)
+	track.turn_segment = _segment_resource(true)
+	return track
+
+
+## A band of plain boxes beside the track - enough geometry to place, count and
+## rank. A test that needs more of a layer, a wider band or instances that face the
+## road, sets the extra fields on the result.
+func _box_layer(count: int, side: BiomeLayer.Side = BiomeLayer.Side.BOTH) -> BiomeLayer:
+	var layer := BiomeLayer.new()
+	layer.meshes = [BoxMesh.new()]
+	layer.count = count
+	layer.side = side
+	layer.distance_min = 20.0
+	layer.distance_max = 20.0
+	layer.edge_margin = 0.0
+	return layer
+
+
+## A director wired to a track, a playlist and a level environment, still out of the
+## tree. Which of the three the caller adds first is left to it on purpose: several
+## tests are about that order, and about whether the pool was refreshed yet.
+func _wired_director(
+	track: TrackManager, playlist: BiomePlaylist, world: WorldEnvironment
+) -> BiomeDirector:
+	var director := BiomeDirector.new()
+	director.track = track
+	director.playlist = playlist
+	director.world_environment = world
+	return director
 
 
 ## A level [WorldEnvironment] with a plain environment, added to the tree. Every test

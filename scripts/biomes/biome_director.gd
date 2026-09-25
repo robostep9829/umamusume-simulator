@@ -271,7 +271,14 @@ func elements_to_biome_change() -> int:
 	if playlist.is_single_biome():
 		return -1
 	var element := track.element_index_at(track.player.global_position)
-	var run := playlist.run_range_at(element)
+	return _elements_left_in(playlist.run_range_at(element), element)
+
+
+## Elements from `element` until the run that covers it ends. A maximal run always
+## contains the element it was measured for, so this is at least 1; the clamp keeps a
+## mis-measured run out of the `-1` that [method elements_to_biome_change] reserves
+## for "this level never changes biome".
+func _elements_left_in(run: Vector2i, element: int) -> int:
 	return maxi(run.x + run.y - element, 0)
 
 
@@ -284,7 +291,13 @@ func distance_to_biome_change() -> float:
 	if elements < 0 or track == null or track.player == null:
 		return -1.0
 	var position := track.player.global_position
-	var element := track.element_index_at(position)
+	return _distance_from(position, track.element_index_at(position), elements)
+
+
+## Metres from `position` - which is inside element `element` - once `elements`
+## elements have passed. Shared by the two callers that measure to a biome change,
+## so the element count and the distance are always measured from the same place.
+func _distance_from(position: Vector3, element: int, elements: int) -> float:
 	var distance := track.element_length_at(element) * (1.0 - track.element_progress_at(position))
 	for step in elements - 1:
 		distance += track.element_length_at(element + step + 1)
@@ -332,21 +345,21 @@ func debug_stats() -> Dictionary:
 		if _active_provider != null:
 			stats["variant"] = _active_provider.road_variant(element)
 		if not playlist.is_single_biome():
-			_fill_change_stats(stats, element)
+			_fill_change_stats(stats, position, element)
 	stats["layers"] = _layer_instance_counts()
 	stats["horizon_cards"] = _horizon_instance_count()
 	stats["horizon_distance"] = _horizon_distance()
 	return stats
 
 
-func _fill_change_stats(stats: Dictionary, element: int) -> void:
+func _fill_change_stats(stats: Dictionary, position: Vector3, element: int) -> void:
 	var run := playlist.run_range_at(element)
 	stats["run_first"] = run.x
 	stats["run_elements"] = run.y
 	var walked : float = float(element - run.x) + stats["progress"]
 	stats["run_progress"] = clampf(walked / maxf(float(run.y), 1.0), 0.0, 1.0)
-	stats["change_elements"] = maxi(run.x + run.y - element, 0)
-	stats["change_distance"] = distance_to_biome_change()
+	stats["change_elements"] = _elements_left_in(run, element)
+	stats["change_distance"] = _distance_from(position, element, int(stats["change_elements"]))
 	var next_provider := playlist.provider_at(run.x + run.y)
 	stats["next_biome"] = next_provider.biome_id if next_provider != null else &"<none>"
 	stats["upcoming"] = _upcoming_runs(element)
@@ -375,18 +388,14 @@ func _upcoming_runs(element_index: int, count: int = 3) -> Array[Dictionary]:
 func _layer_instance_counts() -> Dictionary:
 	var counts := {}
 	for layer in DECORATION_LAYERS:
-		# `Layer.keys()` is an untyped `Array`, so the element is a `Variant` and a
-		# `:=` here would be refused by the analyzer; the cast names the type.
-		var band := String(BiomeProvider.Layer.keys()[layer])
-		var name := band.to_lower()
 		# A band's instances live in one of two places: an along-track layer parents
 		# them to the segment bodies, a `RING` one to the horizon anchor. Both are
 		# counted, so a band that is a ring reads its card count instead of a
 		# permanent 0 - the overlay's `layers` line is only worth reading if it says
 		# what is actually in the world.
-		var total := _count_instances(track, "BiomeLayer%s" % band)
-		total += _count_instances(_anchor, "Horizon%s" % band)
-		counts[name] = total
+		var total := _count_instances(track, _band_container(layer))
+		total += _count_instances(_anchor, _horizon_container(layer))
+		counts[_band_name(layer).to_lower()] = total
 	return counts
 
 
@@ -425,16 +434,18 @@ func _horizon_distance() -> float:
 ## owning biome and rebuilds the decoration of the segment when the body now
 ## shows something else than before.
 func _on_segment_placed(element_index: int, body: StaticBody3D, segment: TrackSegment) -> void:
-	if not enabled or playlist == null or body == null or segment == null:
+	if not enabled or playlist == null:
 		return
 	var provider := playlist.provider_at(element_index)
 	_skin_road(body, segment, provider, element_index)
 
 	var key := body.get_instance_id()
 	var record: Dictionary = _records.get(key, {})
-	var unchanged: bool = record.get("index", -1) == element_index
-	unchanged = unchanged and record.get("provider") == provider
-	unchanged = unchanged and record.get("segment") == segment
+	var unchanged: bool = (
+		record.get("index", -1) == element_index
+		and record.get("provider") == provider
+		and record.get("segment") == segment
+	)
 	if unchanged:
 		return
 	_rebuild_decoration(body, segment, provider, element_index)
@@ -486,7 +497,6 @@ func _skin_floor(body: Node3D, provider: BiomeProvider) -> void:
 	var floor_instance := body.get_node_or_null("Floor") as MeshInstance3D
 	if floor_instance == null:
 		return
-	#floor_instance.material_override = null
 	floor_instance.material_override = provider.skirt_material()
 	if provider.override_road_priority:
 		_apply_render_priority(floor_instance, provider.road_render_priority)
@@ -607,25 +617,35 @@ func _ring_regions_changed() -> bool:
 	for layer in DECORATION_LAYERS:
 		var descriptor := _active_provider.decoration(layer)
 		if descriptor == null or not descriptor.is_usable() or not descriptor.is_ring():
-			changed = _horizon_regions.erase(layer) or changed
+			if _horizon_regions.erase(layer):
+				changed = true
 			continue
-		var region := element_index / maxi(descriptor.host_every, 1)
+		var region := _ring_region(element_index, descriptor)
 		if not _horizon_regions.has(layer) or int(_horizon_regions[layer]) != region:
 			_horizon_regions[layer] = region
 			changed = true
 	return changed
 
 
+## Which stretch of `host_every` elements the ring is in - the unit its layout is
+## seeded on. Floor division, not the truncating `/` of two ints: an endless track's
+## element index is negative before the start of the level, and the two disagree
+## either side of zero, which would have the horizon re-seed itself every frame as
+## the runner crossed the origin.
+func _ring_region(element_index: int, descriptor: BiomeLayer) -> int:
+	return int(floor(float(element_index) / float(maxi(descriptor.host_every, 1))))
+
+
 ## Radius of the widest ring of the active biome, or 0 when it has none: what the
 ## anchor has to stay clear of.
 func _widest_ring_radius() -> float:
-	var radius := -1.0
+	var radius := 0.0
 	if _active_provider != null:
 		for layer in DECORATION_LAYERS:
 			var descriptor := _active_provider.decoration(layer)
 			if descriptor != null and descriptor.is_usable() and descriptor.is_ring():
-				radius = descriptor.distance_max if radius < 0.0 else maxf(radius, descriptor.distance_max)
-	return maxf(radius, 0.0)
+				radius = maxf(radius, descriptor.distance_max)
+	return radius
 
 
 func _rebuild_horizon() -> void:
@@ -646,10 +666,17 @@ func _rebuild_horizon() -> void:
 func _build_along_track(
 	host: Node3D, descriptor: BiomeLayer, segment: TrackSegment, element_index: int, layer: int
 ) -> void:
-	# if descriptor.host_every > 1 and posmod(element_index, descriptor.host_every) != 0:
-	# 	return
-	var spawn_chance: int = randi_range(descriptor.frequency_min, descriptor.frequency_max)
-	if posmod(element_index, spawn_chance):
+	# The period is drawn from the seeded generator, not the global `randi_range()`: a
+	# pooled body re-hosts another element when the window slides, and a global draw
+	# would skip an element it hosted the first time, reshuffling the scenery. Slot -1
+	# keeps this draw apart from the per-instance ones below, which start at 0.
+	var gate_rng := BiomePlacement.instance_rng(
+		decor_seed + descriptor.seed, layer, element_index, -1
+	)
+	var spawn_period: int = maxi(
+		gate_rng.randi_range(descriptor.frequency_min, descriptor.frequency_max), 1
+	)
+	if posmod(element_index, spawn_period):
 		return
 	var sides := _sides_of(descriptor.side)
 	var per_side := maxi(descriptor.count, 1)
@@ -701,7 +728,7 @@ func _build_along_track(
 ## `flip_faces` or a billboard/double-sided material.
 func _build_ring(host: Node3D, descriptor: BiomeLayer, element_index: int, layer: int) -> void:
 	var total := maxi(descriptor.count, 1)
-	var region := int(floor(float(element_index) / float(maxi(descriptor.host_every, 1))))
+	var region := _ring_region(element_index, descriptor)
 	var slot := 0
 	for i in total:
 		var rng := BiomePlacement.instance_rng(decor_seed + descriptor.seed, layer, region, slot)
@@ -909,12 +936,9 @@ func _rank_decorations() -> void:
 	# sitting exactly on the boundary is still ranked.
 	var limit := far + BiomeDrawOrder.bucket_size(far, near)
 	for layer in DECORATION_LAYERS:
-		# `Layer.keys()` is an untyped `Array`, so the element is a `Variant` and a `:=`
-		# here would be refused by the analyzer; the cast names the type.
-		var band := String(BiomeProvider.Layer.keys()[layer])
 		var nodes: Array[GeometryInstance3D] = []
-		_collect_instances(track, "BiomeLayer%s" % band, origin, limit, nodes)
-		_collect_instances(_anchor, "Horizon%s" % band, origin, limit, nodes)
+		_collect_instances(track, _band_container(layer), origin, limit, nodes)
+		_collect_instances(_anchor, _horizon_container(layer), origin, limit, nodes)
 		BiomeDrawOrder.rank(nodes, origin, far, near)
 
 
@@ -1136,12 +1160,29 @@ func _path_of(resource: Resource) -> String:
 	return resource.resource_path if not resource.resource_path.is_empty() else "<inline resource>"
 
 
+## The band a decoration layer is drawn in, named after the [enum BiomeProvider.Layer]
+## entry: `NEAR`, `MID`, `FAR`. `Layer.keys()` is an untyped `Array`, so its elements
+## are `Variant` and the cast is what lets a `:=` infer.
+func _band_name(layer: int) -> String:
+	return String(BiomeProvider.Layer.keys()[layer])
+
+
+## The container one band lives in on a segment body.
+func _band_container(layer: int) -> String:
+	return "BiomeLayer%s" % _band_name(layer)
+
+
+## The container one band lives in on the horizon anchor.
+func _horizon_container(layer: int) -> String:
+	return "Horizon%s" % _band_name(layer)
+
+
 func _layer_host(body: Node3D, layer: int) -> Node3D:
-	return _container(body, "BiomeLayer%s" % BiomeProvider.Layer.keys()[layer])
+	return _container(body, _band_container(layer))
 
 
 func _horizon_host(layer: int) -> Node3D:
-	return _container(_anchor, "Horizon%s" % BiomeProvider.Layer.keys()[layer])
+	return _container(_anchor, _horizon_container(layer))
 
 
 func _container(parent: Node3D, container_name: String) -> Node3D:

@@ -65,8 +65,3 @@ func calc_transform_3d(
 	var basis = Basis.from_euler(rotation_3d.get_euler()).scaled_local(scale_3d)
 	# Combine basis and position into the final transform
 	return Transform3D(basis, position_3d)
-
-
-# Called every frame. 'delta' is the elapsed time since the previous frame.
-func _process(_delta: float) -> void:
-	pass

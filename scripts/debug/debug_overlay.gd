@@ -228,47 +228,40 @@ func _resolve_targets() -> void:
 	if root == null:
 		root = get_tree().root
 	if director == null:
-		director = _find_director(root)
+		director = _find_node(root, _is_director) as BiomeDirector
 	if track == null and director != null:
 		track = director.track
 	if track == null:
-		track = _find_track(root)
+		track = _find_node(root, _is_track) as TrackManager
 	if player == null and track != null:
 		player = track.player
 	if player == null:
-		player = _find_runner(root)
+		player = _find_node(root, _is_runner)
 
 
-## The level's biome plumbing, depth first. Typed `is` checks rather than
-## `Node.is_class()`, which ignores script `class_name` declarations.
-func _find_director(root: Node) -> BiomeDirector:
+## The first node under `root` a `matches` predicate accepts, searched depth first.
+## The predicates use a typed `is` check rather than `Node.is_class()`, which ignores
+## script `class_name` declarations.
+func _find_node(root: Node, matches: Callable) -> Node:
 	for child in root.get_children():
-		if child is BiomeDirector:
+		if matches.call(child):
 			return child
-		var found := _find_director(child)
+		var found := _find_node(child, matches)
 		if found != null:
 			return found
 	return null
 
 
-func _find_track(root: Node) -> TrackManager:
-	for child in root.get_children():
-		if child is TrackManager:
-			return child
-		var found := _find_track(child)
-		if found != null:
-			return found
-	return null
+func _is_director(node: Node) -> bool:
+	return node is BiomeDirector
 
 
-func _find_runner(root: Node) -> Node3D:
-	for child in root.get_children():
-		if child is CharacterBody3D:
-			return child
-		var found := _find_runner(child)
-		if found != null:
-			return found
-	return null
+func _is_track(node: Node) -> bool:
+	return node is TrackManager
+
+
+func _is_runner(node: Node) -> bool:
+	return node is CharacterBody3D
 
 
 # --- Lines --------------------------------------------------------------------

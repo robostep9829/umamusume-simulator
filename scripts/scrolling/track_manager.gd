@@ -302,13 +302,14 @@ func track_forward_at(pos: Vector3) -> Vector3:
 ## listener can ask "which biome is the player in?" without knowing how the track
 ## is pooled.
 func element_index_at(pos: Vector3) -> int:
-	if infinite:
-		if _scroll == null:
-			return 0
-		return _slot_first + int(floor(_local_s_for(pos) / _seg_length))
-	if _slot_count <= 0:
+	# Derived from the same absolute distance as `element_progress_at` below, so the
+	# getters cannot disagree about which element a position falls in.
+	if _seg_length <= 0.0:
 		return 0
-	return posmod(int(floor(_closest_s(pos) / _seg_length)), _slot_count)
+	var index := int(floor(track_distance_at(pos) / _seg_length))
+	if infinite:
+		return index
+	return 0 if _slot_count <= 0 else posmod(index, _slot_count)
 
 
 ## --- Inspection --------------------------------------------------------------
@@ -458,10 +459,10 @@ func _apply_segment(node: StaticBody3D, seg: TrackSegment) -> void:
 	var cs := node.get_node("Collision") as CollisionShape3D
 	mi.mesh = seg.mesh
 	mi.scale.x = 1.0 if seg.direction <= 0 else -1.0
-	var floor := node.get_node("Floor") as MeshInstance3D
-	floor.mesh = seg.floor_mesh
-	floor.visible = seg.floor_mesh != null
-	floor.scale.x = mi.scale.x
+	var floor_instance := node.get_node("Floor") as MeshInstance3D
+	floor_instance.mesh = seg.floor_mesh
+	floor_instance.visible = seg.floor_mesh != null
+	floor_instance.scale.x = mi.scale.x
 	if seg.is_turn():
 		cs.shape = _turn_shape
 		cs.rotation.y = seg.turn() * 0.5
@@ -470,7 +471,6 @@ func _apply_segment(node: StaticBody3D, seg: TrackSegment) -> void:
 		cs.shape = _straight_shape
 		cs.rotation.y = 0.0
 		cs.position.z = -_straight_shape.size.z * 0.5
-	
 
 
 ## Returns the arc-length of the closest point on the centreline polyline

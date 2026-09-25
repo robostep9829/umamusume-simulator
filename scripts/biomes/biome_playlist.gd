@@ -232,6 +232,4 @@ func _shuffled_index(round_index: int, index: int) -> int:
 			permutation[j] = swap
 		_shuffle_order = permutation
 		_shuffle_round = round_index
-	if index < 0 or index >= _shuffle_order.size():
-		return index
 	return _shuffle_order[index]
