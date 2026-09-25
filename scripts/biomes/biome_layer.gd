@@ -45,7 +45,7 @@ enum Side {
 ## Closest a [constant Mode.RING] may sit, in metres. Closer than this the horizon
 ## stops reading as distance and starts reading as scenery the runner could reach -
 ## and could drive past, since a ring card is not anchored to anything.
-const RING_MIN_DISTANCE := 300.0
+const RING_MIN_DISTANCE := 200.0
 
 ## Uncheck to keep an authored layer around but inactive.
 @export var enabled: bool = true
