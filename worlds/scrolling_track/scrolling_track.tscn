@@ -5,10 +5,14 @@
 [ext_resource type="Environment" uid="uid://cwd3w67jcb3xr" path="res://environment/new_environment.tres" id="4_la2pr"]
 [ext_resource type="Resource" uid="uid://ck8dx66csso42" path="res://models/Matikanetannhauser/matitan.tres" id="4_pdat"]
 [ext_resource type="ArrayMesh" uid="uid://dxbpehg82cytg" path="res://worlds/scrolling_track/floor_segments/floor_straight.obj" id="5_7g5pp"]
-[ext_resource type="Material" uid="uid://c8xsq2iw3ca2h" path="res://worlds/scrolling_track/floor_segments/biomes/rural/materials/ground.tres" id="6_7g5pp"]
+[ext_resource type="Material" uid="uid://c8xsq2iw3ca2h" path="res://worlds/scrolling_track/biomes/rural/materials/ground.tres" id="6_7g5pp"]
 [ext_resource type="ArrayMesh" uid="uid://cmmwpaw4ojxm1" path="res://worlds/scrolling_track/floor_segments/floor_turn_left_5deg.obj" id="7_i1jpn"]
-
-[sub_resource type="CylinderMesh" id="CylinderMesh_waqk3"]
+[ext_resource type="Script" uid="uid://vk65f2vfnwtm" path="res://scripts/biomes/biome_director.gd" id="8_biome"]
+[ext_resource type="Resource" uid="uid://bjdqfib13mfdm" path="res://worlds/scrolling_track/playlists/playlist_demo.tres" id="9_playlist"]
+[ext_resource type="Script" uid="uid://7uenwo5bciov" path="res://scripts/debug/debug_overlay.gd" id="10_debug"]
+[ext_resource type="ArrayMesh" uid="uid://ckf2mmjx46y6r" path="res://worlds/scrolling_track/floor_segments/skirt_straight.obj" id="11_kvml8"]
+[ext_resource type="Material" uid="uid://bpos7h0cxwgln" path="res://worlds/scrolling_track/biomes/rural/materials/skirts_grassy.tres" id="12_5fob0"]
+[ext_resource type="ArrayMesh" uid="uid://ofo03d011vj3" path="res://worlds/scrolling_track/floor_segments/skirt_turn_left_5deg.obj" id="12_7xr46"]
 
 [node name="ScrollingTrack" type="Node3D" unique_id=97728838]
 
@@ -19,7 +23,7 @@ infinite = true
 straight_min = 1
 straight_max = 3
 
-[node name="Player" parent="." unique_id=10000006 instance=ExtResource("3_play")]
+[node name="Player" parent="." unique_id=2027806480 instance=ExtResource("3_play")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2, 0)
 auto_run_delay = 5.0
 player_data = ExtResource("4_pdat")
@@ -32,25 +36,37 @@ directional_shadow_max_distance = 6.0
 [node name="WorldEnvironment" type="WorldEnvironment" parent="." unique_id=931496456]
 environment = ExtResource("4_la2pr")
 
-[node name="MeshInstance3D" type="MeshInstance3D" parent="." unique_id=1564056299]
-process_mode = 4
-visible = false
-mesh = SubResource("CylinderMesh_waqk3")
-
-[node name="MeshInstance3D2" type="MeshInstance3D" parent="." unique_id=1805783648]
-process_mode = 4
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -60)
-visible = false
-mesh = SubResource("CylinderMesh_waqk3")
-
-[node name="FloorStraight" type="MeshInstance3D" parent="." unique_id=1591104222]
+[node name="StraightPreview" type="MeshInstance3D" parent="." unique_id=1591104222]
 process_mode = 4
 mesh = ExtResource("5_7g5pp")
 surface_material_override/0 = ExtResource("6_7g5pp")
 
-[node name="FloorTurnLeft5Deg" type="MeshInstance3D" parent="." unique_id=1006989938]
+[node name="TurnPreview" type="MeshInstance3D" parent="." unique_id=1006989938]
 process_mode = 4
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -100)
+visible = false
 material_override = ExtResource("6_7g5pp")
 mesh = ExtResource("7_i1jpn")
 surface_material_override/0 = ExtResource("6_7g5pp")
+
+[node name="BiomeDirector" type="Node3D" parent="." unique_id=1715226903 node_paths=PackedStringArray("track", "world_environment")]
+script = ExtResource("8_biome")
+track = NodePath("../TrackManager")
+playlist = ExtResource("9_playlist")
+world_environment = NodePath("../WorldEnvironment")
+
+[node name="DebugOverlay" type="CanvasLayer" parent="." unique_id=1314205677 node_paths=PackedStringArray("track", "director", "player")]
+visible = false
+script = ExtResource("10_debug")
+track = NodePath("../TrackManager")
+director = NodePath("../BiomeDirector")
+player = NodePath("../Player")
+
+[node name="SkirtStraightPreview" type="MeshInstance3D" parent="." unique_id=871020402]
+mesh = ExtResource("11_kvml8")
+surface_material_override/0 = ExtResource("12_5fob0")
+
+[node name="SkirtTurnPreview" type="MeshInstance3D" parent="." unique_id=1799788526]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -100)
+visible = false
+mesh = ExtResource("12_7xr46")

@@ -1,3 +1,4 @@
+class_name TrackManager
 extends Node3D
 
 ## Track composer that chains consecutive floor elements to build a track.
@@ -9,8 +10,20 @@ extends Node3D
 ##     the player via a precomputed spine (coordinates stay bounded).
 ##   - Infinite: a procedural `InfiniteTrackLevel` with varying curvature; a
 ##     moving scroll origin and player snap keep coordinates from growing.
+##
+## The track itself knows nothing about scenery: it announces every floor body it
+## places through `segment_placed`, and systems such as [BiomeDirector] hang off
+## that signal.
 
 enum Kind { STRAIGHT, TURN }
+
+## Emitted for every floor body that was (re)placed, after its transform, mesh and
+## collider are set. `element_index` identifies the piece of track the body now
+## shows - endless tracks count elements from the start of the level, a closed
+## loop counts them inside the lap - so the same piece always reports the same
+## index, whichever pooled body happens to host it. That is what lets listeners
+## rebuild only what actually changed.
+signal segment_placed(element_index: int, body: StaticBody3D, segment: TrackSegment)
 
 ## Player the track is centred on and recycled around.
 @export var player: Node3D
@@ -55,6 +68,7 @@ var _turn_shape: BoxShape3D
 
 # Closed-loop state
 var _slot_count: int = 0
+var _lap_length: float = 0.0
 var _spine_kind: Array[int] = []
 var _spine_transform: Array[Transform3D] = []
 var _spine_pt: PackedVector3Array = []
@@ -112,6 +126,7 @@ func _physics_process(_delta: float) -> void:
 ## transform of every slot's entry point, starting from the loop origin.
 func _build_spine() -> void:
 	_slot_count = track_level.count()
+	_lap_length = 0.0
 	_spine_kind.resize(_slot_count)
 	_spine_transform.resize(_slot_count)
 	_spine_pt.resize(_slot_count)
@@ -127,6 +142,7 @@ func _build_spine() -> void:
 		_spine_pt[i] = origin
 		origin += _basis_from_heading(heading) * seg.end()
 		heading += seg.turn()
+		_lap_length += seg.arc_length()
 
 
 ## Maps each pooled slot to a level slot centred on the player's arc-length.
@@ -136,9 +152,30 @@ func _replenish(s_p: float) -> void:
 	for k in pool_size:
 		var slot := first_slot + (k - half)
 		var L := posmod(slot, _slot_count)
-		var node := _pool[k]
+		var node := _body_for_slot(slot)
+		var segment := _segment_for(_spine_kind[L])
 		node.global_transform = _spine_transform[L]
-		_apply_segment(node, _segment_for(_spine_kind[L]))
+		_apply_segment(node, segment)
+		segment_placed.emit(L, node, segment)
+
+
+## The pooled body that carries window slot `slot`, which is counted absolutely -
+## the window's own numbering, not folded into the pool - so a body keeps its slot
+## until the window has moved on by a whole pool.
+##
+## This is what makes a re-centre cheap for whoever hangs off [signal
+## segment_placed]: advancing the window by six elements leaves every element that
+## is still in it on the body it is already dressed on, so a listener that compares
+## what a body carries (see [method BiomeDirector._on_segment_placed]) re-dresses
+## the elements that entered and nothing else. Keyed by the body's position in the
+## array, every body changed element on every re-centre and the whole pool - 280
+## trees in the demo level - was rebuilt in a single frame.
+##
+## Not folded into the *element* either: on a closed loop whose lap is not a
+## multiple of the pool, two elements of the window can share a lap slot, and
+## mapping those to one body would leave another element unplaced.
+func _body_for_slot(slot: int) -> StaticBody3D:
+	return _pool[posmod(slot, maxi(_pool.size(), 1))]
 
 
 ## --- Infinite ----------------------------------------------------------------
@@ -191,9 +228,11 @@ func _build_window() -> void:
 	_window_pt[pool_size] = local
 
 	for k in pool_size:
-		var node := _pool[k]
+		var node := _body_for_slot(_slot_first + k)
+		var segment := _segment_for(_window_kind[k])
 		node.transform = _window_tf[k]
-		_apply_segment(node, _segment_for(_window_kind[k]))
+		_apply_segment(node, segment)
+		segment_placed.emit(_slot_first + k, node, segment)
 
 
 ## Moves the window's base slot so the player stays near the middle, keeping
@@ -212,7 +251,12 @@ func _recenter(new_first: int) -> void:
 
 ## Returns the player's arc-length measured in the scroll-local frame.
 func _player_local_s() -> float:
-	var p_local := _scroll.global_transform.affine_inverse() * player.global_position
+	return _local_s_for(player.global_position)
+
+
+## Returns the arc-length of `pos` measured in the scroll-local frame.
+func _local_s_for(pos: Vector3) -> float:
+	var p_local := _scroll.global_transform.affine_inverse() * pos
 	var p := Vector2(p_local.x, p_local.z)
 	var best := 0.0
 	var best_d2 := INF
@@ -253,6 +297,95 @@ func track_forward_at(pos: Vector3) -> Vector3:
 	return _scroll.global_transform.basis * (-_window_tf[i].basis.z)
 
 
+## Returns the index of the track element whose centreline is closest to `pos`,
+## expressed the same way as the `element_index` of `segment_placed` - so a
+## listener can ask "which biome is the player in?" without knowing how the track
+## is pooled.
+func element_index_at(pos: Vector3) -> int:
+	# Derived from the same absolute distance as `element_progress_at` below, so the
+	# getters cannot disagree about which element a position falls in.
+	if _seg_length <= 0.0:
+		return 0
+	var index := int(floor(track_distance_at(pos) / _seg_length))
+	if infinite:
+		return index
+	return 0 if _slot_count <= 0 else posmod(index, _slot_count)
+
+
+## --- Inspection --------------------------------------------------------------
+##
+## Read-only helpers for debug overlays, tests and tools. None of them affects
+## placement; they answer "where is the runner, and what is under them?" in the
+## same terms `segment_placed` reports.
+
+## True when the track is endless (procedural, re-centred around the player)
+## rather than a closed loop.
+func is_endless() -> bool:
+	return infinite
+
+
+## Length of the closed loop in metres, or 0 on an endless track.
+func lap_length() -> float:
+	return _lap_length
+
+
+## Arc length of the element at `element_index`, in metres. A turn is measured
+## along the arc it sweeps, so elements are not all the same length even though the
+## index grid counts every slot as `straight_segment.length`.
+func element_length_at(element_index: int) -> float:
+	if _straight_segment == null:
+		return 0.0
+	return _segment_for(_element_kind_at(element_index)).arc_length()
+
+
+## Which way the element at `element_index` bends: -1 left, +1 right, 0 straight.
+func element_direction_at(element_index: int) -> int:
+	var kind := _element_kind_at(element_index)
+	if kind == TrackLevel.Kind.STRAIGHT:
+		return 0
+	if infinite:
+		return -1 if kind == InfiniteTrackLevel.Kind.TURN_LEFT else 1
+	return signi(track_level.turn_direction)
+
+
+## Distance travelled along the centreline to the point of it closest to `pos`, in
+## metres. An endless track counts from the start of the level, so this grows
+## without bound; a closed loop counts from the loop origin, so it wraps each lap.
+func track_distance_at(pos: Vector3) -> float:
+	if infinite:
+		if _scroll == null:
+			return 0.0
+		return float(_slot_first) * _seg_length + _local_s_for(pos)
+	if _slot_count <= 0:
+		return 0.0
+	return _closest_s(pos)
+
+
+## How far into the element under `pos` the runner is, as a fraction of that
+## element: 0 at its entry, approaching 1 at the seam to the next one. The endless
+## track indexes elements by `straight_segment.length`, so this is progress through
+## the index grid the biomes are chosen on, not an arc-length ratio on a turn.
+func element_progress_at(pos: Vector3) -> float:
+	if _seg_length <= 0.0:
+		return 0.0
+	return clampf(fmod(track_distance_at(pos), _seg_length) / _seg_length, 0.0, 1.0)
+
+
+## Re-places every pooled segment, which re-emits `segment_placed` for the whole
+## pool. Lets listeners update decisions they already made (see
+## [method BiomeDirector.refresh]); harmless to call while the track runs, because
+## re-placing a segment never moves the track.
+func refresh_pool() -> void:
+	if infinite:
+		if _scroll != null:
+			_build_window()
+		return
+	if _pool.is_empty():
+		return
+	var s := _closest_s(player.global_position) if player != null else 0.0
+	_replenish(s)
+
+
 ## Resets the scroll origin (and the player, which rides along) back toward the
 ## world origin so coordinates never grow, without moving the player relative
 ## to the track (interpolation reset hides the teleport).
@@ -273,12 +406,18 @@ func _create_pool(parent: Node) -> void:
 	for _i in pool_size:
 		var node := StaticBody3D.new()
 		var mi := MeshInstance3D.new()
+		mi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 		mi.name = "Mesh"
-		mi.visibility_range_end = 500.0
+		mi.visibility_range_end = 250.0
+		var m_floor := MeshInstance3D.new()
+		m_floor.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+		m_floor.name = "Floor"
+		m_floor.visibility_range_end = 250.0    # parity with the road's own cull distance
 		var cs := CollisionShape3D.new()
 		cs.name = "Collision"
 		cs.position.y = -straight_segment.height * 0.5
 		node.add_child(mi)
+		node.add_child(m_floor)
 		node.add_child(cs)
 		parent.add_child(node)
 		_pool.append(node)
@@ -290,6 +429,18 @@ func _create_pool(parent: Node) -> void:
 func _collider_size(seg: TrackSegment, margin_x: float, margin_z: float) -> Vector3:
 	var aabb := seg.mesh.get_aabb().size
 	return Vector3(aabb.x + margin_x, seg.height, aabb.z + margin_z)
+
+
+## Element kind at `element_index`, in the level's own enum. Both level kinds
+## start with STRAIGHT, so the comparison above is shared.
+func _element_kind_at(element_index: int) -> int:
+	if infinite:
+		if _infinite_level == null:
+			return TrackLevel.Kind.STRAIGHT
+		return _infinite_level.element_at(element_index)
+	if track_level == null:
+		return TrackLevel.Kind.STRAIGHT
+	return track_level.element_at(element_index)
 
 
 ## Returns the TrackSegment an element kind resolves to. In closed-loop mode
@@ -308,6 +459,10 @@ func _apply_segment(node: StaticBody3D, seg: TrackSegment) -> void:
 	var cs := node.get_node("Collision") as CollisionShape3D
 	mi.mesh = seg.mesh
 	mi.scale.x = 1.0 if seg.direction <= 0 else -1.0
+	var floor_instance := node.get_node("Floor") as MeshInstance3D
+	floor_instance.mesh = seg.floor_mesh
+	floor_instance.visible = seg.floor_mesh != null
+	floor_instance.scale.x = mi.scale.x
 	if seg.is_turn():
 		cs.shape = _turn_shape
 		cs.rotation.y = seg.turn() * 0.5

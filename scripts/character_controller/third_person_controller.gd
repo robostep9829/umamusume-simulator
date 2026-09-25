@@ -1,5 +1,6 @@
 @tool
 extends CharacterBody3D
+class_name ThirdPersonController
 
 ## Movement tuning
 @export var move_speed: float = 1.6
@@ -34,7 +35,7 @@ extends CharacterBody3D
 # Cached node references
 @onready var camera_pivot: Node3D = $CameraPivot
 @onready var skeleton: Node3D = $Skeleton3D
-@onready var spring: Node3D = $CameraPivot/SpringArm3D
+@onready var spring: SpringArm3D = $CameraPivot/SpringArm3D
 @onready var animation_tree: AnimationTree = $AnimationTree
 
 # Gravity pulled from project settings so it stays consistent
@@ -47,13 +48,23 @@ var _pitch: float = 0.0
 # Sprint tracking
 var _sprint_timer: float = 0.0
 var is_sprinting: bool = false
+var speed_mul: float = 1.0
 
 # Auto run tracking
 var _idle_time: float = 0.0
 var auto_forward: bool = false
 
+const WALK_ANIM_SPEED := 1.6
+const SPRINT_ANIM_SPEED := 7.0
+const STRIDE_ANIM_SPEED := 14.0
 
 func _ready() -> void:
+	# The arm must not see the character it is attached to. The body's collider is one
+	# physics step behind its own pivot, and the arm's cast only overlooks it while the
+	# pivot still overlaps it: past `capsule_radius * physics_ticks_per_second` - the
+	# capsule's 0.352 m at 60 Hz, about 21 m/s - the character outruns that stale
+	# collider, the cast starts hitting it, and the camera collapses onto the pivot.
+	spring.add_excluded_object(get_rid())
 	if not Engine.is_editor_hint():
 		Input.mouse_mode = Input.MOUSE_MODE_CAPTURED
 	_update_character_mesh()
@@ -133,11 +144,13 @@ func _apply_auto_run(input_dir: Vector2, delta: float) -> Vector2:
 		if _idle_time >= auto_run_delay:
 			auto_forward = true
 	if Input.is_action_just_pressed("move_back"):
+		speed_mul = 1.0
 		auto_forward = false
 		_idle_time = 0.0
 	# Force forward input while auto-running (unless the player is actively
 	# holding backward, which already cancelled it this frame).
 	if auto_forward and input_dir.y >= 0.0:
+		speed_mul += 0.0002
 		return Vector2(input_dir.x, -1.0)
 	return input_dir
 
@@ -167,8 +180,12 @@ func _handle_movement(delta: float) -> void:
 
 	# Choose speed based on sprint input
 	is_sprinting = Input.is_action_pressed("sprint") or auto_forward
-	var speed := sprint_speed if is_sprinting else move_speed
-
+	var speed := sprint_speed * speed_mul if is_sprinting else move_speed
+	
+	# Blend sprint and faster sprint animations
+	animation_tree["parameters/sprint_spd/stride_blend/blend_amount"] = clampf(remap(speed, SPRINT_ANIM_SPEED, STRIDE_ANIM_SPEED, 0.0, 1.0), 0.0, 1.0)
+	animation_tree["parameters/sprint_spd/stride_speed_mul/scale"] = clampf(remap(speed, STRIDE_ANIM_SPEED, 2 * STRIDE_ANIM_SPEED, 1.0, 2.0), 1.0, INF)
+	
 	if is_sprinting:
 		_sprint_timer += delta
 	else:

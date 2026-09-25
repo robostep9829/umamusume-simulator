@@ -5,7 +5,7 @@
 [resource]
 resource_name = "mtl_chr1041_50_face.001"
 albedo_texture = ExtResource("1_qnrxp")
-roughness = 0.48
+roughness = 0.55
 emission = Color(0.11177651, 0.055119462, 0.055135682, 1)
 backlight_enabled = true
 backlight = Color(0.32156864, 0.19607843, 0.19607843, 1)

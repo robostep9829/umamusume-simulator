@@ -2164,6 +2164,7 @@ bones/214/rotation = Quaternion(0, 0, 0, 1)
 bones/214/scale = Vector3(1, 1, 1)
 
 [node name="005_mtl_chr1062_00_hair" type="MeshInstance3D" parent="." unique_id=1583265373]
+layers = 9
 gi_mode = 2
 mesh = ExtResource("4_cpa5x")
 skin = SubResource("Skin_v027o")
@@ -2201,43 +2202,8 @@ skeleton = NodePath("..")
 "blend_shapes/Ear_16_R(Roll)[M_Hair]" = 0.0
 "blend_shapes/Ear_16_L(Roll)[M_Hair]" = 0.0
 
-[node name="000_mtl_bdy1062_00" type="MeshInstance3D" parent="." unique_id=1443047591]
-gi_mode = 2
-mesh = ExtResource("1_fcesk")
-skin = SubResource("Skin_v027o")
-skeleton = NodePath("..")
-
-[node name="004_mtl_chr1062_00_eye" type="MeshInstance3D" parent="." unique_id=624463362]
-gi_mode = 2
-mesh = ExtResource("3_s4n3r")
-skin = SubResource("Skin_v027o")
-skeleton = NodePath("..")
-"blend_shapes/Eye_1_R(HalfA)[M_Face]" = 0.0
-"blend_shapes/Eye_1_L(HalfA)[M_Face]" = 0.0
-"blend_shapes/Eye_2_R(CloseA)[M_Face]" = 0.0
-"blend_shapes/Eye_2_L(CloseA)[M_Face]" = 0.0
-"blend_shapes/Eye_3_R(HalfB)[M_Face]" = 0.0
-"blend_shapes/Eye_3_L(HalfB)[M_Face]" = 0.0
-"blend_shapes/Eye_4_R(HalfC)[M_Face]" = 0.0
-"blend_shapes/Eye_4_L(HalfC)[M_Face]" = 0.0
-"blend_shapes/Eye_5_R(WaraiA)[M_Face]" = 0.0
-"blend_shapes/Eye_5_L(WaraiA)[M_Face]" = 0.0
-"blend_shapes/Eye_8_R(WaraiD)[M_Face]" = 0.0
-"blend_shapes/Eye_8_L(WaraiD)[M_Face]" = 0.0
-"blend_shapes/Eye_12_R(OdorokiA)[M_Face]" = 0.0
-"blend_shapes/Eye_12_L(OdorokiA)[M_Face]" = 0.0
-"blend_shapes/Eye_13_R(OdorokiB)[M_Face]" = 0.0
-"blend_shapes/Eye_13_L(OdorokiB)[M_Face]" = 0.0
-"blend_shapes/Eye_14_R(OdorokiC)[M_Face]" = 0.0
-"blend_shapes/Eye_14_L(OdorokiC)[M_Face]" = 0.0
-"blend_shapes/Eye_20_R(XRange)[M_Face]" = 0.0
-"blend_shapes/Eye_20_L(XRange)[M_Face]" = 0.0
-"blend_shapes/Eye_21_R(YRange)[M_Face]" = 0.0
-"blend_shapes/Eye_21_L(YRange)[M_Face]" = 0.0
-"blend_shapes/Eye_22_R(EyeHideA)[M_Face]" = 0.0
-"blend_shapes/Eye_22_L(EyeHideA)[M_Face]" = 0.0
-
 [node name="006_mtl_tail0001_00" type="MeshInstance3D" parent="." unique_id=1222274565]
+layers = 9
 gi_mode = 2
 mesh = ExtResource("5_bluev")
 skin = SubResource("Skin_v027o")
@@ -2435,7 +2401,46 @@ skeleton = NodePath("..")
 "blend_shapes/Ear_16_R(Roll)[M_Hair]" = 0.0
 "blend_shapes/Ear_16_L(Roll)[M_Hair]" = 0.0
 
+[node name="000_mtl_bdy1062_00" type="MeshInstance3D" parent="." unique_id=1443047591]
+layers = 9
+gi_mode = 2
+mesh = ExtResource("1_fcesk")
+skin = SubResource("Skin_v027o")
+skeleton = NodePath("..")
+
+[node name="004_mtl_chr1062_00_eye" type="MeshInstance3D" parent="." unique_id=624463362]
+layers = 9
+gi_mode = 2
+mesh = ExtResource("3_s4n3r")
+skin = SubResource("Skin_v027o")
+skeleton = NodePath("..")
+"blend_shapes/Eye_1_R(HalfA)[M_Face]" = 0.0
+"blend_shapes/Eye_1_L(HalfA)[M_Face]" = 0.0
+"blend_shapes/Eye_2_R(CloseA)[M_Face]" = 0.0
+"blend_shapes/Eye_2_L(CloseA)[M_Face]" = 0.0
+"blend_shapes/Eye_3_R(HalfB)[M_Face]" = 0.0
+"blend_shapes/Eye_3_L(HalfB)[M_Face]" = 0.0
+"blend_shapes/Eye_4_R(HalfC)[M_Face]" = 0.0
+"blend_shapes/Eye_4_L(HalfC)[M_Face]" = 0.0
+"blend_shapes/Eye_5_R(WaraiA)[M_Face]" = 0.0
+"blend_shapes/Eye_5_L(WaraiA)[M_Face]" = 0.0
+"blend_shapes/Eye_8_R(WaraiD)[M_Face]" = 0.0
+"blend_shapes/Eye_8_L(WaraiD)[M_Face]" = 0.0
+"blend_shapes/Eye_12_R(OdorokiA)[M_Face]" = 0.0
+"blend_shapes/Eye_12_L(OdorokiA)[M_Face]" = 0.0
+"blend_shapes/Eye_13_R(OdorokiB)[M_Face]" = 0.0
+"blend_shapes/Eye_13_L(OdorokiB)[M_Face]" = 0.0
+"blend_shapes/Eye_14_R(OdorokiC)[M_Face]" = 0.0
+"blend_shapes/Eye_14_L(OdorokiC)[M_Face]" = 0.0
+"blend_shapes/Eye_20_R(XRange)[M_Face]" = 0.0
+"blend_shapes/Eye_20_L(XRange)[M_Face]" = 0.0
+"blend_shapes/Eye_21_R(YRange)[M_Face]" = 0.0
+"blend_shapes/Eye_21_L(YRange)[M_Face]" = 0.0
+"blend_shapes/Eye_22_R(EyeHideA)[M_Face]" = 0.0
+"blend_shapes/Eye_22_L(EyeHideA)[M_Face]" = 0.0
+
 [node name="003_mtl_chr1062_00_face_001" type="MeshInstance3D" parent="." unique_id=533138627]
+layers = 13
 gi_mode = 2
 mesh = ExtResource("2_vvpkw")
 skin = SubResource("Skin_v027o")

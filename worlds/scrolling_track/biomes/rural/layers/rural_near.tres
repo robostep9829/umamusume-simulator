@@ -1,0 +1,20 @@
+[gd_resource type="Resource" script_class="BiomeLayer" format=3 uid="uid://dtek1tsbwhr3l"]
+
+[ext_resource type="Script" uid="uid://dl0u5uw0i1tal" path="res://scripts/biomes/biome_layer.gd" id="1_layer"]
+[ext_resource type="Material" uid="uid://cnrli4i0qxdok" path="res://worlds/scrolling_track/biomes/rural/materials/tree_trunk.tres" id="1_voptu"]
+[ext_resource type="ArrayMesh" uid="uid://bt8hhmmxi6gnm" path="res://worlds/scrolling_track/props/rural/fence_segment_wooden.obj" id="2_wx5xs"]
+
+[resource]
+script = ExtResource("1_layer")
+meshes = Array[Mesh]([ExtResource("2_wx5xs")])
+mesh_material = ExtResource("1_voptu")
+multimesh = true
+count = 64
+host_every = 3
+frequency_max = 6
+distance_min = 13.0
+distance_max = 13.0
+edge_margin = 0.12
+along_scatter = 0.0
+visible_range = 250.0
+cast_shadow = false

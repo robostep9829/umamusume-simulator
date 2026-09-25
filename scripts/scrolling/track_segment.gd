@@ -12,6 +12,10 @@ enum Kind { STRAIGHT, TURN }
 
 @export var kind: Kind = Kind.STRAIGHT
 @export var mesh: Mesh
+## Floor that extends the playfield beyond the road mesh (verge, gutter,
+## embankment). Authored in the same local frame as `mesh`: entry at the origin,
+## -Z forward, +X right. Mirrored with the road for right turns.
+@export var floor_mesh: Mesh
 ## Track width (X extent) of the mesh.
 @export var width: float = 30.0
 ## Vertical thickness of the collider.
@@ -43,6 +47,14 @@ func end() -> Vector3:
 ## Heading change across the segment in radians (left negative, right positive).
 func turn() -> float:
 	return direction * deg_to_rad(turn_degrees) if is_turn() else 0.0
+
+
+## Length of the centreline in metres. For a turn this is the arc it sweeps, which
+## is slightly longer than the chord [method end] returns.
+func arc_length() -> float:
+	if is_turn():
+		return deg_to_rad(turn_degrees) * radius
+	return length
 
 
 func _forward(heading: float) -> Vector3:

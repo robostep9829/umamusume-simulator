@@ -1,0 +1,11 @@
+[gd_resource type="StandardMaterial3D" format=3 uid="uid://bpos7h0cxwgln"]
+
+[ext_resource type="Texture2D" uid="uid://cuvlgiuuxsw0r" path="res://worlds/uma_island/tex/layers/grass/forrest_ground_01_diffpack_corr_1k.png" id="1_jnvd3"]
+[ext_resource type="Texture2D" uid="uid://dyfsm6e01tuat" path="res://worlds/uma_island/tex/layers/grass/forrest_ground_01_nor_gl_1k-recomp.exr" id="2_6gjii"]
+
+[resource]
+render_priority = 3
+albedo_color = Color(0.87, 0.87, 0.87, 1)
+albedo_texture = ExtResource("1_jnvd3")
+normal_texture = ExtResource("2_6gjii")
+uv1_scale = Vector3(8, 8, 8)

@@ -1,11 +1,11 @@
 [gd_resource type="ShaderMaterial" format=3 uid="uid://c8xsq2iw3ca2h"]
 
-[ext_resource type="Shader" uid="uid://bt1d5adyshmc6" path="res://worlds/scrolling_track/floor_segments/biomes/rural/materials/ground_.tres" id="1_25ay8"]
+[ext_resource type="Shader" uid="uid://bt1d5adyshmc6" path="res://worlds/scrolling_track/biomes/rural/materials/shaders/ground_.tres" id="1_25ay8"]
 [ext_resource type="Texture2D" uid="uid://dyfsm6e01tuat" path="res://worlds/uma_island/tex/layers/grass/forrest_ground_01_nor_gl_1k-recomp.exr" id="2_82nou"]
-[ext_resource type="Texture2D" uid="uid://wt7lcdvdwbrb" path="res://worlds/scrolling_track/floor_segments/biomes/rural/tex/sand_02_nor_gl_1k_recomp.exr" id="3_0ve8r"]
+[ext_resource type="Texture2D" uid="uid://wt7lcdvdwbrb" path="res://worlds/scrolling_track/biomes/rural/tex/sand_02_nor_gl_1k_recomp.exr" id="3_0ve8r"]
 [ext_resource type="Texture2D" uid="uid://cuvlgiuuxsw0r" path="res://worlds/uma_island/tex/layers/grass/forrest_ground_01_diffpack_corr_1k.png" id="4_7ibs6"]
-[ext_resource type="Texture2D" uid="uid://bgmf13atu0jrd" path="res://worlds/scrolling_track/floor_segments/biomes/rural/tex/track-map.png" id="5_0a2hc"]
-[ext_resource type="Texture2D" uid="uid://dldrrp8ci0lmg" path="res://worlds/scrolling_track/floor_segments/biomes/rural/tex/sand_02_diff_rough_1k.png" id="6_fqla0"]
+[ext_resource type="Texture2D" uid="uid://bgmf13atu0jrd" path="res://worlds/scrolling_track/biomes/rural/tex/track-map.png" id="5_0a2hc"]
+[ext_resource type="Texture2D" uid="uid://dldrrp8ci0lmg" path="res://worlds/scrolling_track/biomes/rural/tex/sand_02_diff_rough_1k.png" id="6_fqla0"]
 
 [sub_resource type="Gradient" id="Gradient_x1s6x"]
 offsets = PackedFloat32Array(0.48138958, 0.7890819)
@@ -37,7 +37,7 @@ color_ramp = SubResource("Gradient_g77uk")
 seamless = true
 
 [resource]
-render_priority = 0
+render_priority = 3
 shader = ExtResource("1_25ay8")
 shader_parameter/tex_grass = ExtResource("4_7ibs6")
 shader_parameter/tex_sand = ExtResource("6_fqla0")

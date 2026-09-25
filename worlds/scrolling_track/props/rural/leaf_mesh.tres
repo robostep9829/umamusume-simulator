@@ -1,0 +1,52 @@
+[gd_resource type="ArrayMesh" format=4 uid="uid://cobx4l3bbhs5a"]
+
+[ext_resource type="Shader" uid="uid://djkpcrm6rddos" path="res://worlds/scrolling_track/biomes/rural/materials/shaders/wind_area_effect_simple.gdshader" id="1_nn28q"]
+
+[sub_resource type="FastNoiseLite" id="FastNoiseLite_6isqc"]
+
+[sub_resource type="NoiseTexture2D" id="NoiseTexture2D_bxmnr"]
+noise = SubResource("FastNoiseLite_6isqc")
+seamless = true
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_bxmnr"]
+render_priority = -1
+shader = ExtResource("1_nn28q")
+shader_parameter/albedo = Color(0.16433334, 0.34, 0, 1)
+shader_parameter/wind_mask = SubResource("NoiseTexture2D_bxmnr")
+shader_parameter/wind_strength = 10.0
+shader_parameter/wind_speed = 6.0
+shader_parameter/wind_direction = Vector2(1, 0)
+shader_parameter/wind_mask_scale = 200.0
+shader_parameter/wind_push = 0.0
+shader_parameter/wind_bend = 0.8830000419425
+
+[sub_resource type="ArrayMesh" id="ArrayMesh_jsywb"]
+_surfaces = [{
+"aabb": AABB(0, 0, -1, 1e-05, 2, 2),
+"format": 34896613377,
+"index_count": 12,
+"index_data": PackedByteArray("AAABAAIAAgABAAMAAAAEAAEABQAEAAAA"),
+"name": "Plane",
+"primitive": 3,
+"uv_scale": Vector4(0, 0, 0, 0),
+"vertex_count": 6,
+"vertex_data": PackedByteArray("AAAAAP9/AAAAAP///38AAAAAnz0AAAAAAABfwgAAAAAAAF/C//8AAAAAnz3//wAA")
+}]
+blend_shape_mode = 0
+
+[resource]
+_surfaces = [{
+"aabb": AABB(0, 0, -1, 1e-05, 2, 2),
+"attribute_data": PackedByteArray("////fwAA/3///wAAAAAAAAAA////////"),
+"format": 34896613399,
+"index_count": 12,
+"index_data": PackedByteArray("AAABAAIAAgABAAMAAAAEAAEABQAEAAAA"),
+"material": SubResource("ShaderMaterial_bxmnr"),
+"name": "Plane",
+"primitive": 3,
+"uv_scale": Vector4(0, 0, 0, 0),
+"vertex_count": 6,
+"vertex_data": PackedByteArray("AAAAAP9/VNUAAP///39U1QAAnz0AAFTVAABfwgAAVNUAAF/C//9U1QAAnz3//1TVqqpUVaqqVFWqqlRVqqpUVaqqVFWqqlRV")
+}]
+blend_shape_mode = 0
+shadow_mesh = SubResource("ArrayMesh_jsywb")
