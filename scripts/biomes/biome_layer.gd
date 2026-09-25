@@ -45,12 +45,7 @@ enum Side {
 ## Closest a [constant Mode.RING] may sit, in metres. Closer than this the horizon
 ## stops reading as distance and starts reading as scenery the runner could reach -
 ## and could drive past, since a ring card is not anchored to anything.
-##
-## The other end of the band is the camera's far plane, which is not this resource's to
-## know: `prefabs/third_person.tscn` draws 250 m of world, so the rural horizon sits at
-## 200-240 m and a [BiomeDirector] reports a ring parked past the far plane as an error
-## rather than letting it vanish.
-const RING_MIN_DISTANCE := 200.0
+const RING_MIN_DISTANCE := 300.0
 
 ## Uncheck to keep an authored layer around but inactive.
 @export var enabled: bool = true
@@ -129,46 +124,6 @@ const RING_MIN_DISTANCE := 200.0
 ## Uncheck for layers whose shadows would never be visible (horizon cards).
 @export var cast_shadow: bool = true
 
-@export_group("Draw order")
-## Ignore the `render_priority` authored in this layer's materials and use
-## [member render_priority] on all of them instead.
-##
-## Off by default, so a layer draws with the priorities its materials were authored
-## with. The override exists because those materials are usually shared - the leaf
-## material lives inside `leaf_mesh.tres`, which `uma_island` also draws - and a layer
-## is the unit the frame's draw order is authored in. See the draw-order section of
-## `worlds/scrolling_track/doc/LAYERS.md`.
-@export var override_render_priority: bool = false
-## Draw priority of every material of this layer, applied when
-## [member override_render_priority] is on. Higher draws later: it is the first field of
-## the engine's opaque sort key, so it orders whole groups of the frame - not the
-## instances of one layer against each other, which is what the director's distance
-## ranking does inside a group.
-@export_range(-128, 127) var render_priority: int = 0
-## Priorities for individual nodes of a prop scene, looked up by node name: a tree says
-## `{"Leaves": 0, "Trunk": 1}` and its canopy draws before its bark.
-##
-## Separate groups are the only way to order these two at all. Within one group the engine
-## compares the shader id before anything else can separate them - the leaf canopy is a
-## [ShaderMaterial], the trunk a [StandardMaterial3D] - so a distance ranking can never put
-## the leaves of a tree before its trunk, however close that trunk is.
-##
-## A name that no node of the layer's props answers to is reported by [BiomeDirector],
-## which is the first place that knows the props' node names.
-@export var prop_priorities: Dictionary[String, int] = {}
-
-
-## Draw priority one node of a prop takes: its own entry in [member prop_priorities] if
-## it has one, else the layer's [member render_priority].
-##
-## Keys are matched as strings, so a hand-authored `{"Leaves": 0}` and a node named
-## `&"Leaves"` meet; the map is a handful of entries, so the lookup is a short walk.
-func priority_for(node_name: StringName) -> int:
-	for key in prop_priorities:
-		if String(key) == String(node_name):
-			return int(prop_priorities[key])
-	return render_priority
-
 
 ## False when the layer has nothing to draw, either because it is disabled or
 ## because no content was authored. The director skips it in that case, which is
@@ -205,17 +160,6 @@ func validate() -> PackedStringArray:
 		problems.append("`distance_max` is smaller than `distance_min`")
 	if fit_to_segment and meshes.is_empty():
 		problems.append("`fit_to_segment` needs `meshes`, it is ignored for scenes")
-	if render_priority != 0 and not override_render_priority:
-		problems.append(
-			"`render_priority` (%d) is set but `override_render_priority` is off, so the "
-			% render_priority
-			+ "materials keep their own priority and this layer ignores it"
-		)
-	if not prop_priorities.is_empty() and not override_render_priority:
-		problems.append(
-			"`prop_priorities` is set but `override_render_priority` is off, so the "
-			+ "materials keep their own priority and this layer ignores it"
-		)
 
 	if not variants.is_empty() and not meshes.is_empty():
 		problems.append(

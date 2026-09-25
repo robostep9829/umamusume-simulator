@@ -140,7 +140,6 @@ func _run_tests() -> void:
 		_test_playlist_sections,
 		_test_road_surfaces,
 		_test_validation,
-		_test_draw_order,
 	]
 	if tree_ready:
 		tests.append_array(_tree_tests())
@@ -207,7 +206,6 @@ func _tree_tests() -> Array[Callable]:
 		_test_first_pool,
 		_test_pool_ring,
 		_test_track_integration,
-		_test_ranking_integration,
 		_test_horizon,
 		_test_debug_stats,
 		_test_atmosphere,
@@ -581,47 +579,6 @@ func _test_validation() -> bool:
 	_check_problem(two_sources, "sections win", "biomes shadowed by sections are reported")
 	_check_problem(two_sources, "negative", "a negative round length is reported")
 
-	# A priority that the layer would silently ignore is reported, and the pair that
-	# works is accepted - the whole point of the check is that the field is not quietly
-	# dead when it is left half set.
-	var unapplied := BiomeLayer.new()
-	unapplied.meshes = [BoxMesh.new()]
-	unapplied.render_priority = 3
-	_check_problem(
-		unapplied, "override_render_priority", "a draw priority that would be ignored is reported"
-	)
-	var applied := BiomeLayer.new()
-	applied.meshes = [BoxMesh.new()]
-	applied.render_priority = 3
-	applied.override_render_priority = true
-	_check(
-		_problems_of(applied).is_empty(),
-		"a layer that sets both the priority and the override is accepted"
-	)
-
-	# Per-prop priorities are the only way a canopy can be ordered against the trunk of its
-	# own tree: within one priority group the engine compares the shader id before anything
-	# else can separate them, and the canopy is a ShaderMaterial while the trunk is a
-	# StandardMaterial3D. The map is keyed by node name, so a name it does not know falls
-	# back to the layer's own number rather than to nothing.
-	var tree := BiomeLayer.new()
-	tree.meshes = [BoxMesh.new()]
-	tree.override_render_priority = true
-	tree.render_priority = 1
-	tree.prop_priorities = {"Leaves": 0, "Trunk": 1}
-	_check(tree.priority_for(&"Leaves") == 0, "a named node takes the priority the map gives it")
-	_check(tree.priority_for(&"Trunk") == 1, "the map's second name is its own priority too")
-	_check(
-		tree.priority_for(&"Fence") == 1,
-		"a node the map does not name falls back to the layer's priority"
-	)
-	var unnamed := BiomeLayer.new()
-	unnamed.meshes = [BoxMesh.new()]
-	unnamed.prop_priorities = {"Leaves": 0}
-	_check_problem(
-		unnamed, "prop_priorities", "per-prop priorities without the override are reported"
-	)
-
 	# And the reporting itself: the same problem is printed once, however many times
 	# the failing code path runs (a pooled body is re-dressed every element).
 	var reporter := BiomeDirector.new()
@@ -668,133 +625,6 @@ func _test_validation() -> bool:
 	return true
 
 
-## The engine's opaque pass is sorted by one packed key, and distance is the last field
-## of it: `priority | shader | material | mesh | surface | depth_layer`, the last of
-## those four bits wide and set from `distance * 16 / (far - near)`. [BiomeDrawOrder]
-## is this project's only per-instance ordering, so the arithmetic it hands the engine
-## is checked here - including what the engine then does with it, by computing the
-## bucket back out of the offset the same way `_fill_render_list` does.
-func _test_draw_order() -> bool:
-	# The bucket width is the camera's far plane over sixteen. The default 4000 m plane
-	# makes a bucket 250 m wide - wider than the whole near band, which is how a layer
-	# whose instances are 300 m apart ends up in one bucket, in no order at all.
-	_check(
-		is_equal_approx(BiomeDrawOrder.bucket_size(250.0, 0.05), 249.95 / 16.0),
-		"a bucket is (far - near) / 16, so ~15.6 m behind a 250 m far plane"
-	)
-	_check(
-		BiomeDrawOrder.bucket_size(4000.0, 0.05) > 240.0,
-		"the default 4000 m far plane makes a bucket wider than the band it should order"
-	)
-	_check(
-		BiomeDrawOrder.bucket_size(0.0, 0.0) > 0.0, "a degenerate camera still gives a usable bucket"
-	)
-
-	# Ranks are spread over all sixteen buckets rather than one rank each: a band with
-	# fewer instances than buckets then still uses the whole depth range.
-	_check(BiomeDrawOrder.bucket_for(0, 4) == 0, "the nearest of four takes the first bucket")
-	_check(BiomeDrawOrder.bucket_for(3, 4) == 15, "the furthest of four takes the last bucket")
-	_check(BiomeDrawOrder.bucket_for(0, 1) == 0, "one instance needs no spread")
-	_check(
-		BiomeDrawOrder.bucket_for(0, 40) == 0 and BiomeDrawOrder.bucket_for(39, 40) == 15,
-		"more instances than buckets still span the range"
-	)
-
-	# `depth = distance - sorting_offset` in the engine, so this offset has to centre
-	# the instance in its bucket whatever its real distance.
-	var size := BiomeDrawOrder.bucket_size(250.0, 0.0)
-	_check(
-		is_equal_approx(BiomeDrawOrder.sorting_offset(100.0, 3, size), 100.0 - 3.5 * size),
-		"the offset centres the instance in its bucket"
-	)
-
-	# Four instances at 5, 50, 100 and 240 m, ranked the way the director ranks a band.
-	# The buckets are read back out of the offsets with the engine's own formula, so
-	# this fails if the arithmetic and the engine's reading of it ever disagree.
-	#
-	# They are parented into the tree first: the director ranks nodes it found by walking
-	# a layer, so they are always inside the tree, and a detached node has no global
-	# transform - ranking one would measure it against the world origin instead of where
-	# it stands, which is exactly the silent misordering this test would then miss.
-	var holder := Node3D.new()
-	root.add_child(holder)
-	var nodes: Array[GeometryInstance3D] = []
-	for distance in [5.0, 50.0, 100.0, 240.0]:
-		var instance := MeshInstance3D.new()
-		holder.add_child(instance)
-		instance.position = Vector3(0.0, 0.0, -distance)
-		nodes.append(instance)
-	var ranked := BiomeDrawOrder.rank(nodes, Vector3.ZERO, 250.0, 0.05)
-	_check(ranked == 4, "every instance of the band is ranked")
-	var buckets: Array[int] = []
-	for node in nodes:
-		buckets.append(_bucket_of(node, Vector3.ZERO, 250.0, 0.05))
-	_check(
-		buckets == [0, 5, 10, 15],
-		"the four instances land in the buckets their rank asks for (got %s)" % str(buckets)
-	)
-	_check(
-		not nodes[0].sorting_use_aabb_center,
-		"ranking switches the instances to origin-based depth, which is the distance it computes"
-	)
-
-	# Two instances the same distance away - a mid-layer card places one each side of the
-	# track - must not trade places between passes, or a capture of one frame would not
-	# match the next. The engine draws the *lower* bucket first, and a lower bucket means a
-	# *larger* sorting offset (`depth = distance - sorting_offset`), so the instance the
-	# tie-break puts first is the one with the larger offset.
-	var tied: Array[GeometryInstance3D] = []
-	for _i in 2:
-		var instance := MeshInstance3D.new()
-		holder.add_child(instance)
-		instance.position = Vector3(0.0, 0.0, -30.0)
-		tied.append(instance)
-	BiomeDrawOrder.rank(tied, Vector3.ZERO, 250.0, 0.05)
-	_check(
-		tied[0].get_instance_id() < tied[1].get_instance_id()
-		and _bucket_of(tied[0], Vector3.ZERO, 250.0, 0.05)
-		< _bucket_of(tied[1], Vector3.ZERO, 250.0, 0.05),
-		"equidistant instances keep a stable order (the lower instance id first)"
-	)
-
-	# An empty band is not an error, and neither is an instance that was freed between
-	# the walk and the ranking - the pool frees bodies while the director runs. The array
-	# has to be filled while the instance is alive: the engine refuses to *set* a freed
-	# object into a typed array ("invalid (previously freed?) object instance"), so the
-	# dangling reference can only be made by freeing the node afterwards.
-	var empty: Array[GeometryInstance3D] = []
-	_check(BiomeDrawOrder.rank(empty, Vector3.ZERO, 250.0, 0.05) == 0, "an empty band ranks nothing")
-	var stale: Array[GeometryInstance3D] = []
-	var gone := MeshInstance3D.new()
-	stale.append(gone)
-	gone.free()
-	_check(BiomeDrawOrder.rank(stale, Vector3.ZERO, 250.0, 0.05) == 0, "a freed instance is skipped")
-
-	# Inside the tree for each of the checks above, then out of it in one move.
-	holder.free()
-	return true
-
-
-## The bucket the engine reads back out of an instance's sorting offset, using the
-## engine's own formula (`depth = distance - sorting_offset`, then
-## `int(depth * 16 / (far - near))`, clamped), so a test can check the ordering the engine
-## will really produce instead of trusting this file's own arithmetic.
-##
-## `origin` is the point the camera measured from: the world origin for the tests that
-## rank against [constant Vector3.ZERO], the camera itself for the ones that run the
-## director.
-func _bucket_of(
-	node: GeometryInstance3D, origin: Vector3, camera_far: float, camera_near: float
-) -> int:
-	var depth := origin.distance_to(node.global_position) - node.sorting_offset
-	return clampi(int(depth * 16.0 / (camera_far - camera_near)), 0, 15)
-
-
-## Nearest first, for the pairs `distance, instance` the ranking tests build.
-func _nearest_pair_first(a: Array, b: Array) -> bool:
-	return float(a[0]) < float(b[0])
-
-
 ## The problems `resource` reports, joined, for substring checks. Taken as a
 ## [Variant] so the same helper serves a playlist, a biome and a layer - `Resource`
 ## has no `validate()` of its own, and a typed call would be refused by the analyzer.
@@ -818,151 +648,6 @@ func section_of(provider: BiomeProvider, segments: int) -> BiomeSection:
 
 ## The contract that matters at runtime: the track announces its pooled
 ## segments, the director dresses them, and re-placing a segment changes nothing.
-## The director's own ranking pass, end to end, on a real track with real hosted layers.
-##
-## It is the only code that writes the buckets the engine reads, and it runs on
-## [`BiomeDirector.RANKING_INTERVAL`] from `_physics_process`, which a test that quits in
-## its first `_process` never reaches - so the pass is called here the way the timer
-## eventually would. What the checks are about is the join between the two: that the walk
-## finds the hosted instances at all, that the far-plane limit keeps it off the ones the
-## camera cannot see, and that what it writes reads back as front-to-back.
-func _test_ranking_integration() -> bool:
-	var track := _racetrack(2, 3, 6)
-	var near_layer := _box_layer(3)
-	near_layer.distance_max = 40.0
-
-	var provider := _provider(&"ranked")
-	provider.near_layer = near_layer
-
-	var playlist := BiomePlaylist.new()
-	playlist.biomes = [provider]
-
-	var world := _level_world()
-	var director := _wired_director(track, playlist, world)
-
-	root.add_child(track)
-	root.add_child(director)
-	track.refresh_pool()
-
-	# The camera is the origin the pass measures from, so it has to be a current one, and
-	# its 250 m far plane is what decides which instances are ranked at all.
-	var camera := Camera3D.new()
-	root.add_child(camera)
-	camera.far = 250.0
-	camera.make_current()
-	var first_body := track.get_child(0) as Node3D
-	camera.global_position = first_body.global_position + Vector3(0.0, 2.0, 0.0)
-	_check(camera.is_current(), "the ranking test has a current camera to measure from")
-
-	# Which instances the pass reached has to be told by the offset it writes, not by
-	# `sorting_use_aabb_center`: the director already switched every instance it *built* to
-	# origin-based depth, so that flag says nothing about the ranking. A sentinel no offset
-	# can equal marks the instances before the pass, and the pass replaces it.
-	var unranked := 12345.0
-	for body in track.get_children():
-		var host := body.get_node_or_null("BiomeLayerNEAR")
-		if host == null:
-			continue
-		for child in host.get_children():
-			var instance := child as GeometryInstance3D
-			if instance != null:
-				instance.sorting_offset = unranked
-
-	director._rank_decorations()
-
-	# The bound is checked on the *bodies*, not the instances: the walk prunes a whole body
-	# by its own distance and never looks inside a pruned one, so an instance of a kept body
-	# can sit a lateral offset past the far plane. That one is harmless - the far plane clips
-	# it whatever bucket it is in - while the body-level bound is what the walk promises.
-	var ranked: Array = []
-	var beyond_slack := 0
-	var unreached := 0
-	var slack := camera.far + BiomeDrawOrder.bucket_size(camera.far, camera.near)
-	for body in track.get_children():
-		var host := body.get_node_or_null("BiomeLayerNEAR")
-		if host == null:
-			continue
-		var from_camera := camera.global_position.distance_to((body as Node3D).global_position)
-		for child in host.get_children():
-			var instance := child as GeometryInstance3D
-			if instance == null:
-				continue
-			if instance.sorting_offset == unranked:
-				unreached += 1
-				continue
-			ranked.append([camera.global_position.distance_to(instance.global_position), instance])
-			if from_camera > slack + EPSILON:
-				beyond_slack += 1
-	_check(ranked.size() > 1, "the pass finds and ranks the hosted instances of the band")
-	_check(
-		beyond_slack == 0,
-		"the pass does not walk a body past the far plane and its bucket of slack"
-	)
-	_check(unreached > 0, "the bodies far out of sight keep their instances unranked")
-
-	ranked.sort_custom(_nearest_pair_first)
-	var buckets: Array[int] = []
-	for pair in ranked:
-		buckets.append(_bucket_of(pair[1], camera.global_position, camera.far, camera.near))
-	var ascending := buckets.duplicate()
-	ascending.sort()
-	_check(
-		buckets == ascending,
-		"the band reads back front to back, nearest instance first (got %s)" % str(buckets)
-	)
-	_check(
-		buckets[0] < buckets[buckets.size() - 1],
-		"the band spans more than one bucket, so the order is a real one and not a tie"
-	)
-
-	# Layer 0 is a group like any other, and the biome decides where it sits: the road
-	# tiles and the floor the pool carries beside them move to the biome's priority, on
-	# copies of the materials they were authored with - the shared ones are never retouched.
-	var road_material := StandardMaterial3D.new()
-	var floor_material := StandardMaterial3D.new()
-	var floor_mesh := BoxMesh.new()
-	floor_mesh.surface_set_material(0, floor_material)
-	provider.road_material_override = road_material
-	provider.override_road_priority = true
-	provider.road_render_priority = 2
-	track.straight_segment.floor_mesh = floor_mesh
-	track.turn_segment.floor_mesh = floor_mesh
-	track.refresh_pool()
-
-	var body := track.get_child(0) as Node3D
-	var road := body.get_node_or_null("Mesh") as MeshInstance3D
-	var floor_instance := body.get_node_or_null("Floor") as MeshInstance3D
-	_check(road != null and floor_instance != null, "a pooled body carries the road and the floor")
-	_check(
-		road.material_override != null and road.material_override != road_material
-		and road.material_override.render_priority == 2,
-		"the road moves to the floor's priority, on a copy of its material"
-	)
-	_check(
-		floor_instance.material_override != null
-		and floor_instance.material_override.render_priority == 2,
-		"the floor the road stands on moves with it"
-	)
-	_check(
-		road_material.render_priority == 0 and floor_material.render_priority == 0,
-		"the materials the road and the floor were authored with are left alone"
-	)
-
-	# A biome that asks for no override leaves the floor as its own mesh has it, instead of
-	# keeping the copy the biome running before it applied.
-	provider.override_road_priority = false
-	track.refresh_pool()
-	body = track.get_child(0) as Node3D
-	floor_instance = body.get_node_or_null("Floor") as MeshInstance3D
-	_check(
-		floor_instance.material_override == null,
-		"a biome without the override clears the floor's copy"
-	)
-
-	_teardown([track, director, world, camera])
-	return true
-
-
 func _test_track_integration() -> bool:
 	var track := _racetrack(2, 3, 6)
 
