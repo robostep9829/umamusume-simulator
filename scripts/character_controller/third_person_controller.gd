@@ -53,6 +53,10 @@ var speed_mul: float = 1.0
 # Auto run tracking
 var _idle_time: float = 0.0
 var auto_forward: bool = false
+var _auto_run_time: float = 0.0
+
+const MAX_SPEED := 20.0
+const LOG_GROWTH := 0.2
 
 const WALK_ANIM_SPEED := 1.6
 const SPRINT_ANIM_SPEED := 7.0
@@ -145,12 +149,15 @@ func _apply_auto_run(input_dir: Vector2, delta: float) -> Vector2:
 			auto_forward = true
 	if Input.is_action_just_pressed("move_back"):
 		speed_mul = 1.0
+		_auto_run_time = 0.0
 		auto_forward = false
 		_idle_time = 0.0
 	# Force forward input while auto-running (unless the player is actively
 	# holding backward, which already cancelled it this frame).
 	if auto_forward and input_dir.y >= 0.0:
-		speed_mul += 0.0002
+		# Logarithmic rise: fast at first, flattening toward MAX_SPEED.
+		_auto_run_time += delta
+		speed_mul = minf(MAX_SPEED / sprint_speed, 1.0 + LOG_GROWTH * log(1.0 + _auto_run_time))
 		return Vector2(input_dir.x, -1.0)
 	return input_dir
 
@@ -180,7 +187,7 @@ func _handle_movement(delta: float) -> void:
 
 	# Choose speed based on sprint input
 	is_sprinting = Input.is_action_pressed("sprint") or auto_forward
-	var speed := sprint_speed * speed_mul if is_sprinting else move_speed
+	var speed := minf(sprint_speed * speed_mul if is_sprinting else move_speed, MAX_SPEED)
 	
 	# Blend sprint and faster sprint animations
 	animation_tree["parameters/sprint_spd/stride_blend/blend_amount"] = clampf(remap(speed, SPRINT_ANIM_SPEED, STRIDE_ANIM_SPEED, 0.0, 1.0), 0.0, 1.0)
