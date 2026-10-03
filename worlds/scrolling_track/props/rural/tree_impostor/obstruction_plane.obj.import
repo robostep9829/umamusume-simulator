@@ -1,0 +1,25 @@
+[remap]
+
+importer="wavefront_obj"
+importer_version=1
+type="Mesh"
+uid="uid://btwrorx5hey4g"
+path="res://.godot/imported/obstruction_plane.obj-9c65e7c2051a80284cf8535744874230.mesh"
+
+[deps]
+
+files=["res://.godot/imported/obstruction_plane.obj-9c65e7c2051a80284cf8535744874230.mesh"]
+
+source_file="res://worlds/scrolling_track/props/rural/tree_impostor/obstruction_plane.obj"
+dest_files=["res://.godot/imported/obstruction_plane.obj-9c65e7c2051a80284cf8535744874230.mesh", "res://.godot/imported/obstruction_plane.obj-9c65e7c2051a80284cf8535744874230.mesh"]
+
+[params]
+
+generate_tangents=true
+generate_lods=true
+generate_shadow_mesh=true
+generate_lightmap_uv2=false
+generate_lightmap_uv2_texel_size=0.2
+scale_mesh=Vector3(1, 1, 1)
+offset_mesh=Vector3(0, 0, 0)
+force_disable_mesh_compression=false

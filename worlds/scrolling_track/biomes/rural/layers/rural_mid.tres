@@ -13,4 +13,4 @@ along_scatter = 0.8
 scale_min = 0.85
 scale_max = 1.3
 yaw_scatter = 180.0
-visible_range = 250.0
+visible_range = 0.0
