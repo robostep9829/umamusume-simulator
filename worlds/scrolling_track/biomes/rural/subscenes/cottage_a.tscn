@@ -1,0 +1,33 @@
+[gd_scene format=3 uid="uid://bd7xmau16y27l"]
+
+[sub_resource type="PlaneMesh" id="PlaneMesh_rahhg"]
+size = Vector2(30, 30)
+
+[sub_resource type="BoxMesh" id="BoxMesh_waqk3"]
+size = Vector3(12, 3, 12)
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_85khc"]
+albedo_color = Color(0.37, 0.122099996, 0.122099996, 1)
+
+[sub_resource type="BoxMesh" id="BoxMesh_rahhg"]
+size = Vector3(1, 1, 5.411621)
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_xv1o2"]
+albedo_color = Color(0.17, 0.116166666, 0, 1)
+
+[node name="CottageA" type="Node3D" unique_id=1343919848]
+
+[node name="plot" type="MeshInstance3D" parent="." unique_id=904184390]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.01, 15)
+visible = false
+mesh = SubResource("PlaneMesh_rahhg")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="." unique_id=825285485]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.47, 15)
+mesh = SubResource("BoxMesh_waqk3")
+surface_material_override/0 = SubResource("StandardMaterial3D_85khc")
+
+[node name="MeshInstance3D3" type="MeshInstance3D" parent="." unique_id=883359200]
+transform = Transform3D(0.62710077, 0, 0.7789381, 0, 1, 0, -0.7789381, 0, 0.62710077, 1.8463631, 0.51, 5.4763165)
+mesh = SubResource("BoxMesh_rahhg")
+surface_material_override/0 = SubResource("StandardMaterial3D_xv1o2")

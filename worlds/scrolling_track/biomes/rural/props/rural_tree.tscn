@@ -10,16 +10,17 @@
 
 [sub_resource type="QuadMesh" id="QuadMesh_waqk3"]
 
-[sub_resource type="ShaderMaterial" id="ShaderMaterial_yc2hg"]
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_s0hut"]
 render_priority = -1
 shader = ExtResource("8_jhl1t")
 shader_parameter/albedo = Color(1, 1, 1, 1)
 shader_parameter/texture_albedo = ExtResource("6_yc2hg")
-shader_parameter/distance_fade_min = 75.0
-shader_parameter/distance_fade_max = 80.0
-shader_parameter/alpha_scissor_threshold = 0.5
+shader_parameter/distance_fade_min = 74.9999983236
+shader_parameter/distance_fade_max = 79.99999821184
+shader_parameter/alpha_scissor_threshold = 0.50000002375
+shader_parameter/normal_mix = 1.0
 shader_parameter/texture_normal = ExtResource("7_sbpso")
-shader_parameter/z_clip_scale = 0.99989997473201
+shader_parameter/z_clip_scale = 0.99998997502673
 
 [sub_resource type="MultiMesh" id="MultiMesh_leaves"]
 transform_format = 1
@@ -29,12 +30,12 @@ buffer = PackedFloat32Array(7.109292e-06, 0.25270012, 0.025880111, 0.16656134, 0
 
 [node name="RuralTree" type="Node3D" unique_id=1360475128]
 
-[node name="MeshInstance3D2" type="MeshInstance3D" parent="." unique_id=921131499]
+[node name="MeshInstance3D2" type="MeshInstance3D" parent="." unique_id=1477931572]
 transform = Transform3D(7.5, 0, 0, 0, 6.6, 0, 0, 0, 7, 0, 3.3, 0)
 cast_shadow = 0
 visibility_range_begin = 60.0
 mesh = SubResource("QuadMesh_waqk3")
-surface_material_override/0 = SubResource("ShaderMaterial_yc2hg")
+surface_material_override/0 = SubResource("ShaderMaterial_s0hut")
 
 [node name="Trunk" type="MeshInstance3D" parent="." unique_id=2018142906]
 material_override = ExtResource("5_bark")

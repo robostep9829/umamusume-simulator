@@ -38,7 +38,6 @@ environment = ExtResource("4_la2pr")
 
 [node name="StraightPreview" type="MeshInstance3D" parent="." unique_id=1591104222]
 process_mode = 4
-visible = false
 mesh = ExtResource("5_7g5pp")
 surface_material_override/0 = ExtResource("6_7g5pp")
 
@@ -63,7 +62,6 @@ director = NodePath("../BiomeDirector")
 player = NodePath("../Player")
 
 [node name="SkirtStraightPreview" type="MeshInstance3D" parent="." unique_id=871020402]
-visible = false
 mesh = ExtResource("11_kvml8")
 surface_material_override/0 = ExtResource("12_5fob0")
 

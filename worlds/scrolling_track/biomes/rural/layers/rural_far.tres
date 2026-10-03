@@ -14,7 +14,6 @@ meshes = Array[Mesh]([SubResource("QuadMesh_hills")])
 mesh_material = ExtResource("2_far_hills")
 mode = 1
 count = 20
-host_every = 40
 distance_min = 200.0
 distance_max = 235.0
 scale_min = 0.9

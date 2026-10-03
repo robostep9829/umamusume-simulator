@@ -6,16 +6,12 @@
 
 [resource]
 script = ExtResource("1_layer")
-detail = 0
 meshes = Array[Mesh]([ExtResource("2_wx5xs")])
 mesh_material = ExtResource("1_voptu")
 multimesh = true
-count = 64
-host_every = 3
-frequency_max = 6
+count = 88
 distance_min = 13.0
 distance_max = 13.0
-edge_margin = 0.12
+edge_margin = 0.0
 along_scatter = 0.0
 visible_range = 250.0
-cast_shadow = false

@@ -1,0 +1,15 @@
+[gd_resource type="Resource" script_class="BiomeLayer" format=3 uid="uid://c8mfxeifmlw3d"]
+
+[ext_resource type="Script" uid="uid://dl0u5uw0i1tal" path="res://scripts/biomes/biome_layer.gd" id="1_vha6a"]
+[ext_resource type="PackedScene" uid="uid://bd7xmau16y27l" path="res://worlds/scrolling_track/biomes/rural/subscenes/cottage_a.tscn" id="2_wd6vq"]
+[ext_resource type="PackedScene" uid="uid://3v4t858bgdkl" path="res://worlds/scrolling_track/biomes/rural/subscenes/cottage_b.tscn" id="3_wd6vq"]
+
+[resource]
+script = ExtResource("1_vha6a")
+variants = Array[PackedScene]([ExtResource("2_wd6vq"), ExtResource("3_wd6vq")])
+side = 1
+distance_min = 15.0
+distance_max = 15.0
+face_track = true
+visible_range = 0.0
+metadata/_custom_type_script = "uid://dl0u5uw0i1tal"
