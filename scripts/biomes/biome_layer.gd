@@ -4,7 +4,11 @@ extends Resource
 ## One decoration layer of a biome: what is placed, how far from the track, how
 ## densely, and how it is recycled.
 ##
-## [BiomeProvider]s hand these out per [enum BiomeProvider.Layer] and the
+## A biome holds a free list of these ([member BiomeProvider.layers], at most
+## [constant BiomeProvider.MAX_LAYERS]): one layer is one placing pattern, so a
+## fence strip, scattered trees and sparse houses are three layers, not one.
+## [member detail] says what a layer costs (full 3D, cheap repeats, horizon
+## cards) while `distance_min`/`distance_max` say where it stands; the
 ## [BiomeDirector] turns them into nodes, so most biomes stay pure data - a few
 ## `.tres` files, no spawning code - which is the "same chunk logic, different
 ## theme" idea from `worlds/scrolling_track/doc/BIOMES.md` and the distance bands
@@ -32,6 +36,20 @@ enum Mode {
 	RING,
 }
 
+## What a layer costs: full 3D scenes up close, cheap repeated meshes further
+## out, horizon cards far away. Placement still comes from `distance_min` /
+## `distance_max` and [enum Mode]; this only groups layers for cost and the
+## debug overlay (which reports `high` / `medium` / `low`), so a biome
+## can hold several layers of the same detail at different distances.
+enum Detail {
+	## Full 3D dressing close to the track (houses, trees, lamps, benches).
+	HIGH,
+	## Cheap repeated geometry further out (tree lines, poles, walls).
+	MEDIUM,
+	## Horizon cards (hills, town edge, haze). Usually [constant Mode.RING].
+	LOW,
+}
+
 ## Which side of the track gets instances (in RING mode the ring is closed, so
 ## this is ignored).
 enum Side {
@@ -49,6 +67,10 @@ const RING_MIN_DISTANCE := 200.0
 
 ## Uncheck to keep an authored layer around but inactive.
 @export var enabled: bool = true
+
+## Cost tier of this layer, for grouping by cost. Several layers of one biome
+## may share a tier (five HIGH layers at different distances, for example).
+@export var detail: Detail = Detail.HIGH
 
 @export_group("Content")
 ## Scenes instanced for this layer; one is picked per instance. Prefer these for
@@ -121,7 +143,7 @@ const RING_MIN_DISTANCE := 200.0
 @export var fit_to_segment: bool = false
 ## Offset added to the director's decoration seed, so two layers of one biome do
 ## not have to be authored with matching seeds.
-@export var seed: int = 0
+@export var seed_offset: int = 0
 
 @export_group("Cost")
 ## Hide instances further away than this, in metres.
@@ -142,65 +164,3 @@ func is_usable() -> bool:
 ## True when the layer is built by the horizon anchor instead of by a segment.
 func is_ring() -> bool:
 	return mode == Mode.RING
-
-
-## Problems the [BiomeDirector] reports as errors at startup, so a layer that is
-## unfinished - or that is set up to do something other than what it looks like it
-## does - fails loudly instead of rendering nothing.
-##
-## The second half is the important half. A layer is data, so half of it can be
-## ignored without anything failing: `variants` win over `meshes`, a [MultiMesh] can
-## only draw one of them, `mesh_material` never touches a scene. Every one of those
-## is reported here, because a prop that never appears is otherwise found by eye, and
-## only after wondering whether the band was wrong.
-func validate() -> PackedStringArray:
-	var problems := PackedStringArray()
-	if not is_usable():
-		problems.append("is enabled but has neither `variants` nor `meshes`")
-	if count <= 0:
-		problems.append("`count` must be at least 1")
-	if host_every <= 0:
-		problems.append("`host_every` must be at least 1")
-	if distance_max < distance_min:
-		problems.append("`distance_max` is smaller than `distance_min`")
-	if fit_to_segment and meshes.is_empty():
-		problems.append("`fit_to_segment` needs `meshes`, it is ignored for scenes")
-
-	if not variants.is_empty() and not meshes.is_empty():
-		problems.append(
-			"`variants` and `meshes` are both set: the scenes win, so the %d mesh(es) "
-			% meshes.size()
-			+ "are never used"
-		)
-	if multimesh and not meshes.is_empty():
-		if not variants.is_empty():
-			problems.append("`multimesh` is never built while `variants` is set")
-		elif meshes.size() > 1:
-			problems.append(
-				"`multimesh` draws `meshes[0]` only, so %d of the %d meshes are never used"
-				% [meshes.size() - 1, meshes.size()]
-			)
-	if mesh_material != null:
-		if meshes.is_empty():
-			problems.append("`mesh_material` applies to `meshes` only, so it is never used")
-		elif not variants.is_empty():
-			problems.append(
-				"`mesh_material` applies to `meshes`, but the scenes win, so it is never applied"
-			)
-
-	if is_ring():
-		if fit_to_segment:
-			problems.append("`fit_to_segment` is used along the track only, RING ignores it")
-		if distance_min < RING_MIN_DISTANCE:
-			problems.append(
-				"a ring card at `distance_min` = %s m could be driven past; the horizon "
-				% String.num(distance_min, 1)
-				+ "belongs beyond %s m" % String.num(RING_MIN_DISTANCE, 0)
-			)
-	if visible_range > 0.0 and visible_range < distance_max:
-		problems.append(
-			"`visible_range` (%s m) is closer than `distance_max` (%s m), so part of "
-			% [String.num(visible_range, 1), String.num(distance_max, 1)]
-			+ "this layer is never visible"
-		)
-	return problems

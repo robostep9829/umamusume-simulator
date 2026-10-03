@@ -9,6 +9,7 @@ center_offset = Vector3(0, 11, 0)
 
 [resource]
 script = ExtResource("1_layer")
+detail = 2
 meshes = Array[Mesh]([SubResource("QuadMesh_hills")])
 mesh_material = ExtResource("2_far_hills")
 mode = 1

@@ -5,6 +5,7 @@
 
 [resource]
 script = ExtResource("1_layer")
+detail = 1
 variants = Array[PackedScene]([ExtResource("2_2ra3c")])
 count = 4
 distance_max = 70.0

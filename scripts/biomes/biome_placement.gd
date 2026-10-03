@@ -20,7 +20,7 @@ extends RefCounted
 ## represent 0xbf58476d1ce4e5b9 as a 64-bit signed integer" - then substitutes
 ## INT64_MAX for it. The murmur3 finaliser quietly becomes two multiplications by the
 ## same constant, which still yields distinct seeds, so nothing looks wrong: they just
-## crowd into the top of the range (see [method _test_seed_spread] in the self-test).
+## crowd into the top of the range instead of spreading over it.
 ## The same bit patterns, spelled the way the engine accepts them.
 const MIX_A := -4658895280553007687  # 0xbf58476d1ce4e5b9
 const MIX_B := -7723592293110705685  # 0x94d049bb133111eb

@@ -15,18 +15,21 @@ extends Resource
 ## the virtual methods only for biomes that need behaviour - a road skin chosen
 ## per element, scripted decoration, a computed sky.
 ##
-## Layers follow `worlds/scrolling_track/doc/LAYERS.md`:
+## Decoration follows `worlds/scrolling_track/doc/LAYERS.md`:
 ## [codeblock]
-## ROAD - layer 0, the playfield itself. Skinned through road_material() and
-##        road_mesh(), never decorated: `decoration(ROAD)` is not asked and
-##        `decorate_layer()` is not called with it. Props can still be *placed*
-##        inside the playfield by a NEAR/MID layer whose distance band is small
-##        enough - they are visual then, like any other decoration. The only layer
-##        that affects gameplay.
-## NEAR - layer 1, full 3D dressing right beside the track.
-## MID  - layer 2, low-poly silhouettes or flat cards, roughly 60-200 m out.
-## FAR  - layer 3, the horizon: camera-locked content that only changes when the
-##        biome changes, plus environment_override() for the atmosphere.
+## layer 0 - the playfield itself. Skinned through road_material() and
+##           road_mesh(), never decorated. Props can still be *placed* inside
+##           the playfield by a layer whose distance band is small enough - they
+##           are visual then, like any other decoration. The only layer that
+##           affects gameplay.
+## layers  - a free list ([member layers], at most [constant MAX_LAYERS]): one
+##           [BiomeLayer] per placing pattern, each with its own [enum
+##           BiomeLayer.Detail] (HIGH = full 3D up close, MEDIUM = cheap repeats,
+##           LOW = horizon cards). The LAYERS.md bands (15-60 / 60-200 / 200+ m)
+##           remain guidance for `distance_min` / `distance_max`, not slots.
+## horizon - [constant BiomeLayer.Mode.RING] layers ride the horizon anchor and
+##           only change on biome transition, plus environment_override() for the
+##           atmosphere.
 ## [/codeblock]
 ##
 ## [b]Biomes must not assume a turn direction.[/b] The same provider is used on
@@ -34,10 +37,6 @@ extends Resource
 ## to the travelling direction (+X is "right of the runner"), not to world axes;
 ## [BiomePlacement] exists for exactly that.
 
-
-## Decoration layers, in the order and with the names of LAYERS.md.
-## [constant Layer.ROAD] is not a decoration layer: it is the road itself.
-enum Layer { ROAD, NEAR, MID, FAR }
 
 ## Gameplay obstacle skins from `doc/BIOMES.md` ("Obstacle skins" table).
 ## [b]Declared but not consumed yet[/b]: there is no obstacle system to dress, so
@@ -50,6 +49,10 @@ enum ObstacleSkin { BARRIER, DIRT_PATH, WEIGHT, STAIRS, SLOW_ZONE }
 const FEATURE_FINAL_STRETCH_GATES := &"final_stretch_gates"
 const FEATURE_CROSSWALK_ZONE := &"crosswalk_zone"
 const FEATURE_PARK_STRETCH := &"park_stretch"
+
+## Hard cap on [member layers]: per-segment decoration cost scales with the
+## layer count, so the [BiomeDirector] only builds the first MAX_LAYERS.
+const MAX_LAYERS := 20
 
 ## Stable identifier of the biome (`&"rural"`, `&"city"`...). Used in logs, debug
 ## overlays and any save data that has to remember which biome the player saw.
@@ -72,14 +75,14 @@ const FEATURE_PARK_STRETCH := &"park_stretch"
 ## origin so chaining, colliders and decoration stay valid.
 @export var road_mesh_override: Mesh
 
-@export_group("Decoration layers (1-3)")
-## Layers 1-3 of LAYERS.md, as authored [BiomeLayer] resources. A layer left
-## empty simply is not built.
-@export var near_layer: BiomeLayer
-@export var mid_layer: BiomeLayer
-@export var far_layer: BiomeLayer
+@export_group("Decoration layers")
+## One [BiomeLayer] per placing pattern, in build order. A fence strip,
+## scattered trees and sparse houses are three layers, not one: each keeps its
+## own distances, counts, frequency and seed. Entries left empty or disabled
+## are skipped.
+@export var layers: Array[BiomeLayer] = []
 
-@export_group("Atmosphere (layer 3)")
+@export_group("Atmosphere (horizon)")
 ## Sky, fog and light of this biome, cross-faded by [BiomeDirector] when the
 ## player enters it. `null` keeps the level's own environment.
 @export var atmosphere: Environment
@@ -125,22 +128,7 @@ func road_mesh(_segment: TrackSegment, _variant: int) -> Mesh:
 	return road_mesh_override
 
 
-## --- Decoration layers (1-3) -------------------------------------------------
-
-## Descriptor of what this biome puts in `layer` (one of NEAR, MID, FAR), or
-## `null` for "nothing here". The default reads the authored layer resources, so
-## a biome that is a pure re-skin needs no code at all; override it when the
-## decoration depends on more than the layer's own data.
-func decoration(layer: Layer) -> BiomeLayer:
-	match layer:
-		Layer.NEAR:
-			return near_layer
-		Layer.MID:
-			return mid_layer
-		Layer.FAR:
-			return far_layer
-	return null
-
+## --- Decoration layers -----------------------------------------------------
 
 ## Escape hatch for decoration that a [BiomeLayer] cannot express (content that
 ## reacts to the player, a painted decal, a scripted prop).
@@ -153,10 +141,13 @@ func decoration(layer: Layer) -> BiomeLayer:
 ## rebuilding must reproduce the same world-space result, otherwise recycling
 ## will look like it pops.
 ##
-## Horizon layers ([constant BiomeLayer.Mode.RING]) are not built per segment,
-## so they never reach this hook.
+## `descriptor` is the layer just built (possibly `null` when the slot holds no
+## usable layer); `layer_index` is its position in [member layers], for seeded
+## placement. Horizon layers ([constant BiomeLayer.Mode.RING]) are not built
+## per segment, so they never reach this hook.
 func decorate_layer(
-	_layer: Layer, _host: Node3D, _element_index: int, _segment: TrackSegment
+	_descriptor: BiomeLayer, _layer_index: int, _host: Node3D, _element_index: int,
+	_segment: TrackSegment
 ) -> void:
 	pass
 
@@ -190,34 +181,3 @@ func obstacle_skin(kind: ObstacleSkin) -> PackedScene:
 ## FEATURE_* constants. [b]Nothing calls this yet[/b], same reason as above.
 func feature(_feature_id: StringName) -> Variant:
 	return null
-
-
-## --- Helpers -----------------------------------------------------------------
-
-## True when this biome decorates `layer`.
-func has_decoration(layer: Layer) -> bool:
-	var descriptor := decoration(layer)
-	return descriptor != null and descriptor.is_usable()
-
-
-## Problems reported by [BiomeDirector] at startup, so a half-authored biome
-## fails loudly instead of rendering nothing.
-func validate() -> PackedStringArray:
-	var problems := PackedStringArray()
-	if biome_id.is_empty():
-		problems.append("`biome_id` is empty; it identifies the biome in logs and save data")
-	if road_variant_count() <= 0:
-		problems.append("`road_variant_count()` must be at least 1")
-	for i in road_skins.size():
-		if road_skins[i] == null:
-			problems.append("`road_skins[%d]` is empty, so that element is unpainted" % i)
-	for i in obstacle_skins.size():
-		if obstacle_skins[i] == null:
-			problems.append("`obstacle_skins[%d]` is empty" % i)
-	for layer in [Layer.NEAR, Layer.MID, Layer.FAR]:
-		var descriptor := decoration(layer)
-		if descriptor == null:
-			continue
-		for problem in descriptor.validate():
-			problems.append("%s layer %s" % [Layer.keys()[layer], problem])
-	return problems

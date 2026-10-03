@@ -1,0 +1,35 @@
+[gd_resource type="Resource" script_class="BiomeLayer" format=3 uid="uid://brloibs4jj4hp"]
+
+[ext_resource type="Shader" uid="uid://gjrrw362lpos" path="res://worlds/scrolling_track/biomes/rural/materials/shaders/billboard_standardmaterial.gdshader" id="1_i4d0k"]
+[ext_resource type="Texture2D" uid="uid://dnqtkkexrs4kj" path="res://worlds/scrolling_track/props/rural/tex/tree_impostor_diffuse.png" id="2_1v6tm"]
+[ext_resource type="Texture2D" uid="uid://bggnlxa0857au" path="res://worlds/scrolling_track/props/rural/tex/tree_impostor_normal.png" id="3_jrqlw"]
+[ext_resource type="Script" uid="uid://dl0u5uw0i1tal" path="res://scripts/biomes/biome_layer.gd" id="4_ol70s"]
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_tc7xt"]
+render_priority = -1
+shader = ExtResource("1_i4d0k")
+shader_parameter/albedo = Color(1, 1, 1, 1)
+shader_parameter/texture_albedo = ExtResource("2_1v6tm")
+shader_parameter/distance_fade_min = 75.0
+shader_parameter/distance_fade_max = 80.0
+shader_parameter/alpha_scissor_threshold = 0.5
+shader_parameter/texture_normal = ExtResource("3_jrqlw")
+shader_parameter/z_clip_scale = 0.99989997473201
+
+[sub_resource type="QuadMesh" id="QuadMesh_pm2i0"]
+
+[resource]
+script = ExtResource("4_ol70s")
+detail = 1
+meshes = Array[Mesh]([SubResource("QuadMesh_pm2i0")])
+mesh_material = SubResource("ShaderMaterial_tc7xt")
+multimesh = true
+count = 4
+distance_max = 70.0
+edge_margin = 0.2
+along_scatter = 0.8
+scale_min = 0.85
+scale_max = 1.3
+yaw_scatter = 180.0
+visible_range = 0.0
+cast_shadow = false

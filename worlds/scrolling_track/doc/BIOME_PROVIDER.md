@@ -14,7 +14,6 @@ scripts/biomes/
     biome_director.gd     BiomeDirector  - applies a playlist to a TrackManager
     biome_placement.gd    BiomePlacement - segment-local geometry + seeded RNG
     providers/rural_biome.gd             - the rural biome as a subclass
-    tests/biome_selftest.gd              - headless checks, no art needed
 
 worlds/scrolling_track/biomes/
     rural.tres                           - a biome, as data (a RuralBiome)
@@ -93,7 +92,7 @@ A layer is data: what to instance, how far away, how many, how jittered.
 | `scale_min/max`, `yaw_scatter`, `face_track` | how it is oriented and sized |
 | `fit_to_segment` | stretch a mesh so one copy spans its share of the segment - for railings, fences and hedges whose authored length you would otherwise match by hand |
 | `visible_range`, `cast_shadow` | cost controls |
-| `seed` | offsets this layer's slice of the director's decoration seed |
+| `seed_offset` | offsets this layer's slice of the director's decoration seed |
 
 A `RING` layer ignores `side`, `edge_margin` and `along_scatter` (its instances are
 spread evenly around the circle), and an along-track layer ignores `host_every`: the
@@ -285,9 +284,10 @@ become a no-op. Only what is switched on counts - a biome with fog off, or with 
 5. **Playlist.** Add it to `playlist_demo.tres` for the endless track, or to a
    `sections` list for an authored lap.
 6. **Check.** `playlist.validate()` runs on `BiomeDirector._ready()` and reports
-   empty biomes, empty layers, inconsistent numbers - and layers that are set up to do
-   something other than what they look like they do - through `push_error()`. See
-   section 7.
+   structural mistakes - an empty playlist, sections that cover nothing, a list
+   that is silently ignored - through `push_error()`. What the run actually
+   looks like is checked by eye, with the debug overlay's `layers` and `build`
+   lines (section 5). See section 6.
 
 For the three biomes of `BIOMES.md`, step 2 is the work: the obstacle and
 feature tables there are data for the hooks of section 1.2 once obstacles exist.
@@ -342,9 +342,9 @@ Four things that decide whether a layer looks right:
   layer, and it wins over the mesh's own material. When two props need different
   looks, they are two scenes in `variants`, or two layers in different bands.
 * **Placement is seeded, not random.** Every instance's position comes from
-  `decor_seed + layer.seed`, the band, the element index and the slot, so a prop is
+  `decor_seed + layer.seed_offset`, the band, the element index and the slot, so a prop is
   in exactly the same place every time the endless track recycles that element.
-  Give each layer its own `seed` only if you want the same band to look different
+  Give each layer its own `seed_offset` only if you want the same band to look different
   between two providers or two layers of one biome.
 
 A whole new prop that is a scene, end to end:
@@ -400,53 +400,7 @@ by hand in `decorate_layer()`. Turning the slots into arrays is a small change t
 
 ---
 
-## 4. Verifying it
-
-```bash
-godot --headless --script res://scripts/biomes/tests/biome_selftest.gd
-```
-
-The self-test builds its own segments, layers, playlist and track (no imported
-art), so it runs in about a second and exits non-zero on failure. It checks:
-
-* placement lands exactly on `TrackSegment.end()` for straights and for left and
-  right turns, mirror symmetry between the two turn directions, and that lateral
-  offsets stay perpendicular to the track;
-* decoration placement is reproducible (same seed + element + slot = same
-  values), which is the property the recycling rules rely on - and those seeds
-  spread over the whole 64-bit range, which is what keeps the mix constants above
-  2^63 - 1 honest;
-* playlist selection in all four modes (auto, single biome, shuffle, sections);
-* the track/director contract: every pooled body gets the road skin, a layer is
-  built once per hosted element, re-placing unchanged segments keeps the *same*
-  decoration nodes, and switching biome rebuilds them in place;
-* the pool ring: a body carries the window slot it is given rather than its position
-  in the array, so moving the endless window by one element and stepping the closed
-  loop by one both re-dress a single body and leave the rest as they were - the
-  property that keeps a re-centre from rebuilding the whole pool in one frame;
-* the spawn gate: an element a layer dresses only every N-th time is hosted the same
-  way every time it is rebuilt, which is the same determinism claim one level up;
-* horizon rings keep their distance band, ride with the runner, and are only laid
-  out again when the runner leaves a region;
-* the debug readout's numbers: the run a biome covers, the distance and element
-  count to the next change (counting turns as the arcs they are), the run's
-  progress, and the single-biome case, where there is no change to wait for.
-
-It also refuses to pass quietly, because a runtime error in GDScript abandons the
-function it happened in and the caller carries on - so a broken test would otherwise be
-nothing but a run with fewer checks in it. Every test is declared `-> bool` and ends
-with `return true`, which the runner reads back; a test that asserted nothing is a
-failure whether it finished or not; and a run whose tree never came up names the tests
-it skipped instead of reporting the shorter suite as a passing one. The summary counts
-tests as well as checks - `252 checks in 18 tests, all green` - so a lost test says
-`17 of 18` rather than hiding behind a green sentence. Why each of those guards is
-there, including why the run starts from the first `_process` frame and not from
-`_initialize()`, is in the file's own header comments; every one of them came from a
-real failure.
-
----
-
-## 5. What is placeholder here
+## 4. What is placeholder here
 
 The system is complete; the *content* of the demo is not, and the demo says so
 wherever it matters:
@@ -484,12 +438,11 @@ Three more things worth knowing while iterating:
   dressing, which is the expensive one and would otherwise be blamed on the first
   frame. A re-centre should read a handful of segments; a number near `pool_size`
   means every body changed element, which in the demo is a few hundred instanced tree
-  scenes and a visible freeze. The self-test asserts the first case for both an endless
-  re-centre and a closed-loop step.
+  scenes and a visible freeze.
 
 ---
 
-## 6. Debug overlay
+## 5. Debug overlay
 
 `scripts/debug/debug_overlay.gd` is the window into all of the above at runtime. It
 is a `CanvasLayer` that builds its own panel, finds the level's `TrackManager`,
@@ -529,9 +482,8 @@ dictionary - `BiomeDirector.debug_stats()` - plus the track's inspection helpers
 (`is_endless()`, `lap_length()`, `track_distance_at()`, `element_index_at()`,
 `element_length_at()`, `element_direction_at()`, `element_progress_at()`) and the
 playlist's (`is_single_biome()`, `run_range_at()`, `describe()`). Those are
-read-only and public on purpose: any other HUD, tool or test that wants "which
-biome is the runner in, and how long until it changes?" can use them, and
-the biome self-test checks the arithmetic behind them.
+read-only and public on purpose: any other HUD or tool that wants "which
+biome is the runner in, and how long until it changes?" can use them.
 
 `run_range_at()` deserves a note: a biome *run* is a maximal stretch of elements
 served by one provider, measured rather than derived from `segments_per_biome`.
@@ -547,36 +499,37 @@ script = ExtResource("debug_overlay")
 
 ---
 
-## 7. Errors in the console
+## 6. Errors in the console
 
 The biome system is data, so most of what can go wrong with it goes wrong quietly: a
 layer keeps rendering, it just renders something else than what the file says. Two
 kinds of message are printed to catch that.
 
 **At startup**, `BiomeDirector._ready()` asks the playlist to validate itself and
-prints one `push_error` per problem, after a line naming the file they came from:
+prints one `push_error` per problem, after a line naming the file they came from.
+Right after that it reports every broken decoration layer of every biome the playlist
+can serve - an empty `layers` slot (a reference that failed to load, so the slot
+builds nothing) and a `RING` layer closer than `BiomeLayer.RING_MIN_DISTANCE`
+(cards the runner could drive past):
 
 ```text
 BiomeDirector (BiomeDirector): res://worlds/scrolling_track/playlists/playlist_demo.tres
-has 3 problem(s), biomes still run:
-  - rural_dusk: MID layer `visible_range` (120.0 m) is closer than `distance_max` (200.0 m),
-    so part of this layer is never visible
-  - rural_dusk: FAR layer a ring card at `distance_min` = 60.0 m could be driven past;
-    the horizon belongs beyond 200 m
+has 1 problem(s), biomes still run:
   - both `biomes` and `sections` are set: the sections win, so the 2 biome(s) in `biomes`
     are never used
 ```
 
-Problems do not stop the run: the playlist is still applied. They mean the world will
-not look like the data says, and the alternative - a prop that never appears, a ring
-that is driven through, a list that is silently ignored - is found by eye hours later.
+Problems do not stop the run: the playlist is still applied. Only the playlist's
+own structure is checked - an empty list, sections that cover nothing, a list
+that is silently ignored. Whether a biome's layers do what they look like they
+do is checked by eye, on the run itself.
 
 **At runtime**, anything that fails while the world is being built is reported with
 `_report_once()`: the first occurrence prints, repeats do not. A pooled body without
 its `Mesh` child or a variant that is not a `Node3D` would otherwise print the same
 line once per segment, several hundred times per minute, and the second message is no
-more useful than the first. The keys are in `reported_problems()`, so a test can see
-what was said:
+more useful than the first. The keys are in the director's `_reported` set, so a
+debug view can see what was said:
 
 | Reported once | When |
 |---|---|
@@ -587,6 +540,5 @@ what was said:
 | neither the biome nor the level has an environment | the atmosphere stays whatever it was |
 | a `variants` entry is empty, or its root is not a `Node3D` | that prop is skipped |
 
-`BiomeDirector.validation_problems()` and `reported_problems()` expose both kinds for a
-test, and the debug overlay shows an `issues` line - `2 · see the Output panel` - at
+The debug overlay shows an `issues` line - `2 · see the Output panel` - at
 every detail level, because a phone screen has no Output panel to look at.

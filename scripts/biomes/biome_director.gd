@@ -53,12 +53,9 @@ const BLENDED_ENVIRONMENT_FIELDS: Array[StringName] = [
 	&"tonemap_white",
 ]
 
-## Decoration layers, in the order and with the names of LAYERS.md.
-const DECORATION_LAYERS: Array[int] = [
-	BiomeProvider.Layer.NEAR,
-	BiomeProvider.Layer.MID,
-	BiomeProvider.Layer.FAR,
-]
+## Decoration is the biome's free layer list ([member BiomeProvider.layers], at
+## most [constant BiomeProvider.MAX_LAYERS]), in build order. Counts group by
+## [enum BiomeLayer.Detail] (`high` / `medium` / `low`), not by band.
 
 ## Track to dress. When left empty, a [TrackManager] among the director's
 ## siblings (or its parent) is used, which is the usual scene layout.
@@ -131,6 +128,7 @@ func _ready() -> void:
 		return
 
 	_report_playlist_problems()
+	_report_layer_problems()
 	track.segment_placed.connect(_on_segment_placed)
 	# A level lists its TrackManager before its BiomeDirector, so the track places
 	# its first pool in its own `_ready()` - which runs first - and announces it
@@ -146,17 +144,6 @@ func _ready() -> void:
 	# end of the first frame keeps the start-up cost visible in the overlay and stops it
 	# being attributed to a frame that did something else.
 	_publish_build()
-
-
-## Problems [method BiomePlaylist.validate] found at startup, empty when the playlist
-## is well formed. Kept so a test or a debug view can read what was reported.
-func validation_problems() -> PackedStringArray:
-	return _problems
-
-
-## What the director has already complained about: problem key -> true.
-func reported_problems() -> Dictionary:
-	return _reported
 
 
 ## Reports the playlist's problems as errors, one message each, prefixed by the file
@@ -178,6 +165,36 @@ func _report_playlist_problems() -> void:
 		push_error("  - %s" % problem)
 
 
+## Pushes one error per broken decoration layer of every biome the playlist can
+## serve: an empty `layers` slot (a reference that failed to load, so the slot
+## builds nothing) and a `RING` layer closer than [constant
+## BiomeLayer.RING_MIN_DISTANCE] (cards the runner could drive past). Runs once
+## at load, next to [method _report_playlist_problems]: either renders as
+## silently wrong scenery, which is otherwise noticed hours later and by eye.
+## Reported through [method _report_once], like any other runtime report.
+func _report_layer_problems() -> void:
+	if playlist == null:
+		return
+	for provider in playlist.all_providers():
+		for index in provider.layers.size():
+			var descriptor := provider.layers[index]
+			if descriptor == null:
+				_report_once(
+					StringName("null_layer:%s:%d" % [_path_of(provider), index]),
+					"BiomeDirector (%s): `%s` has an empty entry in `layers[%d]`, "
+					% [name, _path_of(provider), index]
+					+ "so that layer builds nothing. Re-assign the layer resource."
+				)
+			elif descriptor.is_ring() and descriptor.distance_min < BiomeLayer.RING_MIN_DISTANCE:
+				_report_once(
+					StringName("low_ring:%s:%d" % [_path_of(provider), index]),
+					"BiomeDirector (%s): `%s` rings its horizon at `distance_min` = %s m, "
+					% [name, _path_of(provider), String.num(descriptor.distance_min, 1)]
+					+ "close enough to drive past; the horizon belongs beyond %s m."
+					% String.num(BiomeLayer.RING_MIN_DISTANCE, 0)
+				)
+
+
 ## Prints `message` once per `key`. Anything that fails per segment - a variant that
 ## is not a Node3D, a pooled body without its mesh - would otherwise bury the rest of
 ## the log under a few hundred identical lines, and is no more useful for it.
@@ -196,9 +213,6 @@ func _physics_process(delta: float) -> void:
 	# that froze.
 	_publish_build()
 
-var _unused_variable: float = 0.0
-func _unused():
-	pass
 
 ## One frame of the director's work: follow the player, dress whatever changed, keep
 ## the atmosphere aimed at the right biome. Split out so the frame's build accounting is
@@ -215,9 +229,9 @@ func _advance(_delta: float) -> void:
 			+ "chosen and decoration is not built."
 		)
 		return
-	var position := player.global_position
-	_refresh_anchor(position)
-	var provider := playlist.provider_at(track.element_index_at(position))
+	var player_pos := player.global_position
+	_refresh_anchor(player_pos)
+	var provider := playlist.provider_at(track.element_index_at(player_pos))
 	if provider != _active_provider:
 		_set_active_provider(provider)
 
@@ -239,12 +253,6 @@ func refresh() -> void:
 		# Makes the track re-place and re-announce every pooled segment, which is
 		# what the rebuild above hangs off.
 		track.refresh_pool()
-
-
-## Short human-readable state, handy for a log line.
-func debug_summary() -> String:
-	var current := _active_provider.biome_id if _active_provider != null else &"<none>"
-	return "biome: %s | %s" % [current, playlist.describe() if playlist != null else "no playlist"]
 
 
 ## Elements until the biome under the player changes, or -1 when the level keeps
@@ -274,15 +282,15 @@ func distance_to_biome_change() -> float:
 	var elements := elements_to_biome_change()
 	if elements < 0 or track == null or track.player == null:
 		return -1.0
-	var position := track.player.global_position
-	return _distance_from(position, track.element_index_at(position), elements)
+	var player_pos := track.player.global_position
+	return _distance_from(player_pos, track.element_index_at(player_pos), elements)
 
 
-## Metres from `position` - which is inside element `element` - once `elements`
+## Metres from `player_pos` - which is inside element `element` - once `elements`
 ## elements have passed. Shared by the two callers that measure to a biome change,
 ## so the element count and the distance are always measured from the same place.
-func _distance_from(position: Vector3, element: int, elements: int) -> float:
-	var distance := track.element_length_at(element) * (1.0 - track.element_progress_at(position))
+func _distance_from(player_pos: Vector3, element: int, elements: int) -> float:
+	var distance := track.element_length_at(element) * (1.0 - track.element_progress_at(player_pos))
 	for step in elements - 1:
 		distance += track.element_length_at(element + step + 1)
 	return distance
@@ -291,7 +299,7 @@ func _distance_from(position: Vector3, element: int, elements: int) -> float:
 ## Everything the debug overlay shows about the biome system, in one dictionary, so
 ## a UI does not have to know how biomes, layers and the horizon are stored. Safe
 ## to call before the first physics frame - the biome fields then say "nothing
-## yet" - and safe to call without a player, which is what the self-test does.
+## yet" - and safe to call without a player.
 func debug_stats() -> Dictionary:
 	var stats := {
 		"biome": &"<none>",
@@ -322,28 +330,28 @@ func debug_stats() -> Dictionary:
 		if _active_provider.atmosphere != null:
 			stats["atmosphere"] = _active_provider.atmosphere.resource_path.get_file()
 	if track != null and track.player != null and playlist != null:
-		var position := track.player.global_position
-		var element := track.element_index_at(position)
+		var player_pos := track.player.global_position
+		var element := track.element_index_at(player_pos)
 		stats["elements"] = element
-		stats["progress"] = track.element_progress_at(position)
+		stats["progress"] = track.element_progress_at(player_pos)
 		if _active_provider != null:
 			stats["variant"] = _active_provider.road_variant(element)
 		if not playlist.is_single_biome():
-			_fill_change_stats(stats, position, element)
+			_fill_change_stats(stats, player_pos, element)
 	stats["layers"] = _layer_instance_counts()
 	stats["horizon_cards"] = _horizon_instance_count()
 	stats["horizon_distance"] = _horizon_distance()
 	return stats
 
 
-func _fill_change_stats(stats: Dictionary, position: Vector3, element: int) -> void:
+func _fill_change_stats(stats: Dictionary, player_pos: Vector3, element: int) -> void:
 	var run := playlist.run_range_at(element)
 	stats["run_first"] = run.x
 	stats["run_elements"] = run.y
 	var walked : float = float(element - run.x) + stats["progress"]
 	stats["run_progress"] = clampf(walked / maxf(float(run.y), 1.0), 0.0, 1.0)
 	stats["change_elements"] = _elements_left_in(run, element)
-	stats["change_distance"] = _distance_from(position, element, int(stats["change_elements"]))
+	stats["change_distance"] = _distance_from(player_pos, element, int(stats["change_elements"]))
 	var next_provider := playlist.provider_at(run.x + run.y)
 	stats["next_biome"] = next_provider.biome_id if next_provider != null else &"<none>"
 	stats["upcoming"] = _upcoming_runs(element)
@@ -367,32 +375,55 @@ func _upcoming_runs(element_index: int, count: int = 3) -> Array[Dictionary]:
 	return runs
 
 
-## Instances currently built per decoration layer, walking the pool rather than
+## Instances currently built per detail tier, walking the pool rather than
 ## trusting a counter: it reports what is really there.
+##
+## Attribution is per host, not per active biome: a body is dressed by whatever
+## provider owned its element (see `_records`), and the horizon by the active
+## one. That keeps the counts right while bodies still wear a previous biome,
+## and before any biome is active at all (a director that joins late dresses
+## the pool it found).
 func _layer_instance_counts() -> Dictionary:
-	var counts := {}
-	for layer in DECORATION_LAYERS:
-		# A band's instances live in one of two places: an along-track layer parents
-		# them to the segment bodies, a `RING` one to the horizon anchor. Both are
-		# counted, so a band that is a ring reads its card count instead of a
-		# permanent 0 - the overlay's `layers` line is only worth reading if it says
-		# what is actually in the world.
-		var total := _count_instances(track, _band_container(layer))
-		total += _count_instances(_anchor, _horizon_container(layer))
-		counts[_band_name(layer).to_lower()] = total
+	var counts := {"high": 0, "medium": 0, "low": 0}
+	_accumulate_layer_counts(track, counts, false)
+	_accumulate_layer_counts(_anchor, counts, true)
 	return counts
 
 
-func _count_instances(root: Node, container_name: String) -> int:
+## Adds the instances under `root` to `counts`, attributing each `LayerNN` /
+## `HorizonNN` host to the detail tier of the layer that built it. Hosts with
+## no mapping (no record yet, biome gone) are skipped rather than guessed.
+func _accumulate_layer_counts(root: Node, counts: Dictionary, horizon: bool) -> void:
 	if root == null:
-		return 0
-	var total := 0
+		return
+	var prefix := "Horizon" if horizon else "Layer"
 	for child in root.get_children():
-		if child.name == container_name:
-			total += child.get_child_count()
+		var child_name := String(child.name)
+		if child_name.begins_with(prefix) and child_name.trim_prefix(prefix).is_valid_int():
+			var descriptor := _descriptor_for_host(
+				child, int(child_name.trim_prefix(prefix)), horizon
+			)
+			if descriptor != null:
+				var key := _detail_key(descriptor.detail)
+				counts[key] = int(counts[key]) + child.get_child_count()
 		else:
-			total += _count_instances(child, container_name)
-	return total
+			_accumulate_layer_counts(child, counts, horizon)
+
+
+## The layer that built `host`'s instances: for a segment host, the provider
+## recorded when its body was dressed (falling back to the active one); for a
+## horizon host, the active provider, which owns the horizon.
+func _descriptor_for_host(host: Node, index: int, horizon: bool) -> BiomeLayer:
+	var provider := _active_provider
+	if not horizon:
+		var record: Dictionary = _records.get(host.get_parent().get_instance_id(), {})
+		if record.get("provider") is BiomeProvider:
+			provider = record["provider"] as BiomeProvider
+	if provider == null or index < 0 or index >= mini(
+		provider.layers.size(), BiomeProvider.MAX_LAYERS
+	):
+		return null
+	return provider.layers[index]
 
 
 func _horizon_instance_count() -> int:
@@ -482,29 +513,24 @@ func _skin_floor(body: Node3D, provider: BiomeProvider) -> void:
 	floor_instance.material_override = provider.skirt_material()
 
 
-## Every node name in a subtree, for the report above.
-func _collect_node_names(node: Node, into: PackedStringArray) -> void:
-	into.append(String(node.name))
-	for child in node.get_children():
-		_collect_node_names(child, into)
-
-
 
 func _rebuild_decoration(
 	body: Node3D, segment: TrackSegment, provider: BiomeProvider, element_index: int
 ) -> void:
 	var started := Time.get_ticks_usec()
 	var instances := 0
-	for layer in DECORATION_LAYERS:
-		var host := _layer_host(body, layer)
+	var descriptors := _provider_layers(provider)
+	for index in descriptors.size():
+		var host := _layer_host(body, index)
 		_clear(host)
 		if provider == null:
 			continue
-		var descriptor := provider.decoration(layer)
+		var descriptor := descriptors[index]
 		if descriptor != null and descriptor.is_usable() and not descriptor.is_ring():
-			_build_along_track(host, descriptor, segment, element_index, layer)
-		provider.decorate_layer(layer, host, element_index, segment)
+			_build_along_track(host, descriptor, segment, element_index, index)
+		provider.decorate_layer(descriptor, index, host, element_index, segment)
 		instances += host.get_child_count()
+	_clear_stale_hosts(body, descriptors.size(), false)
 	_build_segments += 1
 	_build_instances += instances
 	_build_usec += Time.get_ticks_usec() - started
@@ -551,14 +577,14 @@ func last_build() -> Dictionary:
 ## the horizon surrounds them in every direction instead of piling up in front of
 ## them, and no card can ever be outrun. Only the direction the runner faces
 ## changes which part of it they see, which is what a real horizon does.
-func _refresh_anchor(position: Vector3) -> void:
+func _refresh_anchor(player_pos: Vector3) -> void:
 	if _active_provider == null or track == null:
 		return
 	if _widest_ring_radius() <= 0.0:
 		# Nothing to keep around the runner: a biome without a horizon must not
 		# rebuild an empty anchor every frame.
 		return
-	_anchor.global_position = Vector3(position.x, 0.0, position.z)
+	_anchor.global_position = Vector3(player_pos.x, 0.0, player_pos.z)
 	if _ring_regions_changed():
 		_rebuild_horizon()
 
@@ -571,15 +597,21 @@ func _refresh_anchor(position: Vector3) -> void:
 func _ring_regions_changed() -> bool:
 	var element_index := track.element_index_at(_anchor.global_position)
 	var changed := false
-	for layer in DECORATION_LAYERS:
-		var descriptor := _active_provider.decoration(layer)
+	var descriptors := _active_layers()
+	for index in descriptors.size():
+		var descriptor := descriptors[index]
 		if descriptor == null or not descriptor.is_usable() or not descriptor.is_ring():
-			if _horizon_regions.erase(layer):
+			if _horizon_regions.erase(index):
 				changed = true
 			continue
 		var region := _ring_region(element_index, descriptor)
-		if not _horizon_regions.has(layer) or int(_horizon_regions[layer]) != region:
-			_horizon_regions[layer] = region
+		if not _horizon_regions.has(index) or int(_horizon_regions[index]) != region:
+			_horizon_regions[index] = region
+			changed = true
+	# A biome with fewer layers than the last one leaves stale region entries.
+	for key in _horizon_regions.keys():
+		if int(key) < 0 or int(key) >= descriptors.size():
+			_horizon_regions.erase(key)
 			changed = true
 	return changed
 
@@ -597,38 +629,39 @@ func _ring_region(element_index: int, descriptor: BiomeLayer) -> int:
 ## anchor has to stay clear of.
 func _widest_ring_radius() -> float:
 	var radius := 0.0
-	if _active_provider != null:
-		for layer in DECORATION_LAYERS:
-			var descriptor := _active_provider.decoration(layer)
-			if descriptor != null and descriptor.is_usable() and descriptor.is_ring():
-				radius = maxf(radius, descriptor.distance_max)
+	for descriptor in _active_layers():
+		if descriptor != null and descriptor.is_usable() and descriptor.is_ring():
+			radius = maxf(radius, descriptor.distance_max)
 	return radius
 
 
 func _rebuild_horizon() -> void:
-	for layer in DECORATION_LAYERS:
-		var host := _horizon_host(layer)
+	var descriptors := _active_layers()
+	for index in descriptors.size():
+		var host := _horizon_host(index)
 		_clear(host)
 		if _active_provider == null or track == null:
 			continue
-		var descriptor := _active_provider.decoration(layer)
+		var descriptor := descriptors[index]
 		if descriptor == null or not descriptor.is_usable() or not descriptor.is_ring():
 			continue
-		_build_ring(host, descriptor, track.element_index_at(_anchor.global_position), layer)
+		_build_ring(host, descriptor, track.element_index_at(_anchor.global_position), index)
+	_clear_stale_hosts(_anchor, descriptors.size(), true)
 
 
 # --- Builders ----------------------------------------------------------------
 
 ## Spreads instances along the hosted segment's arc, beside the track.
 func _build_along_track(
-	host: Node3D, descriptor: BiomeLayer, segment: TrackSegment, element_index: int, layer: int
+	host: Node3D, descriptor: BiomeLayer, segment: TrackSegment, element_index: int,
+	layer_index: int
 ) -> void:
 	# The period is drawn from the seeded generator, not the global `randi_range()`: a
 	# pooled body re-hosts another element when the window slides, and a global draw
 	# would skip an element it hosted the first time, reshuffling the scenery. Slot -1
 	# keeps this draw apart from the per-instance ones below, which start at 0.
 	var gate_rng := BiomePlacement.instance_rng(
-		decor_seed + descriptor.seed, layer, element_index, -1
+		decor_seed + descriptor.seed_offset, layer_index, element_index, -1
 	)
 	var spawn_period: int = maxi(
 		gate_rng.randi_range(descriptor.frequency_min, descriptor.frequency_max), 1
@@ -648,7 +681,9 @@ func _build_along_track(
 
 	for s in sides:
 		for i in per_side:
-			var rng := BiomePlacement.instance_rng(decor_seed + descriptor.seed, layer, element_index, slot)
+			var rng := BiomePlacement.instance_rng(
+				decor_seed + descriptor.seed_offset, layer_index, element_index, slot
+			)
 			slot += 1
 
 			var jitter := (rng.randf() - 0.5) * descriptor.along_scatter
@@ -659,9 +694,9 @@ func _build_along_track(
 			var lift := descriptor.lift + rng.randf_range(-1.0, 1.0) * descriptor.lift_scatter
 			var yaw := -s * PI * 0.5 if descriptor.face_track else 0.0
 			yaw += deg_to_rad(rng.randf_range(-1.0, 1.0) * descriptor.yaw_scatter)
-			var scale := rng.randf_range(descriptor.scale_min, descriptor.scale_max)
+			var uniform_scale := rng.randf_range(descriptor.scale_min, descriptor.scale_max)
 			var placement := BiomePlacement.local_transform(
-				segment, t, s * distance, lift, yaw, Vector3.ONE * scale
+				segment, t, s * distance, lift, yaw, Vector3.ONE * uniform_scale
 			)
 
 			if descriptor.multimesh and not descriptor.meshes.is_empty():
@@ -683,12 +718,16 @@ func _build_along_track(
 ## of the track itself: the instance's -Z (Godot's forward) points at the middle
 ## of the ring. A card whose visible side is its +Z - a plain [QuadMesh] - needs
 ## `flip_faces` or a billboard/double-sided material.
-func _build_ring(host: Node3D, descriptor: BiomeLayer, element_index: int, layer: int) -> void:
+func _build_ring(
+	host: Node3D, descriptor: BiomeLayer, element_index: int, layer_index: int
+) -> void:
 	var total := maxi(descriptor.count, 1)
 	var region := _ring_region(element_index, descriptor)
 	var slot := 0
 	for i in total:
-		var rng := BiomePlacement.instance_rng(decor_seed + descriptor.seed, layer, region, slot)
+		var rng := BiomePlacement.instance_rng(
+			decor_seed + descriptor.seed_offset, layer_index, region, slot
+		)
 		slot += 1
 		# The slot jitter is kept small on purpose: a ring that clumps its cards
 		# leaves holes of empty sky between them, and a few rectangles with gaps in
@@ -696,11 +735,13 @@ func _build_ring(host: Node3D, descriptor: BiomeLayer, element_index: int, layer
 		var angle := TAU * (float(i) + rng.randf_range(-0.15, 0.15)) / float(total)
 		var distance := rng.randf_range(descriptor.distance_min, descriptor.distance_max)
 		var lift := descriptor.lift + rng.randf_range(-1.0, 1.0) * descriptor.lift_scatter
-		var position := Vector3(cos(angle), 0.0, sin(angle)) * distance + Vector3(0.0, lift, 0.0)
+		var ring_pos := Vector3(cos(angle), 0.0, sin(angle)) * distance + Vector3(0.0, lift, 0.0)
 		var yaw := angle - PI * 0.5 + deg_to_rad(rng.randf_range(-1.0, 1.0) * descriptor.yaw_scatter)
-		var scale := rng.randf_range(descriptor.scale_min, descriptor.scale_max)
-		var basis := BiomePlacement.scaled(BiomePlacement.basis_from_heading(yaw), Vector3.ONE * scale)
-		_spawn(host, descriptor, Transform3D(basis, position), rng, 0.0)
+		var uniform_scale := rng.randf_range(descriptor.scale_min, descriptor.scale_max)
+		var ring_basis := BiomePlacement.scaled(
+			BiomePlacement.basis_from_heading(yaw), Vector3.ONE * uniform_scale
+		)
+		_spawn(host, descriptor, Transform3D(ring_basis, ring_pos), rng, 0.0)
 
 
 ## Instances one decoration. Scenes win over meshes, so a biome can be moved to
@@ -779,17 +820,17 @@ func _fitted_transform(
 	var along_x := size.x >= size.z
 	var extent := maxf(size.x if along_x else size.z, 0.001)
 	var factor := share / extent
-	var basis := placement.basis
+	var frame_basis := placement.basis
 	if along_x:
-		basis = basis * Basis(Vector3.UP, -PI * 0.5)
-		basis = BiomePlacement.scaled(basis, Vector3(factor, 1.0, 1.0))
+		frame_basis = frame_basis * Basis(Vector3.UP, -PI * 0.5)
+		frame_basis = BiomePlacement.scaled(frame_basis, Vector3(factor, 1.0, 1.0))
 	else:
-		basis = BiomePlacement.scaled(basis, Vector3(1.0, 1.0, factor))
+		frame_basis = BiomePlacement.scaled(frame_basis, Vector3(1.0, 1.0, factor))
 	# Ground-plane correction only: a mesh authored off-centre still ends up
 	# centred on its share, without changing the height it was authored at.
-	var offset := basis * mesh.get_aabb().get_center()
+	var offset := frame_basis * mesh.get_aabb().get_center()
 	offset.y = 0.0
-	return Transform3D(basis, placement.origin - offset)
+	return Transform3D(frame_basis, placement.origin - offset)
 
 
 func _configure_instance(node: Node, descriptor: BiomeLayer) -> void:
@@ -851,7 +892,7 @@ func live_environment() -> Environment:
 ## tweeners and stores the fraction - instead of being read back out of the [Tween].
 ## A [Tween] has no "how far along am I" call: `get_total_elapsed_time()` counts the
 ## time since it started but nothing remembers the duration it was started with, and
-## a fade stepped by hand (`custom_step()`, which the self-test uses) would have to be
+## a fade stepped by hand (`custom_step()`) would have to be
 ## reflected here separately. Letting the tween write it keeps the two in step by
 ## construction.
 func blend_progress() -> float:
@@ -959,29 +1000,66 @@ func _path_of(resource: Resource) -> String:
 	return resource.resource_path if not resource.resource_path.is_empty() else "<inline resource>"
 
 
-## The band a decoration layer is drawn in, named after the [enum BiomeProvider.Layer]
-## entry: `NEAR`, `MID`, `FAR`. `Layer.keys()` is an untyped `Array`, so its elements
-## are `Variant` and the cast is what lets a `:=` infer.
-func _band_name(layer: int) -> String:
-	return String(BiomeProvider.Layer.keys()[layer])
+## Layers the active biome builds, capped at [constant BiomeProvider.MAX_LAYERS].
+## Empty when no biome is active yet.
+func _active_layers() -> Array[BiomeLayer]:
+	if _active_provider == null:
+		return [] as Array[BiomeLayer]
+	return _provider_layers(_active_provider)
 
 
-## The container one band lives in on a segment body.
-func _band_container(layer: int) -> String:
-	return "BiomeLayer%s" % _band_name(layer)
+## Layers `provider` builds, capped at [constant BiomeProvider.MAX_LAYERS].
+## The cap bounds per-segment cost; anything beyond it is never built.
+func _provider_layers(provider: BiomeProvider) -> Array[BiomeLayer]:
+	var capped: Array[BiomeLayer] = []
+	if provider == null:
+		return capped
+	for i in mini(provider.layers.size(), BiomeProvider.MAX_LAYERS):
+		capped.append(provider.layers[i])
+	return capped
 
 
-## The container one band lives in on the horizon anchor.
-func _horizon_container(layer: int) -> String:
-	return "Horizon%s" % _band_name(layer)
+## Overlay key of a detail tier: `high`, `medium`, `low`.
+func _detail_key(detail: BiomeLayer.Detail) -> String:
+	return String(BiomeLayer.Detail.keys()[detail]).to_lower()
 
 
-func _layer_host(body: Node3D, layer: int) -> Node3D:
-	return _container(body, _band_container(layer))
+## The container one layer lives in on a segment body. Index-based, so several
+## layers of the same detail tier each get their own host.
+func _layer_container(index: int) -> String:
+	return "Layer%02d" % index
 
 
-func _horizon_host(layer: int) -> Node3D:
-	return _container(_anchor, _horizon_container(layer))
+## The container one layer lives in on the horizon anchor.
+func _horizon_container(index: int) -> String:
+	return "Horizon%02d" % index
+
+
+func _layer_host(body: Node3D, index: int) -> Node3D:
+	return _container(body, _layer_container(index))
+
+
+func _horizon_host(index: int) -> Node3D:
+	return _container(_anchor, _horizon_container(index))
+
+
+## Drops hosts left by a biome with more layers (e.g. `Layer07` after switching
+## to a five-layer biome). Without this the old hosts linger with the previous
+## biome's decoration still parented to them.
+func _clear_stale_hosts(parent: Node3D, kept: int, horizon: bool) -> void:
+	if parent == null:
+		return
+	for child in parent.get_children():
+		var child_name := String(child.name)
+		var prefix := "Horizon" if horizon else "Layer"
+		if not child_name.begins_with(prefix):
+			continue
+		var suffix := child_name.trim_prefix(prefix)
+		if not suffix.is_valid_int():
+			continue
+		if int(suffix) >= kept:
+			parent.remove_child(child)
+			child.queue_free()
 
 
 func _container(parent: Node3D, container_name: String) -> Node3D:

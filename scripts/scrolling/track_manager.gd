@@ -272,31 +272,6 @@ func _local_s_for(pos: Vector3) -> float:
 	return best
 
 
-## Returns the track's forward direction (world space) at the nearest point to
-## `pos`. Useful for steering helpers or camera following without imposing any
-## movement on the player.
-func track_forward_at(pos: Vector3) -> Vector3:
-	if not infinite:
-		var s := _closest_s(pos)
-		var i := int(floor(s / _seg_length))
-		return -_spine_transform[i].basis.z
-	var p_local := _scroll.global_transform.affine_inverse() * pos
-	var p := Vector2(p_local.x, p_local.z)
-	var best_s := 0.0
-	var best_d2 := INF
-	for i in pool_size:
-		var a := Vector2(_window_pt[i].x, _window_pt[i].z)
-		var b := Vector2(_window_pt[i + 1].x, _window_pt[i + 1].z)
-		var ab := b - a
-		var t := clampf((p - a).dot(ab) / ab.length_squared(), 0.0, 1.0)
-		var d2 := (p - (a + ab * t)).length_squared()
-		if d2 < best_d2:
-			best_d2 = d2
-			best_s = float(i) * _seg_length + t * _seg_length
-	var i := int(clampf(floor(best_s / _seg_length), 0, pool_size - 1))
-	return _scroll.global_transform.basis * (-_window_tf[i].basis.z)
-
-
 ## Returns the index of the track element whose centreline is closest to `pos`,
 ## expressed the same way as the `element_index` of `segment_placed` - so a
 ## listener can ask "which biome is the player in?" without knowing how the track

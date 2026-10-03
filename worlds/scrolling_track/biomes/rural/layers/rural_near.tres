@@ -6,6 +6,7 @@
 
 [resource]
 script = ExtResource("1_layer")
+detail = 0
 meshes = Array[Mesh]([ExtResource("2_wx5xs")])
 mesh_material = ExtResource("1_voptu")
 multimesh = true

@@ -398,8 +398,8 @@ func _add_extra_lines(lines: Array[String]) -> void:
 	if director == null:
 		return
 	var layers := _stats.get("layers", {}) as Dictionary
-	lines.append(_field("layers", "near %d · mid %d · far %d" % [
-		int(layers.get("near", 0)), int(layers.get("mid", 0)), int(layers.get("far", 0))
+	lines.append(_field("layers", "high %d · med %d · low %d" % [
+		int(layers.get("high", 0)), int(layers.get("medium", 0)), int(layers.get("low", 0))
 	]))
 	lines.append(_field("horizon", "%d cards · %s away" % [
 		int(_stats.get("horizon_cards", 0)), _metres(float(_stats.get("horizon_distance", 0.0)))

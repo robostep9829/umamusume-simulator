@@ -46,13 +46,3 @@ func road_variant_count() -> int:
 	if road_surfaces.is_empty():
 		return super.road_variant_count()
 	return road_surfaces.size()
-
-
-## Problems reported at startup, on top of the base class's own checks, so a
-## half-authored biome fails loudly instead of rendering a road with holes in it.
-func validate() -> PackedStringArray:
-	var problems := super.validate()
-	for i in road_surfaces.size():
-		if road_surfaces[i] == null:
-			problems.append("`road_surfaces[%d]` is empty" % i)
-	return problems

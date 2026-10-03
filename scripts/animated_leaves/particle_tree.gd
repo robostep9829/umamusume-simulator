@@ -49,12 +49,12 @@ func _ready() -> void:
 			# not in it stay where the scene was saved, which is better than a
 			# half-built tree.
 			break
-		var position := Vector3(float(row[0]), float(row[2]), -float(row[1]))
-		var scale := Vector3(float(row[3]), float(row[5]), -float(row[4]))
-		scale *= 0.2
-		scale.y *= 3
-		var rotation := Quaternion(float(row[7]), float(row[9]), -float(row[8]), float(row[6]))
-		multimesh.set_instance_transform(i, calc_transform_3d(position, rotation, scale))
+		var position_3d := Vector3(float(row[0]), float(row[2]), -float(row[1]))
+		var scale_3d := Vector3(float(row[3]), float(row[5]), -float(row[4]))
+		scale_3d *= 0.2
+		scale_3d.y *= 3
+		var rotation_3d := Quaternion(float(row[7]), float(row[9]), -float(row[8]), float(row[6]))
+		multimesh.set_instance_transform(i, calc_transform_3d(position_3d, rotation_3d, scale_3d))
 	csv_file.close()
 
 
@@ -62,6 +62,6 @@ func calc_transform_3d(
 	position_3d: Vector3, rotation_3d: Quaternion, scale_3d: Vector3
 ) -> Transform3D:
 	# Create basis from rotation, then apply local scale
-	var basis = Basis.from_euler(rotation_3d.get_euler()).scaled_local(scale_3d)
+	var scaled_basis = Basis.from_euler(rotation_3d.get_euler()).scaled_local(scale_3d)
 	# Combine basis and position into the final transform
-	return Transform3D(basis, position_3d)
+	return Transform3D(scaled_basis, position_3d)

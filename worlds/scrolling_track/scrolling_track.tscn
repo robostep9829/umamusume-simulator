@@ -57,7 +57,6 @@ playlist = ExtResource("9_playlist")
 world_environment = NodePath("../WorldEnvironment")
 
 [node name="DebugOverlay" type="CanvasLayer" parent="." unique_id=1314205677 node_paths=PackedStringArray("track", "director", "player")]
-visible = false
 script = ExtResource("10_debug")
 track = NodePath("../TrackManager")
 director = NodePath("../BiomeDirector")

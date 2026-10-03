@@ -42,7 +42,7 @@ enum Order {
 		sections = value
 		_rebuild_section_layout()
 ## Seed of the shuffled orders of [constant Order.SHUFFLE].
-@export var seed: int = 0
+@export var shuffle_seed: int = 0
 
 # Sections flattened into "element -> provider" ranges, rebuilt when they change.
 var _section_starts: PackedInt32Array = PackedInt32Array()
@@ -100,30 +100,27 @@ func run_range_at(element_index: int) -> Vector2i:
 	return Vector2i(first, last - first + 1)
 
 
-## Index of the [BiomeSection] that covers `element_index`, or -1 when the playlist
-## runs in auto order. Handy for debug overlays and lap-split logic.
-func section_index_at(element_index: int) -> int:
-	if _section_providers.is_empty():
-		return -1
-	return _section_index_from_local(posmod(element_index, _section_total))
-
-
-## First element of section `index` inside the loop, or -1 when there are no
-## sections. Useful to preview the layout; the playlist itself never needs it.
-func section_start(index: int) -> int:
-	if index < 0 or index >= _section_starts.size():
-		return -1
-	return _section_starts[index]
-
-
-## Length of one full pass through the sections, in elements (0 in auto order).
-func section_loop_length() -> int:
-	return _section_total
-
-
 ## True when the playlist uses [member sections] instead of [member biomes].
 func uses_sections() -> bool:
 	return not _section_providers.is_empty()
+
+
+## Every biome this playlist can serve, without duplicates: [member biomes] in
+## auto order, the sections' providers otherwise. Handy for load-time checks
+## that must see each biome once, however often it repeats around the lap.
+func all_providers() -> Array[BiomeProvider]:
+	var found: Array[BiomeProvider] = []
+	var seen := {}
+	for provider in biomes:
+		if provider != null and not seen.has(provider.get_instance_id()):
+			seen[provider.get_instance_id()] = true
+			found.append(provider)
+	for section in sections:
+		var provider := section.provider if section != null else null
+		if provider != null and not seen.has(provider.get_instance_id()):
+			seen[provider.get_instance_id()] = true
+			found.append(provider)
+	return found
 
 
 ## One-line description of what the playlist does, for a debug overlay or a log.
@@ -167,12 +164,8 @@ func validate() -> PackedStringArray:
 	elif order == Order.SHUFFLE and biomes.size() > 1 and segments_per_biome <= 0:
 		problems.append("`order` is SHUFFLE but `segments_per_biome` is 0, so nothing ever changes")
 	for i in biomes.size():
-		var provider := biomes[i]
-		if provider == null:
+		if biomes[i] == null:
 			problems.append("biomes[%d] is empty" % i)
-			continue
-		for problem in provider.validate():
-			problems.append("%s: %s" % [biomes[i].biome_id, problem])
 	return problems
 
 
@@ -215,12 +208,12 @@ func _section_index_from_local(local_index: int) -> int:
 
 ## Index into [member biomes] for one round, where a round is one pass through the
 ## list. The permutation is regenerated when the query moves to another round and
-## is a pure function of [member seed] and the round number, so the same element
+## is a pure function of [member shuffle_seed] and the round number, so the same element
 ## always gets the same biome.
 func _shuffled_index(round_index: int, index: int) -> int:
 	if round_index != _shuffle_round or _shuffle_order.size() != biomes.size():
 		var rng := RandomNumberGenerator.new()
-		rng.seed = seed + round_index * 0x9e3779b9
+		rng.seed = shuffle_seed + round_index * 0x9e3779b9
 		var permutation := PackedInt32Array()
 		permutation.resize(biomes.size())
 		for i in biomes.size():

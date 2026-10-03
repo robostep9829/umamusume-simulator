@@ -32,9 +32,9 @@ func convert_():
 		morphs_str = morphs_str.trim_prefix("[").trim_suffix("]")
 		var morph_names: Array[StringName] = []
 		for m in morphs_str.split(","):
-			var name = m.strip_edges().lstrip("'\"").rstrip("'\"")
-			if not name.is_empty():
-				morph_names.append(StringName(name))
+			var morph_name = m.strip_edges().lstrip("'\"").rstrip("'\"")
+			if not morph_name.is_empty():
+				morph_names.append(StringName(morph_name))
 
 		var entry = MorphControlEntry.new()
 		for i in range(morph_names.size()):
