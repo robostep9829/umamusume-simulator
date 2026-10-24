@@ -49,7 +49,7 @@ layout(push_constant, std430) uniform Ctrl {
 	vec4 params;  // raster_size.xy (px), max_radius_px, strength
 	vec4 params2; // sample_count, center_keep, center_radius, far_expo
 	vec4 params3; // center_pos.xy, exposure_scale, reserved
-	vec4 params4; // far_falloff_distance (m), -, -, -
+	vec4 params4; // far_falloff_distance (m), motion_threshold_px, -, -
 } ctrl;
 
 float sample_depth(vec2 p_uv) {
@@ -117,7 +117,14 @@ void main() {
 	// to zero with the velocity (no hard cutoff, which would leave a visible
 	// seam where the motion crosses the threshold).
 	float weight = blur_weight(uv_interp, distance);
-	float blurred_px = min(vel_px, ctrl.params.w) * ctrl.params.z * weight;
+	float gate = 1.0;
+	if (ctrl.params4.y > 0.0) {
+		// Fade in over a small feather so the threshold does not leave a
+		// hard contour where slow pixels cross it.
+		float feather = max(ctrl.params4.y * 0.25, 1.0);
+		gate = smoothstep(ctrl.params4.y, ctrl.params4.y + feather, vel_px);
+	}
+	float blurred_px = min(vel_px, ctrl.params.w) * ctrl.params.z * weight * gate;
 	if (blurred_px < 0.05) {
 		out_color = base_color;
 		return;
@@ -147,6 +154,9 @@ void main() {
 @export_range(0.0, 1.0, 0.01) var motion_strength: float = 0.9
 @export_range(2, 32, 1) var motion_sample_count: int = 16
 @export_range(0.0, 256.0, 0.5) var motion_max_radius_px: float = 32.0
+## Minimum screen-space motion (pixels per 1/60 s exposure) that produces
+## blur. Slower pixels fade smoothly to no blur; 0 disables the gate.
+@export_range(0.0, 64.0, 0.5) var motion_threshold_px: float = 0.0
 ## Fraction of full blur kept at the blur-suppression anchor.
 @export_range(0.0, 1.0, 0.05) var center_keep: float = 0.1
 ## Radius (in units of screen height) of the suppressed region; blur recovers
@@ -519,7 +529,7 @@ func _render_callback(p_effect_callback_type: int, p_render_data: RenderData) ->
 			motion_max_radius_px, motion_strength,
 			float(motion_sample_count), center_keep, center_radius, far_falloff,
 			center_pos.x, center_pos.y, fps_scale, 0.0,
-			falloff_distance, 0.0, 0.0, 0.0,
+			falloff_distance, motion_threshold_px, 0.0, 0.0,
 		])
 
 		var draw_list := rd.draw_list_begin(result_fb)
