@@ -6,6 +6,7 @@
 [ext_resource type="ArrayMesh" uid="uid://cobx4l3bbhs5a" path="res://worlds/scrolling_track/props/rural/leaf_mesh.tres" id="4_cc07c"]
 [ext_resource type="Material" uid="uid://cyf877vmtffqu" path="res://worlds/uma_island/materials/water.tres" id="5_4ygcm"]
 [ext_resource type="Environment" uid="uid://cwd3w67jcb3xr" path="res://environment/new_environment.tres" id="6_1s6q0"]
+[ext_resource type="Compositor" path="res://environment/compositor/compositor.tres" id="comp_mblur"]
 [ext_resource type="Script" uid="uid://bpkcxjs7n20gk" path="res://scripts/animated_leaves/particle_tree.gd" id="8_bxm4f"]
 [ext_resource type="ArrayMesh" uid="uid://cu4j5daeqc0pi" path="res://worlds/scrolling_track/props/rural/trunk.obj" id="9_cc07c"]
 [ext_resource type="Material" uid="uid://cngf66gdqkvb5" path="res://worlds/uma_island/materials/track_overlay.tres" id="10_cc07c"]
@@ -2450,6 +2451,7 @@ directional_shadow_max_distance = 45.7
 
 [node name="WorldEnvironment" type="WorldEnvironment" parent="." unique_id=275566782]
 environment = ExtResource("6_1s6q0")
+compositor = ExtResource("comp_mblur")
 
 [node name="island-col" type="StaticBody3D" parent="." unique_id=1730721046]
 visible = false

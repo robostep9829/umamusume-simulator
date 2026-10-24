@@ -1,5 +1,5 @@
 shader_type spatial;
-render_mode cull_disabled, world_vertex_coords, shadows_disabled;
+render_mode cull_disabled, world_vertex_coords, shadows_disabled, diffuse_lambert_wrap;
 
 uniform sampler2D texture_albedo : source_color, filter_linear_mipmap, repeat_enable;
 uniform vec4 albedo : source_color = vec4(1.0);
@@ -28,8 +28,8 @@ vec3 rotate_around(vec3 v, vec3 axis, float angle) {
 
 void vertex() {
 	vec3 instance_origin = (MODEL_MATRIX * vec4(0.0, 0.0, 0.0, 1.0)).xyz;
-	vec3 leaf_axis = normalize((MODEL_MATRIX * vec4(0.0, 1.0, 0.0, 0.0)).xyz);
-	vec3 leaf_normal = normalize((MODEL_MATRIX * vec4(NORMAL, 0.0)).xyz);
+	lowp vec3 leaf_axis = normalize((MODEL_MATRIX * vec4(0.0, 1.0, 0.0, 0.0)).xyz);
+	lowp vec3 leaf_normal = normalize((MODEL_MATRIX * vec4(NORMAL, 0.0)).xyz);
 
 	wind_sample = sample_wind(instance_origin);
 

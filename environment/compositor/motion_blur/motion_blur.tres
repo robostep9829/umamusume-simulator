@@ -1,0 +1,13 @@
+[gd_resource type="CompositorEffect" format=3]
+
+[ext_resource type="Script" path="res://environment/compositor/motion_blur/motion_blur.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+enabled = true
+effect_callback_type = 4
+access_resolved_color = true
+access_resolved_depth = true
+motion_strength = 0.45
+motion_sample_count = 16
+motion_max_radius_px = 24.0
