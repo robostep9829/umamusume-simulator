@@ -1,13 +1,15 @@
-[gd_resource type="CompositorEffect" format=3]
+[gd_resource type="CompositorEffect" script_class="MotionBlurEffect" format=3 uid="uid://bwe7jo1vbbdfu"]
 
-[ext_resource type="Script" path="res://environment/compositor/motion_blur/motion_blur.gd" id="1"]
+[ext_resource type="Script" uid="uid://bjcj5nnaod04w" path="res://environment/compositor/motion_blur/motion_blur.gd" id="1"]
 
 [resource]
-script = ExtResource("1")
+resource_local_to_scene = false
+resource_name = ""
 enabled = true
 effect_callback_type = 4
-access_resolved_color = true
-access_resolved_depth = true
-motion_strength = 0.45
-motion_sample_count = 16
-motion_max_radius_px = 24.0
+needs_motion_vectors = false
+needs_normal_roughness = false
+script = ExtResource("1")
+motion_max_radius_px = 18.5
+center_radius = 0.35
+center_pos = Vector2(0.5, 0.59)
