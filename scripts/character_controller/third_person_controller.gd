@@ -146,35 +146,12 @@ func _update_camera() -> void:
 	camera_pivot.rotation.x = _pitch
 
 
-## Projects the character capsule through the camera so the motion blur can
-## leave it sharp. The capsule follows the spring-arm framing, so it moves
-## left/center and closer/farther together with the camera.
+## Hands the character capsule to the motion blur. The projection and viewport
+## cache live in MotionBlurFocus.
 func _update_blur_focus() -> void:
-	var viewport_size := camera.get_viewport().get_visible_rect().size
-	if viewport_size.x <= 0.0 or viewport_size.y <= 0.0:
-		MotionBlurFocus.clear()
-		return
-
 	var feet := global_transform * Vector3(0.0, 0.05, 0.0)
 	var head := global_transform * Vector3(0.0, blur_focus_head_height, 0.0)
-	if camera.is_position_behind(feet) or camera.is_position_behind(head):
-		MotionBlurFocus.clear()
-		return
-
-	var center := (feet + head) * 0.5
-	var center_screen := camera.unproject_position(center)
-	var radius_px := camera.unproject_position(
-		center + camera.global_transform.basis.x * blur_focus_radius
-	).distance_to(center_screen)
-	var view_center := camera.global_transform.affine_inverse() * center
-
-	MotionBlurFocus.set_focus(
-		camera.unproject_position(feet) / viewport_size,
-		camera.unproject_position(head) / viewport_size,
-		Vector2(radius_px, radius_px) / viewport_size,
-		-view_center.z,
-		blur_focus_depth
-	)
+	MotionBlurFocus.update_focus(camera, feet, head, blur_focus_radius, blur_focus_depth)
 
 
 ## Auto run: idle counter. Any directional input resets the clock; only

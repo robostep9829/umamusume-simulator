@@ -1,0 +1,6 @@
+[gd_resource type="CompositorEffect" load_steps=2 format=3]
+
+[ext_resource type="Script" uid="uid://cmjofwiu8gpmt" path="res://environment/compositor/tree_shadow/tree_shadow.gd" id="1_effect"]
+
+[resource]
+script = ExtResource("1_effect")

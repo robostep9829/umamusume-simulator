@@ -71,6 +71,14 @@ var _blit_shader: RID = RID()
 var _blit_pipeline: RID = RID()
 var _blit_pipeline_format: int = -1
 
+# Reused across frames and views. Creating these framebuffers per frame leaked
+# one RenderingDevice framebuffer per pass, which ran the game out of memory
+# after a couple of minutes on Android.
+var _result_fbs: Array[RID] = []
+var _result_fb_views: Array[RID] = []
+var _blit_fbs: Array[RID] = []
+var _blit_fb_colors: Array[RID] = []
+
 var _prev_transforms: Array[Transform3D] = []
 var _prev_ticks: int = -1
 
@@ -96,6 +104,8 @@ func _notification(what: int) -> void:
 			rd.free_rid(_depth_sampler)
 		if _vertex_array.is_valid():
 			rd.free_rid(_vertex_array)
+		# The rendering device graph owns framebuffers created through
+		# framebuffer_create; freeing them here double-frees at teardown.
 		if _blit_pipeline.is_valid():
 			rd.free_rid(_blit_pipeline)
 		if _blit_shader.is_valid():
@@ -352,6 +362,23 @@ func _ensure_blit_pipeline(framebuffer_format: int) -> bool:
 	return _blit_pipeline.is_valid()
 
 
+## Returns a cached framebuffer for `view`, recreating it only when its
+## attachment changes (a viewport resize). One array pair is kept per pass.
+func _view_framebuffer(
+	framebuffers: Array[RID], attachments: Array[RID], view: int, attachment: RID
+) -> RID:
+	while framebuffers.size() <= view:
+		framebuffers.append(RID())
+		attachments.append(RID())
+	if framebuffers[view].is_valid() and attachments[view] == attachment:
+		return framebuffers[view]
+	# The old framebuffer is left to the rendering device graph; freeing it here
+	# can double-free when the graph has already retired the attachment.
+	framebuffers[view] = rd.framebuffer_create([attachment])
+	attachments[view] = attachment
+	return framebuffers[view]
+
+
 func _render_callback(p_effect_callback_type: int, p_render_data: RenderData) -> void:
 	if p_effect_callback_type != effect_callback_type:
 		return
@@ -414,10 +441,20 @@ func _render_callback(p_effect_callback_type: int, p_render_data: RenderData) ->
 		if not result_view.is_valid():
 			continue
 
+		# During editor/game teardown the callback can still receive scene
+		# buffers whose textures are already gone. Binding one fails
+		# uniform_set_create and leaves a broken set in the cache.
+		if not rd.texture_is_valid(color_rid) or not rd.texture_is_valid(depth_rid):
+			continue
+		if not rd.texture_is_valid(result_view):
+			continue
+
 		# Pass 1: sample the resolved color + depth buffers, write blurred
 		# output into our own texture (reading and writing the same
 		# framebuffer attachment is not allowed).
-		var result_fb: RID = rd.framebuffer_create([result_view])
+		var result_fb: RID = _view_framebuffer(
+			_result_fbs, _result_fb_views, view, result_view
+		)
 		if not result_fb.is_valid():
 			continue
 		if not _ensure_pipeline(rd.framebuffer_get_format(result_fb)):
@@ -456,7 +493,9 @@ func _render_callback(p_effect_callback_type: int, p_render_data: RenderData) ->
 
 		# Pass 2: blit the blurred result back into the resolved color buffer
 		# with blending disabled (strict source replacement).
-		var blit_fb: RID = rd.framebuffer_create([color_rid])
+		var blit_fb: RID = _view_framebuffer(
+			_blit_fbs, _blit_fb_colors, view, color_rid
+		)
 		if not blit_fb.is_valid():
 			continue
 		if not _ensure_blit_pipeline(rd.framebuffer_get_format(blit_fb)):

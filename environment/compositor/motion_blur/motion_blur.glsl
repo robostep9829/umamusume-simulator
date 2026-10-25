@@ -31,6 +31,11 @@ layout(location = 0) out vec4 out_color;
 
 // --- Semi-static parameters ------------------------------------------------
 
+// Reject taps that land on a nearer surface (an occluder) instead of letting
+// it bleed into the blur. Comment out to let the blur cross depth
+// discontinuities: removes the fence-ground seam but lets occluders ghost.
+// #define MB_DEPTH_REJECT 1
+
 // Exposure as a shutter angle relative to the 1/60 s reprojection arc:
 // 360 deg integrates the full arc, 180 deg half of it. 0 disables the blur.
 const float MB_SHUTTER_ANGLE_DEG = 180.0;
@@ -38,7 +43,7 @@ const float MB_SHUTTER_ANGLE_DEG = 180.0;
 // Must match MotionBlurUniforms.SAMPLE_COUNT.
 const int MB_SAMPLE_COUNT = 4;
 // Longest screen-space blur, in pixels.
-const float MB_MAX_RADIUS_PX = 12.0;
+const float MB_MAX_RADIUS_PX = 128.0;
 // Minimum screen-space motion (pixels per 1/60 s exposure) that produces
 // blur. Slower pixels fade smoothly to none; 0 disables the gate.
 const float MB_MOTION_THRESHOLD_PX = 1.0;
@@ -168,15 +173,20 @@ void main() {
 
 	// Integrate along the arc. The last tap is the current pixel itself
 	// (base_color), so taps 0..MB_SAMPLE_COUNT-2 plus the base cover the
-	// exposure evenly. A tap that lands on a nearer surface is an occlusion,
-	// so it is rejected instead of bleeding a hidden object into the blur.
+	// exposure evenly.
 	vec4 sum = base_color;
 	float weight_sum = 1.0;
 	for (int i = 0; i < MB_SAMPLE_COUNT - 1; i++) {
 		vec2 tap_uv = clamp(mix(uv_interp, project_uv(reproj.steps[i], clip), amount),
 			vec2(0.001), vec2(0.999));
+#ifdef MB_DEPTH_REJECT
+		// Drop taps that land on a nearer surface: an occluder there would
+		// otherwise bleed a hidden object into the blur.
 		float tap_distance = linear_distance(tap_uv, sample_depth(tap_uv));
 		float visible = step(distance * 0.75, tap_distance);
+#else
+		float visible = 1.0;
+#endif
 		sum += textureLod(color_tex, tap_uv, 0.0) * visible;
 		weight_sum += visible;
 	}

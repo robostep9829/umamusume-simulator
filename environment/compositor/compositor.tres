@@ -1,6 +1,7 @@
-[gd_resource type="Compositor" format=3 uid="uid://uyehki6wshxb"]
+[gd_resource type="Compositor" load_steps=3 format=3 uid="uid://uyehki6wshxb"]
 
 [ext_resource type="CompositorEffect" uid="uid://bwe7jo1vbbdfu" path="res://environment/compositor/motion_blur/motion_blur.tres" id="1"]
+[ext_resource type="CompositorEffect" path="res://environment/compositor/tree_shadow/tree_shadow.tres" id="2"]
 
 [resource]
-compositor_effects = Array[CompositorEffect]([ExtResource("1")])
+compositor_effects = Array[CompositorEffect]([ExtResource("1"), ExtResource("2")])
