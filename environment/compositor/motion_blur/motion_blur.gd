@@ -14,8 +14,20 @@ class_name MotionBlurEffect
 ## same regardless of the real frame rate. Depth is read straight from the
 ## multisampled depth attachment on the Mobile renderer (it never resolves
 ## depth for compositor effects).
+##
+## The shader lives in motion_blur.glsl. Authoring-time tuning (shutter angle,
+## sample count, threshold) is compiled into it as constants;
+## MotionBlurUniforms packs the per-frame push constants and the reprojection
+## uniform buffer.
 
-const _VERTEX_SOURCE: String = """
+const _SHADER_PATH := "res://environment/compositor/motion_blur/motion_blur.glsl"
+## Shader versions declared by the #[versions] section of motion_blur.glsl.
+const _SHADER_VERSION := "default"
+const _SHADER_VERSION_MSAA := "msaa"
+const _SHADER_VERSION_DEBUG := "debug"
+const _SHADER_VERSION_DEBUG_MSAA := "debug_msaa"
+
+const _BLIT_VERTEX_SOURCE: String = """
 #version 450
 layout(location = 0) out vec2 uv_interp;
 void main() {
@@ -23,125 +35,6 @@ void main() {
 	vec2 in_pos = triangle[gl_VertexIndex];
 	uv_interp = in_pos * 0.5 + 0.5;
 	gl_Position = vec4(in_pos, 0.0, 1.0);
-}
-"""
-
-const _FRAG_SOURCE: String = """
-layout(location = 0) in vec2 uv_interp;
-layout(location = 0) out vec4 out_color;
-
-layout(set = 0, binding = 0) uniform sampler2D color_tex;
-#ifdef USE_MSAA_DEPTH
-// With MSAA the mobile renderer never writes the resolved RB_TEX_DEPTH
-// (depth resolve for compositor effects is unsupported), so read the
-// multisampled depth attachment itself.
-layout(set = 0, binding = 1) uniform sampler2DMS depth_tex;
-#else
-layout(set = 0, binding = 1) uniform sampler2D depth_tex;
-#endif
-
-// One matrix per tap: maps this frame's clip position to the position the
-// same world point had at an earlier point of the exposure. Interpolating the
-// camera pose makes rotation follow its true arc instead of a straight chord.
-layout(set = 1, binding = 0, std140) uniform Reprojection {
-	mat4 steps[32];
-	mat4 inv_projection;
-} reproj;
-
-layout(push_constant, std430) uniform Ctrl {
-	vec4 params;  // raster_size.xy (px), max_radius_px, strength
-	vec4 params2; // sample_count, center_keep, center_radius, far_expo
-	vec4 params3; // center_pos.xy, exposure (baked into steps), reserved
-	vec4 params4; // far_falloff_distance (m), motion_threshold_px, -, -
-} ctrl;
-
-float sample_depth(vec2 p_uv) {
-#ifdef USE_MSAA_DEPTH
-	return texelFetch(depth_tex, ivec2(p_uv * ctrl.params.xy), 0).x;
-#else
-	return textureLod(depth_tex, p_uv, 0.0).x;
-#endif
-}
-
-vec2 project_uv(mat4 p_matrix, vec4 p_clip) {
-	vec4 out_clip = p_matrix * p_clip;
-	return (out_clip.xy / out_clip.w) * 0.5 + 0.5;
-}
-
-// Reversed-Z: depth = 1 at the near plane, 0 at the far plane/sky. Unproject
-// the NDC point to recover the true linear view distance in metres.
-float linear_distance(vec2 p_uv, float p_depth) {
-	vec4 view = reproj.inv_projection * vec4(p_uv * 2.0 - 1.0, p_depth, 1.0);
-	return abs(view.z / view.w);
-}
-
-// Blur envelope: reduced around the character's screen position and in the
-// far distance.
-float blur_weight(vec2 p_uv, float p_distance) {
-	float depth_w = 1.0;
-	if (ctrl.params2.w > 0.0) {
-		depth_w = pow(clamp(ctrl.params4.x / max(p_distance, 0.001), 0.0, 1.0), ctrl.params2.w);
-	}
-
-	float aspect = ctrl.params.x / ctrl.params.y;
-	vec2 d = (p_uv - ctrl.params3.xy) * vec2(aspect, 1.0);
-	float dist = length(d);
-	float radial_w = ctrl.params2.y + (1.0 - ctrl.params2.y) * smoothstep(ctrl.params2.z * 0.25, ctrl.params2.z, dist);
-
-	return clamp(depth_w * radial_w, 0.0, 1.0);
-}
-
-void main() {
-	vec4 base_color = textureLod(color_tex, uv_interp, 0.0);
-	int samples = int(ctrl.params2.x);
-	if (samples < 2 || ctrl.params.w <= 0.0) {
-		out_color = base_color;
-		return;
-	}
-
-	float depth = sample_depth(uv_interp);
-	float distance = linear_distance(uv_interp, depth);
-	if (depth <= 0.0) {
-		out_color = base_color; // Reversed depth: far plane / sky is 0.0.
-		return;
-	}
-
-	vec4 clip = vec4(uv_interp * 2.0 - 1.0, depth, 1.0);
-	vec2 previous_uv = project_uv(reproj.steps[0], clip);
-	float vel_px = length((previous_uv - uv_interp) * ctrl.params.xy);
-
-	// Blur envelope: fade with the center/distance envelope and the velocity
-	// threshold. `amount` shortens the whole arc toward the current pixel so
-	// strength and max radius still act as artistic controls.
-	float weight = blur_weight(uv_interp, distance);
-	float gate = 1.0;
-	if (ctrl.params4.y > 0.0) {
-		// Fade in over a small feather so the threshold does not leave a
-		// hard contour where slow pixels cross it.
-		float feather = max(ctrl.params4.y * 0.25, 1.0);
-		gate = smoothstep(ctrl.params4.y, ctrl.params4.y + feather, vel_px);
-	}
-	float amount = min(1.0, ctrl.params.z / max(vel_px, 1e-6)) * ctrl.params.w * weight * gate;
-	if (amount * vel_px < 0.05) {
-		out_color = base_color;
-		return;
-	}
-
-	// Integrate along the arc. The last tap is the current pixel itself
-	// (base_color), so taps 0..samples-2 plus the base cover the exposure
-	// evenly. A tap that lands on a nearer surface is an occlusion, so it is
-	// rejected instead of bleeding a hidden object into the blur.
-	vec4 sum = base_color;
-	float weight_sum = 1.0;
-	for (int i = 0; i < samples - 1; i++) {
-		vec2 tap_uv = clamp(mix(uv_interp, project_uv(reproj.steps[i], clip), amount),
-			vec2(0.001), vec2(0.999));
-		float tap_distance = linear_distance(tap_uv, sample_depth(tap_uv));
-		float visible = step(distance * 0.75, tap_distance);
-		sum += textureLod(color_tex, tap_uv, 0.0) * visible;
-		weight_sum += visible;
-	}
-	out_color = sum / weight_sum;
 }
 """
 
@@ -156,31 +49,17 @@ void main() {
 }
 """
 
-@export_range(0.0, 1.0, 0.01) var motion_strength: float = 0.9
-@export_range(2, 32, 1) var motion_sample_count: int = 16
-@export_range(0.0, 256.0, 0.5) var motion_max_radius_px: float = 32.0
-## Minimum screen-space motion (pixels per 1/60 s exposure) that produces
-## blur. Slower pixels fade smoothly to no blur; 0 disables the gate.
-@export_range(0.0, 64.0, 0.5) var motion_threshold_px: float = 0.0
-## Fraction of full blur kept at the blur-suppression anchor.
-@export_range(0.0, 1.0, 0.05) var center_keep: float = 0.1
-## Radius (in units of screen height) of the suppressed region; blur recovers
-## to full past this radius.
-@export_range(0.0, 1.0, 0.05) var center_radius: float = 0.22
-## Exponent of the far-distance falloff (0 = no distance falloff).
-@export_range(0.0, 4.0, 0.1) var far_falloff: float = 1.0
-## Distance (metres) at which full blur has decayed; closer is fully blurred.
-@export_range(1.0, 500.0, 1.0) var falloff_distance: float = 45.0
-## Screen-space anchor of the suppression region (UV, y grows downward).
-@export var center_pos: Vector2 = Vector2(0.5, 0.4)
-
-## Must match the `steps[32]` array size in the shader.
-const MAX_REPROJECTION_STEPS := 32
-
 var rd: RenderingDevice = null
+
+## Tint the pixels the blur touches instead of applying it: red intensity is
+## the sampled arc length relative to MB_MAX_RADIUS_PX.
+@export var debug_view: bool = false
+
+var _uniforms := MotionBlurUniforms.new()
 
 var _shader: RID = RID()
 var _shader_msaa_depth: bool = false
+var _shader_debug: bool = false
 var _pipeline: RID = RID()
 var _pipeline_format: int = -1
 var _vertex_array: RID = RID()
@@ -223,11 +102,11 @@ func _notification(what: int) -> void:
 			rd.free_rid(_blit_shader)
 
 
-## Compiles the vertex + fragment stages into a single shader program.
-## Returns true once the shader is valid. Two variants exist: one sampling a
-## normal depth texture, one sampling a multisampled depth attachment.
+## Loads the precompiled vertex + fragment stages from motion_blur.glsl.
+## Returns true once the shader is valid. The file provides normal and debug
+## versions, each with a resolved-depth and a multisampled-depth variant.
 func _create_shader(msaa_depth: bool) -> bool:
-	if _shader.is_valid() and _shader_msaa_depth == msaa_depth:
+	if _shader.is_valid() and _shader_msaa_depth == msaa_depth and _shader_debug == debug_view:
 		return true
 	if not rd:
 		return false
@@ -238,16 +117,19 @@ func _create_shader(msaa_depth: bool) -> bool:
 		_pipeline = RID()
 		_pipeline_format = -1
 
-	var body := _FRAG_SOURCE
-	if msaa_depth:
-		body = "#define USE_MSAA_DEPTH 1\n" + body
+	var shader_file := load(_SHADER_PATH) as RDShaderFile
+	if not shader_file:
+		push_error("MotionBlurEffect: cannot load %s" % _SHADER_PATH)
+		return false
+	if not shader_file.base_error.is_empty():
+		push_error("MotionBlurEffect shader parse error: %s" % shader_file.base_error)
+		return false
 
-	var source := RDShaderSource.new()
-	source.language = RenderingDevice.SHADER_LANGUAGE_GLSL
-	source.source_vertex = _VERTEX_SOURCE
-	source.source_fragment = "#version 450\n" + body
-
-	var spirv := rd.shader_compile_spirv_from_source(source)
+	var version := _shader_version(msaa_depth)
+	var spirv: RDShaderSPIRV = shader_file.get_spirv(version)
+	if not spirv:
+		push_error("MotionBlurEffect: shader version '%s' is missing" % version)
+		return false
 	for message: String in [spirv.compile_error_vertex, spirv.compile_error_fragment]:
 		if not message.is_empty():
 			push_error("MotionBlurEffect shader compile error: %s" % message)
@@ -255,7 +137,14 @@ func _create_shader(msaa_depth: bool) -> bool:
 
 	_shader = rd.shader_create_from_spirv(spirv)
 	_shader_msaa_depth = msaa_depth
+	_shader_debug = debug_view
 	return _shader.is_valid()
+
+
+func _shader_version(msaa_depth: bool) -> String:
+	if debug_view:
+		return _SHADER_VERSION_DEBUG_MSAA if msaa_depth else _SHADER_VERSION_DEBUG
+	return _SHADER_VERSION_MSAA if msaa_depth else _SHADER_VERSION
 
 
 func _create_resources(msaa_depth: bool) -> bool:
@@ -285,24 +174,12 @@ func _create_resources(msaa_depth: bool) -> bool:
 		_depth_sampler = rd.sampler_create(depth_state)
 
 		_reprojection_buffer = rd.uniform_buffer_create(
-			(MAX_REPROJECTION_STEPS + 1) * 16 * 4, PackedByteArray(), 0
+			_uniforms.to_reprojection_bytes().size(), PackedByteArray(), 0
 		)
 		if not _reprojection_buffer.is_valid():
 			return false
 
 	return true
-
-
-func _pack_matrix(mat: Projection) -> PackedFloat32Array:
-	var packed := PackedFloat32Array()
-	packed.resize(16)
-	for column in range(4):
-		var col := mat[column] as Vector4
-		packed[column * 4 + 0] = col.x
-		packed[column * 4 + 1] = col.y
-		packed[column * 4 + 2] = col.z
-		packed[column * 4 + 3] = col.w
-	return packed
 
 
 ## Builds one reprojection matrix per blur tap by interpolating the camera pose
@@ -345,11 +222,9 @@ func _update_reprojection(
 		+ (previous_transform.origin - current_transform.origin) * fps_scale
 	)
 
-	var samples: int = clampi(motion_sample_count, 2, MAX_REPROJECTION_STEPS)
+	var samples := MotionBlurUniforms.SAMPLE_COUNT
 	var inverse_projection: Projection = current_projection.inverse()
-	var steps := PackedFloat32Array()
-	steps.resize(MAX_REPROJECTION_STEPS * 16)
-	for i in range(MAX_REPROJECTION_STEPS):
+	for i in range(MotionBlurUniforms.MAX_REPROJECTION_STEPS):
 		var step_projection: Projection
 		if i < samples:
 			# steps[0] is the oldest pose, steps[samples-1] is the current
@@ -367,12 +242,11 @@ func _update_reprojection(
 			)
 		else:
 			step_projection = Projection.IDENTITY
-		var packed := _pack_matrix(step_projection)
-		for column in range(16):
-			steps[i * 16 + column] = packed[column]
-	steps.append_array(_pack_matrix(inverse_projection))
+		_uniforms.set_step(i, step_projection)
+	_uniforms.set_inverse_projection(inverse_projection)
 
-	rd.buffer_update(_reprojection_buffer, 0, steps.size() * 4, steps.to_byte_array())
+	var payload := _uniforms.to_reprojection_bytes()
+	rd.buffer_update(_reprojection_buffer, 0, payload.size(), payload)
 	return true
 
 
@@ -423,7 +297,7 @@ func _ensure_blit_pipeline(framebuffer_format: int) -> bool:
 	if not _blit_shader.is_valid():
 		var blit_source := RDShaderSource.new()
 		blit_source.language = RenderingDevice.SHADER_LANGUAGE_GLSL
-		blit_source.source_vertex = _VERTEX_SOURCE
+		blit_source.source_vertex = _BLIT_VERTEX_SOURCE
 		blit_source.source_fragment = _BLIT_FRAG_SOURCE
 
 		var blit_spirv := rd.shader_compile_spirv_from_source(blit_source)
@@ -511,6 +385,9 @@ func _render_callback(p_effect_callback_type: int, p_render_data: RenderData) ->
 			fps_scale = clampf((1.0 / 60.0) / dt, 1.0 / 6.0, 8.0)
 	_prev_ticks = Time.get_ticks_usec()
 
+	_uniforms.raster_size = Vector2(size)
+	var push_constants := _uniforms.to_push_constants()
+
 	var color_format: int = rd.texture_get_format(scene_buffers.get_color_texture()).format
 	var result_texture: RID = scene_buffers.create_texture(
 		"motion_blur", "result", color_format,
@@ -567,20 +444,12 @@ func _render_callback(p_effect_callback_type: int, p_render_data: RenderData) ->
 		reproj_uniform.add_id(_reprojection_buffer)
 		var reproj_set := UniformSetCacheRD.get_cache(_shader, 1, [reproj_uniform])
 
-		var push_constants := PackedFloat32Array([
-			size.x, size.y,
-			motion_max_radius_px, motion_strength,
-			float(motion_sample_count), center_keep, center_radius, far_falloff,
-			center_pos.x, center_pos.y, fps_scale, 0.0,
-			falloff_distance, motion_threshold_px, 0.0, 0.0,
-		])
-
 		var draw_list := rd.draw_list_begin(result_fb)
 		rd.draw_list_bind_render_pipeline(draw_list, _pipeline)
 		rd.draw_list_bind_vertex_array(draw_list, _vertex_array)
 		rd.draw_list_bind_uniform_set(draw_list, sampler_set, 0)
 		rd.draw_list_bind_uniform_set(draw_list, reproj_set, 1)
-		rd.draw_list_set_push_constant(draw_list, push_constants.to_byte_array(), push_constants.size() * 4)
+		rd.draw_list_set_push_constant(draw_list, push_constants, push_constants.size())
 		rd.draw_list_draw(draw_list, false, 1)
 		rd.draw_list_end()
 
