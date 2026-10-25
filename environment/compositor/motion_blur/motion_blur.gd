@@ -386,6 +386,7 @@ func _render_callback(p_effect_callback_type: int, p_render_data: RenderData) ->
 	_prev_ticks = Time.get_ticks_usec()
 
 	_uniforms.raster_size = Vector2(size)
+	_uniforms.set_focus(MotionBlurFocus.get_focus())
 	var push_constants := _uniforms.to_push_constants()
 
 	var color_format: int = rd.texture_get_format(scene_buffers.get_color_texture()).format

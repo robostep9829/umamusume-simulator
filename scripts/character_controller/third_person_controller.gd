@@ -26,6 +26,11 @@ class_name ThirdPersonController
 @export var normal_spring_position: Vector3 = Vector3(0.5, 0.0, 0.0)
 @export var sprint_spring_position: Vector3 = Vector3(0.0, 0.0, 0.0)
 
+## Motion-blur focus: the character is kept sharp while the world blurs.
+@export var blur_focus_head_height: float = 1.7
+@export var blur_focus_radius: float = 0.55
+@export var blur_focus_depth: float = 0.55
+
 @export var player_data: PlayerData:
 	set(value):
 		player_data = value
@@ -36,6 +41,7 @@ class_name ThirdPersonController
 @onready var camera_pivot: Node3D = $CameraPivot
 @onready var skeleton: Node3D = $Skeleton3D
 @onready var spring: SpringArm3D = $CameraPivot/SpringArm3D
+@onready var camera: Camera3D = $CameraPivot/SpringArm3D/Camera3D
 @onready var animation_tree: AnimationTree = $AnimationTree
 
 # Gravity pulled from project settings so it stays consistent
@@ -72,6 +78,16 @@ func _ready() -> void:
 	if not Engine.is_editor_hint():
 		Input.mouse_mode = Input.MOUSE_MODE_CAPTURED
 	_update_character_mesh()
+
+
+func _exit_tree() -> void:
+	MotionBlurFocus.clear()
+
+
+func _process(_delta: float) -> void:
+	if Engine.is_editor_hint():
+		return
+	_update_blur_focus()
 
 
 func _update_character_mesh() -> void:
@@ -128,6 +144,37 @@ func _update_camera() -> void:
 	# Yaw rotates the pivot horizontally, pitch tilts it vertically
 	camera_pivot.rotation.y = _yaw
 	camera_pivot.rotation.x = _pitch
+
+
+## Projects the character capsule through the camera so the motion blur can
+## leave it sharp. The capsule follows the spring-arm framing, so it moves
+## left/center and closer/farther together with the camera.
+func _update_blur_focus() -> void:
+	var viewport_size := camera.get_viewport().get_visible_rect().size
+	if viewport_size.x <= 0.0 or viewport_size.y <= 0.0:
+		MotionBlurFocus.clear()
+		return
+
+	var feet := global_transform * Vector3(0.0, 0.05, 0.0)
+	var head := global_transform * Vector3(0.0, blur_focus_head_height, 0.0)
+	if camera.is_position_behind(feet) or camera.is_position_behind(head):
+		MotionBlurFocus.clear()
+		return
+
+	var center := (feet + head) * 0.5
+	var center_screen := camera.unproject_position(center)
+	var radius_px := camera.unproject_position(
+		center + camera.global_transform.basis.x * blur_focus_radius
+	).distance_to(center_screen)
+	var view_center := camera.global_transform.affine_inverse() * center
+
+	MotionBlurFocus.set_focus(
+		camera.unproject_position(feet) / viewport_size,
+		camera.unproject_position(head) / viewport_size,
+		Vector2(radius_px, radius_px) / viewport_size,
+		-view_center.z,
+		blur_focus_depth
+	)
 
 
 ## Auto run: idle counter. Any directional input resets the clock; only

@@ -15,6 +15,10 @@ const MAX_REPROJECTION_STEPS := 32
 ## Push-constant block: vec2 raster_size, vec2 reserved.
 var raster_size := Vector2.ZERO
 
+## Focus capsule that stays sharp: feet.xy, head.xy, radius.xy, distance,
+## half depth. A non-positive distance disables it.
+var _focus := PackedFloat32Array([0.0, 0.0, 0.0, 0.0, 0.0, 0.0, -1.0, 0.5])
+
 ## MAX_REPROJECTION_STEPS step matrices followed by the inverse projection,
 ## column-major, matching the std140 Reprojection block.
 var _reprojection := PackedFloat32Array()
@@ -33,8 +37,14 @@ func set_inverse_projection(p_projection: Projection) -> void:
 	_write_matrix(MAX_REPROJECTION_STEPS * 16, p_projection)
 
 
+func set_focus(p_focus: PackedFloat32Array) -> void:
+	_focus = p_focus
+
+
 func to_push_constants() -> PackedByteArray:
-	return PackedFloat32Array([raster_size.x, raster_size.y, 0.0, 0.0]).to_byte_array()
+	var data := PackedFloat32Array([raster_size.x, raster_size.y, 0.0, 0.0])
+	data.append_array(_focus)
+	return data.to_byte_array()
 
 
 func to_reprojection_bytes() -> PackedByteArray:

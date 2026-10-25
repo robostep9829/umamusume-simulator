@@ -66,10 +66,12 @@ layout(set = 1, binding = 0, std140) uniform Reprojection {
 	mat4 inv_projection;
 } reproj;
 
-// Per-frame values only: raster size in pixels.
+// Per-frame values: raster size and the screen-space focus capsule.
 layout(push_constant, std430) uniform Frame {
 	vec2 raster_size;
 	vec2 reserved;
+	vec4 focus_endpoints; // xy = feet UV, zw = head UV
+	vec4 focus_shape;     // xy = radius UV, z = distance, w = half depth
 } frame;
 
 // --- Helpers ---------------------------------------------------------------
@@ -94,6 +96,25 @@ float linear_distance(vec2 p_uv, float p_depth) {
 	return abs(view.z / view.w);
 }
 
+// Keeps the tracked character sharp: a screen-space capsule swept from feet to
+// head, limited to the character's depth band so world geometry at a different
+// distance is not unblurred with it.
+float focus_mask(vec2 p_uv, float p_distance) {
+	if (frame.focus_shape.z <= 0.0) {
+		return 0.0;
+	}
+
+	vec2 radius = max(frame.focus_shape.xy, vec2(1e-4));
+	vec2 pa = (p_uv - frame.focus_endpoints.xy) / radius;
+	vec2 ba = (frame.focus_endpoints.zw - frame.focus_endpoints.xy) / radius;
+	float h = clamp(dot(pa, ba) / max(dot(ba, ba), 1e-6), 0.0, 1.0);
+	float radial = 1.0 - smoothstep(0.95, 1.2, length(pa - ba * h));
+
+	float half_depth = max(frame.focus_shape.w, 0.05);
+	float depth = 1.0 - smoothstep(half_depth, half_depth * 1.4, abs(p_distance - frame.focus_shape.z));
+	return radial * depth;
+}
+
 void main() {
 	vec4 base_color = textureLod(color_tex, uv_interp, 0.0);
 	if (MB_SAMPLE_COUNT < 2 || MB_SHUTTER_ANGLE_DEG <= 0.0) {
@@ -105,6 +126,13 @@ void main() {
 	float distance = linear_distance(uv_interp, depth);
 	if (depth <= 0.0) {
 		out_color = base_color; // Reversed depth: far plane / sky is 0.0.
+		return;
+	}
+
+	// Fully focused pixels keep the current frame and skip the reprojection.
+	float focus = focus_mask(uv_interp, distance);
+	if (focus >= 0.999) {
+		out_color = base_color;
 		return;
 	}
 
@@ -123,6 +151,7 @@ void main() {
 	}
 	float shutter = clamp(MB_SHUTTER_ANGLE_DEG / 360.0, 0.0, 1.0);
 	float amount = min(1.0, MB_MAX_RADIUS_PX / max(vel_px, 1e-6)) * shutter * gate;
+	amount *= 1.0 - focus;
 	if (amount * vel_px < 0.05) {
 		out_color = base_color;
 		return;
