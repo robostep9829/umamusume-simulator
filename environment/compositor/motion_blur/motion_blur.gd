@@ -40,15 +40,18 @@ layout(set = 0, binding = 1) uniform sampler2DMS depth_tex;
 layout(set = 0, binding = 1) uniform sampler2D depth_tex;
 #endif
 
+// One matrix per tap: maps this frame's clip position to the position the
+// same world point had at an earlier point of the exposure. Interpolating the
+// camera pose makes rotation follow its true arc instead of a straight chord.
 layout(set = 1, binding = 0, std140) uniform Reprojection {
-	mat4 reprojection;
+	mat4 steps[32];
 	mat4 inv_projection;
 } reproj;
 
 layout(push_constant, std430) uniform Ctrl {
 	vec4 params;  // raster_size.xy (px), max_radius_px, strength
 	vec4 params2; // sample_count, center_keep, center_radius, far_expo
-	vec4 params3; // center_pos.xy, exposure_scale, reserved
+	vec4 params3; // center_pos.xy, exposure (baked into steps), reserved
 	vec4 params4; // far_falloff_distance (m), motion_threshold_px, -, -
 } ctrl;
 
@@ -60,12 +63,9 @@ float sample_depth(vec2 p_uv) {
 #endif
 }
 
-vec2 derive_motion_vector(vec2 p_uv, float p_depth, mat4 p_reprojection) {
-	// p_reprojection is built from matrices that already carry the engine's
-	// Vulkan depth correction: clip z lives in 0..1 (x maps u directly,
-	// y is flipped to Y-down), so depth is used as-is.
-	vec4 prev_clip = p_reprojection * vec4(p_uv * 2.0 - 1.0, p_depth, 1.0);
-	return (prev_clip.xy / prev_clip.w) * 0.5 + 0.5 - p_uv;
+vec2 project_uv(mat4 p_matrix, vec4 p_clip) {
+	vec4 out_clip = p_matrix * p_clip;
+	return (out_clip.xy / out_clip.w) * 0.5 + 0.5;
 }
 
 // Reversed-Z: depth = 1 at the near plane, 0 at the far plane/sky. Unproject
@@ -106,16 +106,13 @@ void main() {
 		return;
 	}
 
-	vec2 velocity = derive_motion_vector(uv_interp, depth, reproj.reprojection);
-	// params3.z: exposure scale = (1/60 s) / real frame delta, so the blur
-	// length looks the same at 30, 60 or 350 FPS.
-	velocity *= ctrl.params3.z;
-	float vel_px = length(velocity * ctrl.params.xy);
+	vec4 clip = vec4(uv_interp * 2.0 - 1.0, depth, 1.0);
+	vec2 previous_uv = project_uv(reproj.steps[0], clip);
+	float vel_px = length((previous_uv - uv_interp) * ctrl.params.xy);
 
-	// Keep direction, clamp length to max radius, tone down by strength and
-	// scale by the center/distance envelope. The blur length fades smoothly
-	// to zero with the velocity (no hard cutoff, which would leave a visible
-	// seam where the motion crosses the threshold).
+	// Blur envelope: fade with the center/distance envelope and the velocity
+	// threshold. `amount` shortens the whole arc toward the current pixel so
+	// strength and max radius still act as artistic controls.
 	float weight = blur_weight(uv_interp, distance);
 	float gate = 1.0;
 	if (ctrl.params4.y > 0.0) {
@@ -124,19 +121,27 @@ void main() {
 		float feather = max(ctrl.params4.y * 0.25, 1.0);
 		gate = smoothstep(ctrl.params4.y, ctrl.params4.y + feather, vel_px);
 	}
-	float blurred_px = min(vel_px, ctrl.params.w) * ctrl.params.z * weight * gate;
-	if (blurred_px < 0.05) {
+	float amount = min(1.0, ctrl.params.z / max(vel_px, 1e-6)) * ctrl.params.w * weight * gate;
+	if (amount * vel_px < 0.05) {
 		out_color = base_color;
 		return;
 	}
-	velocity *= blurred_px / max(vel_px, 1e-6);
 
+	// Integrate along the arc. The last tap is the current pixel itself
+	// (base_color), so taps 0..samples-2 plus the base cover the exposure
+	// evenly. A tap that lands on a nearer surface is an occlusion, so it is
+	// rejected instead of bleeding a hidden object into the blur.
 	vec4 sum = base_color;
-	for (int i = 1; i < samples; i++) {
-		float t = float(i) / float(samples - 1);
-		sum += textureLod(color_tex, uv_interp + velocity * t, 0.0);
+	float weight_sum = 1.0;
+	for (int i = 0; i < samples - 1; i++) {
+		vec2 tap_uv = clamp(mix(uv_interp, project_uv(reproj.steps[i], clip), amount),
+			vec2(0.001), vec2(0.999));
+		float tap_distance = linear_distance(tap_uv, sample_depth(tap_uv));
+		float visible = step(distance * 0.75, tap_distance);
+		sum += textureLod(color_tex, tap_uv, 0.0) * visible;
+		weight_sum += visible;
 	}
-	out_color = sum / float(samples);
+	out_color = sum / weight_sum;
 }
 """
 
@@ -169,6 +174,9 @@ void main() {
 ## Screen-space anchor of the suppression region (UV, y grows downward).
 @export var center_pos: Vector2 = Vector2(0.5, 0.4)
 
+## Must match the `steps[32]` array size in the shader.
+const MAX_REPROJECTION_STEPS := 32
+
 var rd: RenderingDevice = null
 
 var _shader: RID = RID()
@@ -184,7 +192,6 @@ var _blit_shader: RID = RID()
 var _blit_pipeline: RID = RID()
 var _blit_pipeline_format: int = -1
 
-var _prev_projections: Array[Projection] = []
 var _prev_transforms: Array[Transform3D] = []
 var _prev_ticks: int = -1
 
@@ -277,7 +284,9 @@ func _create_resources(msaa_depth: bool) -> bool:
 		depth_state.repeat_u = RenderingDevice.SAMPLER_REPEAT_MODE_CLAMP_TO_EDGE
 		_depth_sampler = rd.sampler_create(depth_state)
 
-		_reprojection_buffer = rd.uniform_buffer_create(128, PackedByteArray(), 0)
+		_reprojection_buffer = rd.uniform_buffer_create(
+			(MAX_REPROJECTION_STEPS + 1) * 16 * 4, PackedByteArray(), 0
+		)
 		if not _reprojection_buffer.is_valid():
 			return false
 
@@ -296,40 +305,74 @@ func _pack_matrix(mat: Projection) -> PackedFloat32Array:
 	return packed
 
 
-## Builds the same re-projection matrix the engine uses for depth derived
-## motion vectors (FSR2/TAA): it maps the (uv, depth) of this frame to the
-## position it projected to in the previous frame. Returns false on the
-## first frame for a view (no history yet).
-func _update_reprojection(view: int, view_count: int, scene_data: RenderSceneData) -> bool:
+## Builds one reprojection matrix per blur tap by interpolating the camera pose
+## between the previous and the current frame (exposure scaled to 1/60 s).
+## Rotating the camera then moves samples along their true arc instead of a
+## straight chord, which removes the corner jaggies of a single-vector blur.
+## Returns false on the first frame for a view (no history yet).
+func _update_reprojection(
+	view: int, view_count: int, scene_data: RenderSceneData, fps_scale: float
+) -> bool:
 	var current_projection: Projection = scene_data.get_view_projection(view)
 	var current_transform: Transform3D = scene_data.get_cam_transform()
 
-	if view >= _prev_projections.size():
+	if view >= _prev_transforms.size():
 		# No history yet: record this frame and skip the blur.
-		_prev_projections.resize(view_count)
 		_prev_transforms.resize(view_count)
-		_prev_projections[view] = current_projection
 		_prev_transforms[view] = current_transform
 		return false
 
-	var previous_projection: Projection = _prev_projections[view]
 	var previous_transform: Transform3D = _prev_transforms[view]
-	_prev_projections[view] = current_projection
 	_prev_transforms[view] = current_transform
 
-	# get_view_projection() already applies the engine depth correction
-	# (Y flip + z remap to 0..1, Vulkan conventions). Adding another
-	# correction matrix would double-flip Y, so none is needed here.
-	var reprojection: Projection = (
-		previous_projection
-		* Projection(previous_transform.affine_inverse() * current_transform)
-		* current_projection.inverse()
+	# Extrapolate the previous pose to a fixed 1/60 s exposure. Interpolating
+	# from the current pose to this target keeps rotation on an arc.
+	var current_rotation := Quaternion(current_transform.basis.orthonormalized())
+	var previous_rotation := Quaternion(previous_transform.basis.orthonormalized())
+	var rotation_delta := previous_rotation * current_rotation.inverse()
+	var target_rotation := current_rotation
+	var delta_angle := rotation_delta.get_angle()
+	if delta_angle > 0.000001:
+		# get_axis() is not guaranteed to be unit length for small angles, and
+		# Quaternion(axis, angle) rejects non-normalized axes.
+		var axis := rotation_delta.get_axis()
+		if axis.length_squared() > 0.0:
+			target_rotation = Quaternion(
+				axis.normalized(), delta_angle * fps_scale
+			) * current_rotation
+	var target_origin := (
+		current_transform.origin
+		+ (previous_transform.origin - current_transform.origin) * fps_scale
 	)
-	var inv_projection: Projection = current_projection.inverse()
 
-	var packed := _pack_matrix(reprojection)
-	packed.append_array(_pack_matrix(inv_projection))
-	rd.buffer_update(_reprojection_buffer, 0, 128, packed.to_byte_array())
+	var samples: int = clampi(motion_sample_count, 2, MAX_REPROJECTION_STEPS)
+	var inverse_projection: Projection = current_projection.inverse()
+	var steps := PackedFloat32Array()
+	steps.resize(MAX_REPROJECTION_STEPS * 16)
+	for i in range(MAX_REPROJECTION_STEPS):
+		var step_projection: Projection
+		if i < samples:
+			# steps[0] is the oldest pose, steps[samples-1] is the current
+			# frame (identity). The shader integrates 0..samples-2 and uses the
+			# base color as the current sample.
+			var tau := 1.0 - float(i) / float(samples - 1)
+			var pose := Transform3D(
+				Basis(current_rotation.slerp(target_rotation, tau)),
+				current_transform.origin.lerp(target_origin, tau)
+			)
+			step_projection = (
+				current_projection
+				* Projection(pose.affine_inverse() * current_transform)
+				* inverse_projection
+			)
+		else:
+			step_projection = Projection.IDENTITY
+		var packed := _pack_matrix(step_projection)
+		for column in range(16):
+			steps[i * 16 + column] = packed[column]
+	steps.append_array(_pack_matrix(inverse_projection))
+
+	rd.buffer_update(_reprojection_buffer, 0, steps.size() * 4, steps.to_byte_array())
 	return true
 
 
@@ -478,7 +521,7 @@ func _render_callback(p_effect_callback_type: int, p_render_data: RenderData) ->
 		return
 
 	for view: int in range(view_count):
-		if not _update_reprojection(view, view_count, scene_data):
+		if not _update_reprojection(view, view_count, scene_data, fps_scale):
 			continue
 
 		var depth_rid: RID = scene_buffers.get_depth_layer(view, msaa_depth)
