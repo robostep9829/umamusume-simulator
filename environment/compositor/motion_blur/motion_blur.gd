@@ -19,10 +19,6 @@ class_name MotionBlurEffect
 ## sample count, threshold) is compiled into it as constants;
 ## MotionBlurUniforms packs the per-frame push constants and the reprojection
 ## uniform buffer.
-##
-## The blur output stays full resolution. The taps sample a half-res,
-## 2x2-prefiltered copy of the color so the trail is smoother at the same tap
-## count, while the resolved color itself is never downsampled.
 
 const _SHADER_PATH := "res://environment/compositor/motion_blur/motion_blur.glsl"
 ## Shader versions declared by the #[versions] section of motion_blur.glsl.
@@ -53,18 +49,6 @@ void main() {
 }
 """
 
-const _DOWNSAMPLE_FRAG_SOURCE := """
-#version 450
-precision highp float;
-layout(location = 0) in vec2 uv_interp;
-layout(location = 0) out vec4 out_color;
-layout(set = 0, binding = 0) uniform sampler2D color_tex;
-void main() {
-	// Linear sampling at a half-res texel centre averages its 2x2 block.
-	out_color = textureLod(color_tex, uv_interp, 0.0);
-}
-"""
-
 var rd: RenderingDevice = null
 
 ## Tint the pixels the blur touches instead of applying it: red intensity is
@@ -86,9 +70,6 @@ var _reprojection_buffer: RID = RID()
 var _blit_shader: RID = RID()
 var _blit_pipeline: RID = RID()
 var _blit_pipeline_format: int = -1
-var _downsample_shader: RID = RID()
-var _downsample_pipeline: RID = RID()
-var _downsample_pipeline_format: int = -1
 
 # Reused across frames and views. Creating these framebuffers per frame leaked
 # one RenderingDevice framebuffer per pass, which ran the game out of memory
@@ -97,8 +78,6 @@ var _result_fbs: Array[RID] = []
 var _result_fb_views: Array[RID] = []
 var _blit_fbs: Array[RID] = []
 var _blit_fb_colors: Array[RID] = []
-var _downsample_fbs: Array[RID] = []
-var _downsample_views: Array[RID] = []
 
 var _prev_transforms: Array[Transform3D] = []
 var _prev_ticks: int = -1
@@ -131,10 +110,6 @@ func _notification(what: int) -> void:
 			rd.free_rid(_blit_pipeline)
 		if _blit_shader.is_valid():
 			rd.free_rid(_blit_shader)
-		if _downsample_pipeline.is_valid():
-			rd.free_rid(_downsample_pipeline)
-		if _downsample_shader.is_valid():
-			rd.free_rid(_downsample_shader)
 
 
 ## Loads the precompiled vertex + fragment stages from motion_blur.glsl.
@@ -354,7 +329,7 @@ func _ensure_blit_pipeline(framebuffer_format: int) -> bool:
 
 	var depth_stencil := RDPipelineDepthStencilState.new()
 
-	# Strict replacement: the full-res result already holds the focused character.
+	# Disable blending entirely: the destination becomes exactly the source.
 	var blend_attachment := RDPipelineColorBlendStateAttachment.new()
 	blend_attachment.src_color_blend_factor = RenderingDevice.BLEND_FACTOR_ONE
 	blend_attachment.dst_color_blend_factor = RenderingDevice.BLEND_FACTOR_ZERO
@@ -385,70 +360,6 @@ func _ensure_blit_pipeline(framebuffer_format: int) -> bool:
 	if _blit_pipeline.is_valid():
 		_blit_pipeline_format = framebuffer_format
 	return _blit_pipeline.is_valid()
-
-
-func _ensure_downsample_pipeline(framebuffer_format: int) -> bool:
-	if _downsample_pipeline.is_valid() and _downsample_pipeline_format == framebuffer_format:
-		return true
-	if _downsample_pipeline.is_valid():
-		rd.free_rid(_downsample_pipeline)
-		_downsample_pipeline = RID()
-
-	if not _downsample_shader.is_valid():
-		var source := RDShaderSource.new()
-		source.language = RenderingDevice.SHADER_LANGUAGE_GLSL
-		source.source_vertex = _BLIT_VERTEX_SOURCE
-		source.source_fragment = _DOWNSAMPLE_FRAG_SOURCE
-
-		var spirv := rd.shader_compile_spirv_from_source(source)
-		if spirv.compile_error_vertex.length() or spirv.compile_error_fragment.length():
-			printerr("MotionBlurEffect downsample shader compile error: [v]=",
-				spirv.compile_error_vertex, " [f]=",
-				spirv.compile_error_fragment)
-			return false
-
-		_downsample_shader = rd.shader_create_from_spirv(spirv)
-		if not _downsample_shader.is_valid():
-			return false
-
-	var rasterizer := RDPipelineRasterizationState.new()
-	rasterizer.cull_mode = RenderingDevice.POLYGON_CULL_DISABLED
-
-	var multisample := RDPipelineMultisampleState.new()
-	multisample.sample_count = RenderingDevice.TEXTURE_SAMPLES_1
-
-	var depth_stencil := RDPipelineDepthStencilState.new()
-
-	var blend_attachment := RDPipelineColorBlendStateAttachment.new()
-	blend_attachment.src_color_blend_factor = RenderingDevice.BLEND_FACTOR_ONE
-	blend_attachment.dst_color_blend_factor = RenderingDevice.BLEND_FACTOR_ZERO
-	blend_attachment.src_alpha_blend_factor = RenderingDevice.BLEND_FACTOR_ONE
-	blend_attachment.dst_alpha_blend_factor = RenderingDevice.BLEND_FACTOR_ZERO
-	blend_attachment.color_blend_op = RenderingDevice.BLEND_OP_ADD
-	blend_attachment.alpha_blend_op = RenderingDevice.BLEND_OP_ADD
-	blend_attachment.write_r = true
-	blend_attachment.write_g = true
-	blend_attachment.write_b = true
-	blend_attachment.write_a = true
-	var blend := RDPipelineColorBlendState.new()
-	blend.attachments = [blend_attachment]
-
-	_downsample_pipeline = rd.render_pipeline_create(
-		_downsample_shader,
-		framebuffer_format,
-		_vertex_format,
-		RenderingDevice.RENDER_PRIMITIVE_TRIANGLES,
-		rasterizer,
-		multisample,
-		depth_stencil,
-		blend,
-		0,
-		0,
-		[]
-	)
-	if _downsample_pipeline.is_valid():
-		_downsample_pipeline_format = framebuffer_format
-	return _downsample_pipeline.is_valid()
 
 
 ## Returns a cached framebuffer for `view`, recreating it only when its
@@ -501,27 +412,17 @@ func _render_callback(p_effect_callback_type: int, p_render_data: RenderData) ->
 			fps_scale = clampf((1.0 / 60.0) / dt, 1.0 / 6.0, 8.0)
 	_prev_ticks = Time.get_ticks_usec()
 
-	# Velocity, threshold and radius stay in full-res pixels; the half-res color
-	# below is only a prefiltered source for the taps.
 	_uniforms.raster_size = Vector2(size)
 	_uniforms.set_focus(MotionBlurFocus.get_focus())
 	var push_constants := _uniforms.to_push_constants()
 
 	var color_format: int = rd.texture_get_format(scene_buffers.get_color_texture()).format
-	var half_size := Vector2i(maxi(size.x / 2, 1), maxi(size.y / 2, 1))
 	var result_texture: RID = scene_buffers.create_texture(
 		"motion_blur", "result", color_format,
 		RenderingDevice.TEXTURE_USAGE_SAMPLING_BIT | RenderingDevice.TEXTURE_USAGE_COLOR_ATTACHMENT_BIT,
 		RenderingDevice.TEXTURE_SAMPLES_1, size, view_count, 1, false, false
 	)
 	if not result_texture.is_valid():
-		return
-	var color_half_texture: RID = scene_buffers.create_texture(
-		"motion_blur", "color_half", color_format,
-		RenderingDevice.TEXTURE_USAGE_SAMPLING_BIT | RenderingDevice.TEXTURE_USAGE_COLOR_ATTACHMENT_BIT,
-		RenderingDevice.TEXTURE_SAMPLES_1, half_size, view_count, 1, false, false
-	)
-	if not color_half_texture.is_valid():
 		return
 
 	for view: int in range(view_count):
@@ -539,48 +440,18 @@ func _render_callback(p_effect_callback_type: int, p_render_data: RenderData) ->
 		var result_view: RID = scene_buffers.get_texture_slice("motion_blur", "result", view, 0, 1, 1)
 		if not result_view.is_valid():
 			continue
-		var color_half_view: RID = scene_buffers.get_texture_slice(
-			"motion_blur", "color_half", view, 0, 1, 1
-		)
-		if not color_half_view.is_valid():
-			continue
 
 		# During editor/game teardown the callback can still receive scene
 		# buffers whose textures are already gone. Binding one fails
 		# uniform_set_create and leaves a broken set in the cache.
 		if not rd.texture_is_valid(color_rid) or not rd.texture_is_valid(depth_rid):
 			continue
-		if not rd.texture_is_valid(result_view) or not rd.texture_is_valid(color_half_view):
+		if not rd.texture_is_valid(result_view):
 			continue
 
-		# Pass 0: 2x2-prefiltered color for the taps. Linear sampling at the
-		# half-res texel centre averages the full-res 2x2 block.
-		var downsample_fb: RID = _view_framebuffer(
-			_downsample_fbs, _downsample_views, view, color_half_view
-		)
-		if not downsample_fb.is_valid():
-			continue
-		if not _ensure_downsample_pipeline(rd.framebuffer_get_format(downsample_fb)):
-			continue
-
-		var downsample_uniform := RDUniform.new()
-		downsample_uniform.uniform_type = RenderingDevice.UNIFORM_TYPE_SAMPLER_WITH_TEXTURE
-		downsample_uniform.binding = 0
-		downsample_uniform.add_id(_color_sampler)
-		downsample_uniform.add_id(color_rid)
-		var downsample_set := UniformSetCacheRD.get_cache(
-			_downsample_shader, 0, [downsample_uniform]
-		)
-
-		var downsample_draw_list := rd.draw_list_begin(downsample_fb)
-		rd.draw_list_bind_render_pipeline(downsample_draw_list, _downsample_pipeline)
-		rd.draw_list_bind_vertex_array(downsample_draw_list, _vertex_array)
-		rd.draw_list_bind_uniform_set(downsample_draw_list, downsample_set, 0)
-		rd.draw_list_draw(downsample_draw_list, false, 1)
-		rd.draw_list_end()
-
-		# Pass 1: sample the full-res color + depth and the prefiltered color,
-		# write the full-res blurred output into our own texture.
+		# Pass 1: sample the resolved color + depth buffers, write blurred
+		# output into our own texture (reading and writing the same
+		# framebuffer attachment is not allowed).
 		var result_fb: RID = _view_framebuffer(
 			_result_fbs, _result_fb_views, view, result_view
 		)
@@ -589,7 +460,7 @@ func _render_callback(p_effect_callback_type: int, p_render_data: RenderData) ->
 		if not _ensure_pipeline(rd.framebuffer_get_format(result_fb)):
 			continue
 
-		# Set 0: resolved color, depth and the prefiltered tap color.
+		# Set 0: resolved color + depth as sampler2D uniforms.
 		var color_uniform := RDUniform.new()
 		color_uniform.uniform_type = RenderingDevice.UNIFORM_TYPE_SAMPLER_WITH_TEXTURE
 		color_uniform.binding = 0
@@ -602,15 +473,7 @@ func _render_callback(p_effect_callback_type: int, p_render_data: RenderData) ->
 		depth_uniform.add_id(_depth_sampler)
 		depth_uniform.add_id(depth_rid)
 
-		var color_half_uniform := RDUniform.new()
-		color_half_uniform.uniform_type = RenderingDevice.UNIFORM_TYPE_SAMPLER_WITH_TEXTURE
-		color_half_uniform.binding = 2
-		color_half_uniform.add_id(_color_sampler)
-		color_half_uniform.add_id(color_half_view)
-
-		var sampler_set := UniformSetCacheRD.get_cache(
-			_shader, 0, [color_uniform, depth_uniform, color_half_uniform]
-		)
+		var sampler_set := UniformSetCacheRD.get_cache(_shader, 0, [color_uniform, depth_uniform])
 
 		# Set 1: per-frame reprojection matrix uniform.
 		var reproj_uniform := RDUniform.new()
@@ -628,7 +491,8 @@ func _render_callback(p_effect_callback_type: int, p_render_data: RenderData) ->
 		rd.draw_list_draw(draw_list, false, 1)
 		rd.draw_list_end()
 
-		# Pass 2: copy the full-res result back into the resolved color buffer.
+		# Pass 2: blit the blurred result back into the resolved color buffer
+		# with blending disabled (strict source replacement).
 		var blit_fb: RID = _view_framebuffer(
 			_blit_fbs, _blit_fb_colors, view, color_rid
 		)

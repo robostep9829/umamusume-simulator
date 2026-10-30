@@ -46,7 +46,7 @@ const int MB_SAMPLE_COUNT = 4;
 const float MB_MAX_RADIUS_PX = 128.0;
 // Minimum screen-space motion (pixels per 1/60 s exposure) that produces
 // blur. Slower pixels fade smoothly to none; 0 disables the gate.
-const float MB_MOTION_THRESHOLD_PX = 0.5;
+const float MB_MOTION_THRESHOLD_PX = 1.0;
 
 // Matrices per view. Must match MotionBlurUniforms.MAX_REPROJECTION_STEPS.
 const int MB_MAX_STEPS = 32;
@@ -62,9 +62,6 @@ layout(set = 0, binding = 1) uniform sampler2DMS depth_tex;
 #else
 layout(set = 0, binding = 1) uniform sampler2D depth_tex;
 #endif
-// 2x2-prefiltered copy of color_tex: taps sample this so the trail is
-// smoother at the same tap count.
-layout(set = 0, binding = 2) uniform sampler2D color_half_tex;
 
 // One matrix per tap: maps this frame's clip position to the position the
 // same world point had at an earlier point of the exposure. Interpolating the
@@ -190,7 +187,7 @@ void main() {
 #else
 		float visible = 1.0;
 #endif
-		sum += textureLod(color_half_tex, tap_uv, 0.0) * visible;
+		sum += textureLod(color_tex, tap_uv, 0.0) * visible;
 		weight_sum += visible;
 	}
 	out_color = sum / weight_sum;
